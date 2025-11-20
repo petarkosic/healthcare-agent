@@ -13,8 +13,8 @@ load_dotenv()
 fake = Faker()
 client = OpenAI(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
 
-NUM_PATIENTS = 10
-ENCOUNTERS_PER_PATIENT = (3, 6)
+NUM_PATIENTS = 5
+ENCOUNTERS_PER_PATIENT = (2, 4)
 NOTES_PER_ENCOUNTER = (1, 3)
 
 OUT_DIR = "synthetic_ehr_data"
@@ -50,7 +50,7 @@ def generate_lab_result(lab_name, ranges):
 
 def generate_clinical_note(condition, note_type):
     prompt = f"""
-Generate a realistic clinical {note_type} note (200–350 words).
+Generate a realistic clinical {note_type} note (100–150 words).
 Include condition: {condition}.
 Include: history, assessment, plan, and relevant findings.
 Do NOT include patient-identifying information.

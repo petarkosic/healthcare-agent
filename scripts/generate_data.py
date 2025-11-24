@@ -1,4 +1,5 @@
 import os
+import time
 import uuid
 import random
 import json
@@ -55,10 +56,39 @@ Include condition: {condition}.
 Include: history, assessment, plan, and relevant findings.
 Do NOT include patient-identifying information.
     """
+
+    max_retries = 3
+    retry_delay = 1
+
+    for attempt in range(max_retries):
+        try:
+            resp = client.chat.completions.create(
+                model="gemini-2.0-flash",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            time.sleep(1)
+
+            return resp.choices[0].message.content.strip()
+
+        except Exception as e:
+            if attempt == max_retries - 1:
+                print(f"Error generating clinical note after {max_retries} attempts: {e}")
+
+                return f"Standard {note_type} note for {condition} with history, assessment, and plan. Patient shows expected symptoms and treatment is progressing."
+            else:
+                print(f"Attempt {attempt + 1} failed. Retrying in {retry_delay} seconds...")
+                
+                time.sleep(retry_delay)
+
+                retry_delay *= 2
+
+
     resp = client.chat.completions.create(
         model="gemini-2.0-flash",
         messages=[{"role": "user", "content": prompt}]
     )
+    
     return resp.choices[0].message.content.strip()
 
 patients = []
@@ -82,7 +112,7 @@ for _ in range(NUM_PATIENTS):
     }
     patients.append(patient)
 
-    for med_name in random.sample(MEDICATION_LIST, random.randint(0, 3)):
+    for med_name in random.sample(MEDICATION_LIST, random.randint(1, 3)):
         meds.append({
             "med_id": str(uuid.uuid4()),
             "patient_id": patient_id,

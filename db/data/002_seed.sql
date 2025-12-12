@@ -1,5 +1,7 @@
 -- Structure follows the CTE pattern so generated serials/ids are used consistently.
 
+\c healthcare_agent
+
 WITH
 pats AS (
   INSERT INTO patients (

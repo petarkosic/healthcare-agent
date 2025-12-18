@@ -14,6 +14,22 @@ services:
     networks:
       - ha-network
 
+  server:
+    build: ./server
+    container_name: ha-server
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+    networks:
+      - ha-network
+
 networks:
   ha-network:
     driver: bridge

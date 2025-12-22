@@ -45,7 +45,7 @@ async def get_patient(patient_serial_number: str):
 
             columns = [desc[0] for desc in cur.description]
             
-            patient = dict(zip(columns, cur.fetchone()))
+            patient = dict(zip(columns, row))
     
     return patient
 

@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import psycopg
 from dotenv import load_dotenv
 
@@ -20,31 +20,32 @@ router = APIRouter(
 
 @router.get("/")
 async def get_patients():
-    conn = psycopg.connect(**DB_CONFIG)
+    with psycopg.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT patient_serial_number, first_name, last_name FROM patients")
 
-    cur = conn.cursor()
-
-    cur.execute("SELECT * FROM patients")
-
-    patients = cur.fetchall()
-
-    conn.close()
+            columns = [desc[0] for desc in cur.description]
+            
+            patients = [dict(zip(columns, row)) for row in cur.fetchall()]
     
-    return {"patients": patients}
+    return patients
 
 
 
 @router.get("/{patient_serial_number}")
 async def get_patient(patient_serial_number: str):
-    conn = psycopg.connect(**DB_CONFIG)
+    with psycopg.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM patients WHERE patient_serial_number = %s", (patient_serial_number,))
 
-    cur = conn.cursor()
+            row = cur.fetchone()
 
-    cur.execute("SELECT * FROM patients WHERE patient_serial_number = %s", (patient_serial_number,))
+            if not row:
+                raise HTTPException(status_code=404, detail="Patient not found")
 
-    patient = cur.fetchone()
-
-    conn.close()
+            columns = [desc[0] for desc in cur.description]
+            
+            patient = dict(zip(columns, cur.fetchone()))
     
-    return {"patient": patient}
+    return patient
 

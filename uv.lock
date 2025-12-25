@@ -751,6 +751,7 @@ source = { virtual = "server" }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "uvicorn" },
 ]
@@ -759,6 +760,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.124.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.2" },
+    { name = "pydantic", specifier = ">=2.12.4" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "uvicorn", specifier = ">=0.38.0" },
 ]

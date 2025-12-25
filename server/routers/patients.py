@@ -149,7 +149,7 @@ router = APIRouter(
 async def get_patients():
     with psycopg.connect(**DB_CONFIG) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT patient_serial_number, first_name, last_name FROM patients")
+            cur.execute("SELECT * FROM patient_summary")
 
             columns = [desc[0] for desc in cur.description]
             
@@ -160,7 +160,7 @@ async def get_patients():
 
 
 @router.get("/{patient_serial_number}", response_model=PatientFullResponse)
-async def get_patient_full(patient_serial_number: str):
+async def get_patient(patient_serial_number: str):
     try:
         with psycopg.connect(**DB_CONFIG) as conn:
             with conn.cursor() as cur:

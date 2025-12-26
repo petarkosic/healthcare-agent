@@ -20,7 +20,7 @@
 
 	margin: 0 auto;
 	padding: 0;
-	background: white;
+	background: var(--bg-body);
 }
 
 body {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import { useNavigate } from 'react-router';
 
 interface Patients {
 	patient_serial_number: number;
@@ -17,6 +18,8 @@ interface Patients {
 function App() {
 	const [patients, setPatients] = useState<Patients[]>([]);
 	const [loading, setLoading] = useState(true);
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetch('http://localhost:8000/api/patients')
@@ -41,6 +44,10 @@ function App() {
 			.toUpperCase();
 	};
 
+	const handlePatientClick = (patientId: number) => {
+		navigate(`/patients/${patientId}`);
+	};
+
 	return (
 		<div className='container'>
 			<div className='header'>
@@ -55,6 +62,9 @@ function App() {
 						<article
 							key={patient.patient_serial_number}
 							className='patient-card'
+							onClick={() => {
+								handlePatientClick(patient.patient_serial_number);
+							}}
 						>
 							<div className='identity'>
 								<div className='avatar'>{getInitials(patient.full_name)}</div>

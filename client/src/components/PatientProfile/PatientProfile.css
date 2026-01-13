@@ -638,7 +638,10 @@ status-scheduled {
 	font-size: 0.9rem;
 	color: #475569;
 	line-height: 1.5;
-	white-space: pre-wrap;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 300px;
 }
 
 .card-labs {

@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import './PatientProfile.css';
 import { useParams } from 'react-router';
 
+type Error = {
+	message: string;
+};
+
 interface PatientBase {
 	address: string;
 	allergies: string[];
@@ -140,6 +144,7 @@ function PatientProfile() {
 	const [newNoteType, setNewNoteType] = useState('progress_note');
 	const [newNoteText, setNewNoteText] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>('');
 
 	const { id: patient_serial } = useParams();
 
@@ -150,13 +155,21 @@ function PatientProfile() {
 					`http://localhost:8000/api/patients/${patient_serial}`
 				);
 
-				if (!response.ok) throw new Error('Patient not found');
+				if (!response.ok) {
+					const errorData = await response.json();
+
+					throw new Error(
+						errorData.detail || `HTTP error! status: ${response.status}`
+					);
+				}
 
 				const result = await response.json();
 
 				setData(result);
 			} catch (error) {
-				console.error('Error fetching patient:', error);
+				const err = error as Error;
+
+				setError(err.message);
 			} finally {
 				setLoading(false);
 			}
@@ -181,12 +194,64 @@ function PatientProfile() {
 			minute: '2-digit',
 		});
 	};
-	console.log(data);
+
+	const handleAddNote = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setError(null);
+
+		if (!data) {
+			setError('Patient not found');
+			return;
+		}
+
+		setIsSubmitting(true);
+
+		try {
+			const response = await fetch(
+				`http://localhost:8000/api/patients/${data.patient.patient_id}/notes`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						visit_id: data.clinical_notes[0].visit_id,
+						note_type: newNoteType,
+						note_text: newNoteText,
+						doctor_serial_number: data.clinical_notes[0].doctor_serial_number,
+					}),
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to add note');
+			}
+
+			const newNote = await response.json();
+
+			setData((prevData) => {
+				if (!prevData) return null;
+
+				return {
+					...prevData,
+					clinical_notes: [newNote, ...prevData.clinical_notes],
+				};
+			});
+		} catch (error) {
+			setError(error as string);
+		} finally {
+			setIsSubmitting(false);
+			setNewNoteText('');
+			setIsModalOpen(false);
+		}
+	};
 
 	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
 
 	if (loading)
 		return <div className='loading-state'>Loading Patient Profile...</div>;
+
+	if (error) return <div className='error-state'>{error}</div>;
 
 	if (!data) return <div className='error-state'>Patient not found.</div>;
 
@@ -301,6 +366,15 @@ function PatientProfile() {
 				</div>
 
 				<div className='card card-notes'>
+					<div className='card-header-row'>
+						<h3>Clinical Notes</h3>
+						<button
+							className='btn-primary'
+							onClick={() => setIsModalOpen(true)}
+						>
+							+ New Note
+						</button>
+					</div>
 					<div className='notes-timeline'>
 						{data.clinical_notes.length > 0 ? (
 							data.clinical_notes.map((note) => (
@@ -308,10 +382,10 @@ function PatientProfile() {
 									<div className='note-header'>
 										<span
 											className={`note-type-badge type-${
-												note.note_type.split('_')[1] || 'generic'
+												note?.note_type?.split('_')[1] || 'generic'
 											}`}
 										>
-											{note.note_type.replace(/_/g, ' ').toUpperCase()}
+											{note?.note_type?.replace(/_/g, ' ').toUpperCase()}
 										</span>
 										<span className='note-date'>
 											{formatDate(note.created_at)}
@@ -320,9 +394,6 @@ function PatientProfile() {
 									<div className='note-author'>
 										By Dr. {note.doctor_first_name} {note.doctor_last_name}
 									</div>
-									{note.summary && (
-										<div className='note-summary'>{note.summary}</div>
-									)}
 									<div className='note-text'>{note.note_text}</div>
 								</div>
 							))
@@ -403,7 +474,7 @@ function PatientProfile() {
 								<tr key={visit.visit_id}>
 									<td>{new Date(visit.visit_date).toLocaleString()}</td>
 									<td style={{ textTransform: 'capitalize' }}>
-										{visit.visit_type.replace('_', ' ')}
+										{visit?.visit_type?.replace('_', ' ')}
 									</td>
 									<td>
 										{visit.doctor_first_name} {visit.doctor_last_name}
@@ -433,7 +504,7 @@ function PatientProfile() {
 								&times;
 							</button>
 						</div>
-						<form>
+						<form onSubmit={handleAddNote}>
 							<div className='form-group'>
 								<label>Note Type</label>
 								<select

@@ -8,7 +8,7 @@ interface Patients {
 	age: number;
 	gender: string;
 	blood_type: string;
-	alergies: string[];
+	allergies: string[];
 	chronic_conditions: string[];
 	total_visits: number;
 	last_visit_date: string;
@@ -86,8 +86,8 @@ function App() {
 							<div className='history'>
 								<div className='tag-group'>
 									<span className='tag-label'>Allergies:</span>
-									{patient.alergies && patient.alergies.length > 0 ? (
-										patient.alergies.map((allergy, index) => (
+									{patient.allergies && patient.allergies.length > 0 ? (
+										patient.allergies.map((allergy, index) => (
 											<span key={index} className='tag allergy'>
 												{allergy}
 											</span>

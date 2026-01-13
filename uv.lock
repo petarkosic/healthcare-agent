@@ -750,6 +750,7 @@ version = "0.1.0"
 source = { virtual = "server" }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
+    { name = "openai" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic" },
     { name = "python-dotenv" },
@@ -759,6 +760,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.124.0" },
+    { name = "openai", specifier = ">=2.8.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.2" },
     { name = "pydantic", specifier = ">=2.12.4" },
     { name = "python-dotenv", specifier = ">=1.2.1" },

@@ -6,8 +6,11 @@ from datetime import date, datetime
 import psycopg
 from uuid import UUID
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
+
+client = OpenAI(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
 
 DB_CONFIG = {
     "host": os.getenv("POSTGRES_HOST"),
@@ -297,4 +300,76 @@ async def get_patient(patient_serial_number: str):
         raise HTTPException(
             status_code=500, 
             detail=f"Error fetching patient data: {str(e)}"
+        )
+
+class Note(BaseModel):
+    visit_id: UUID
+    note_type: str
+    note_text: str
+    doctor_serial_number: str
+    summary: Optional[str] = None
+
+@router.post("/{patient_serial_number}/notes", )
+async def set_note(patient_serial_number: UUID, note: Note):
+    if not note.visit_id or not note.note_type or not note.note_text or not note.doctor_serial_number:
+        raise HTTPException(
+            status_code=400, 
+            detail="Visit ID, Note type, note text, and doctor serial number are required"
+        )
+
+    prompt = f"""
+    Generate a concise medical summary of this clinical note: 
+
+    {note.note_text}
+    
+    Keep it brief and professional, focusing on key findings and recommendations.
+    """
+
+    try:
+        resp = client.chat.completions.create(
+            model="gemini-2.5-flash",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+        )
+
+        summary = resp.choices[0].message.content.strip()
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating summary: {str(e)}"
+        )
+
+    try:
+        with psycopg.connect(**DB_CONFIG) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO clinical_notes 
+                    (note_id, visit_id, doctor_serial_number, note_type, note_text, summary)
+                    VALUES (gen_random_uuid(), %s, %s, %s, %s, %s)
+                    RETURNING note_id
+                """, (
+                    str(note.visit_id), 
+                    note.doctor_serial_number, 
+                    note.note_type, 
+                    note.note_text,
+                    summary
+                ))
+                
+                note_id = cur.fetchone()[0]
+                conn.commit()
+                
+                return {
+                    "message": "Note added successfully",
+                    "note_id": note_id,
+                    "summary": summary
+                }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error adding note: {str(e)}"
         )

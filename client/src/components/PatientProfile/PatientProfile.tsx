@@ -146,6 +146,8 @@ function PatientProfile() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>('');
 
+	const [isAiOpen, setIsAiOpen] = useState(false);
+
 	const { id: patient_serial } = useParams();
 
 	useEffect(() => {
@@ -549,6 +551,67 @@ function PatientProfile() {
 					</div>
 				</div>
 			)}
+
+			<div className={`ai-widget ${isAiOpen ? 'open' : ''}`}>
+				{!isAiOpen ? (
+					<button
+						className='ai-fab'
+						onClick={() => setIsAiOpen(true)}
+						title='Open AI Assistant'
+					>
+						<svg
+							width='24'
+							height='24'
+							viewBox='0 0 24 24'
+							fill='none'
+							stroke='currentColor'
+							strokeWidth='2'
+							stroke-linecap='round'
+							stroke-linejoin='round'
+						>
+							<path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'></path>
+						</svg>
+						<span>AI Assistant</span>
+					</button>
+				) : (
+					<div className='ai-window'>
+						<div className='ai-header'>
+							<button
+								className='ai-close-btn'
+								onClick={() => setIsAiOpen(false)}
+							>
+								&times;
+							</button>
+						</div>
+						<div className='ai-body'>
+							<div className='ai-placeholder-content'>
+								<div className='ai-message ai-ai'>
+									<p>
+										Hello! I'm ready to help analyze patient data or draft
+										notes.
+									</p>
+								</div>
+							</div>
+						</div>
+						<div className='ai-input-area'>
+							<input type='text' placeholder='Ask AI Agent...' />
+							<button className='ai-send-btn' disabled>
+								<svg
+									width='18'
+									height='18'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2'
+								>
+									<line x1='22' y1='2' x2='11' y2='13'></line>
+									<polygon points='22 2 15 22 11 13 2 9 22 2'></polygon>
+								</svg>
+							</button>
+						</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

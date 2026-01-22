@@ -8,13 +8,19 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 VECTOR_DB_PATH = "./chroma_db"
 
 class RAGService:
-    def __init__(self):
+    def __init__(
+            self,
+            collection_name: str = "patient_notes",
+            persist_directory: str = VECTOR_DB_PATH,
+            hf_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    ):
         self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+            model_name=hf_model_name
         )
 
         self.vectorstore = Chroma(
-            persist_directory=VECTOR_DB_PATH,
+            collection_name=collection_name,
+            persist_directory=persist_directory,
             embedding_function=self.embeddings
         )
 
@@ -37,11 +43,11 @@ class RAGService:
 
         self.vectorstore.add_texts(
             texts=chunks,
-            metadatas=[{"patient_id": patient_id}] * len(chunks),
+            metadatas=[{"patient_id": str(patient_id)}] * len(chunks),
             ids=ids
         )
 
-        self.vectorstore.persist()
+        return ids
 
     def get_patient_overview(
         self,
@@ -50,8 +56,8 @@ class RAGService:
     ) -> List[str]:
         docs = self.vectorstore.similarity_search(
             query="patient medical overview",
-            filter={"patient_id": patient_id},
-            k=k
+            filter={"patient_id": str(patient_id)},
+            k=k,
         )
 
         return [doc.page_content for doc in docs]

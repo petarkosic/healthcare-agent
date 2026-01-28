@@ -8,9 +8,14 @@ from uuid import UUID
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from rag.rag_service import RAGService
+
+
 load_dotenv()
 
 client = OpenAI(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
+
+rag = RAGService()
 
 DB_CONFIG = {
     "host": os.getenv("POSTGRES_HOST"),
@@ -309,8 +314,8 @@ class Note(BaseModel):
     doctor_serial_number: str
     summary: Optional[str] = None
 
-@router.post("/{patient_serial_number}/notes", )
-async def set_note(patient_serial_number: UUID, note: Note):
+@router.post("/{patient_serial}/notes", )
+async def set_note(patient_serial: str, note: Note):
     if not note.visit_id or not note.note_type or not note.note_text or not note.doctor_serial_number:
         raise HTTPException(
             status_code=400, 
@@ -334,6 +339,11 @@ async def set_note(patient_serial_number: UUID, note: Note):
         )
 
         summary = resp.choices[0].message.content.strip()
+
+        rag.upsert_patient_note(
+            patient_serial=str(patient_serial),
+            note_summary=summary
+        )
 
     except Exception as e:
         raise HTTPException(

@@ -25,39 +25,70 @@ class RAGService:
         )
 
         self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=400,
-            chunk_overlap=100
+            chunk_size=1000,
+            chunk_overlap=200,
+            separators=["\n\n", "\n", ". ", " ", ""]
         )
 
     def upsert_patient_note(
         self,
-        patient_id: str,
+        patient_serial: str,
         note_summary: str
     ):
-        chunks = self.splitter.split_text(note_summary)
+        print(f"Upserting patient note for patient {patient_serial}...")
 
-        ids = [
-            f"{patient_id}_{uuid.uuid4()}"
-            for _ in chunks
-        ]
+        self.delete_patient_note(patient_serial=patient_serial)
 
-        self.vectorstore.add_texts(
-            texts=chunks,
-            metadatas=[{"patient_id": str(patient_id)}] * len(chunks),
-            ids=ids
-        )
-
-        return ids
+        return self.add_patient_note(patient_serial=patient_serial, note_summary=note_summary)
 
     def get_patient_overview(
         self,
-        patient_id: str,
+        patient_serial: str,
         k: int = 6
     ) -> List[str]:
+        query = f"patient medical overview for patient {patient_serial}"
+
         docs = self.vectorstore.similarity_search(
-            query="patient medical overview",
-            filter={"patient_id": str(patient_id)},
+            query=query,
+            filter={"patient_serial": patient_serial},
             k=k,
         )
 
         return [doc.page_content for doc in docs]
+    
+    def add_patient_note(
+        self,
+        patient_serial: str,
+        note_summary: str
+    ) -> List[str]:
+        chunks = self.splitter.split_text(note_summary)
+
+        if not chunks:
+            print(f"Warning: Note for patient {patient_serial} resulted in no chunks.")
+            return []
+
+        ids = [f"{patient_serial}_{uuid.uuid4()}" for _ in chunks]
+
+        self.vectorstore.add_texts(
+            texts=chunks,
+            metadatas=[{"patient_serial": patient_serial}] * len(chunks),
+            ids=ids
+        )
+
+        print(f"Successfully added {len(chunks)} chunks for patient {patient_serial}.")
+
+        return ids
+
+    def delete_patient_note(self, patient_serial: str) -> bool:    
+        try:
+            result = self.vectorstore.delete(
+                where={"patient_serial": patient_serial}
+            )
+
+            print(f"Deletion result for patient {patient_serial}: {result}")
+            
+            return True
+        except Exception as e:
+            print(f"Error deleting data for patient {patient_serial}: {e}")
+
+            return False

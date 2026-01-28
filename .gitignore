@@ -2,3 +2,4 @@
 .env
 /postgres-data
 /**/*__pycache__
+/**/*chroma_db

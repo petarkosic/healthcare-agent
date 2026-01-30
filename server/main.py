@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import patients
+from routers import agents
 
 origins = [
     "http://localhost:3000",
@@ -18,3 +19,4 @@ app.add_middleware(
 )
 
 app.include_router(patients.router, prefix="/api")
+app.include_router(agents.router, prefix="/api")

@@ -136,6 +136,77 @@ interface PatientFullResponse {
 	diagnoses: Diagnosis[];
 }
 
+interface AIOverview {
+	critical_alerts: string[];
+	overview: string;
+	stability: string;
+	suggested_questions: string[];
+}
+
+interface ActiveDiagnoses {
+	code: string;
+	name: string;
+	type: string;
+	status: string;
+}
+
+interface ActiveMedications {
+	name: string;
+	dosage: string;
+	frequency: string;
+	reason: string;
+}
+
+interface LatestLab {
+	date: string;
+	reference_range: string;
+	result: string;
+	status: string;
+	test_name: string;
+	unit: string;
+}
+
+interface LatestVisit {
+	chief_complaint: string;
+	date: string;
+	doctor: string;
+	specialty: string;
+	status: string;
+	type: string;
+	visit_id: string;
+}
+
+interface LatestVitals {
+	blood_pressure: string;
+	bmi: number;
+	heart_rate: number;
+	measured_at: string;
+	oxygen_saturation: number;
+	pain_level: number;
+	temperature: number;
+}
+
+interface RawData {
+	active_diagnoses: ActiveDiagnoses[];
+	active_medications: ActiveMedications[];
+	alergies: string[];
+	blood_type: string;
+	chronic_conditions: string[];
+	full_name: string;
+	gender: string;
+	latest_lab: LatestLab;
+	latest_visit: LatestVisit;
+	latest_vitals: LatestVitals;
+	patient_serial_number: string;
+}
+
+interface Overview {
+	patient_serial: number;
+	ai_overview: AIOverview;
+	raw_data: RawData;
+	chroma_sources: number;
+}
+
 function PatientProfile() {
 	const [data, setData] = useState<PatientFullResponse | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -147,20 +218,22 @@ function PatientProfile() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>('');
 
+	const [overview, setOverview] = useState<Overview>();
+
 	const { id: patient_serial } = useParams();
 
 	useEffect(() => {
 		const fetchPatient = async () => {
 			try {
 				const response = await fetch(
-					`http://localhost:8000/api/patients/${patient_serial}`
+					`http://localhost:8000/api/patients/${patient_serial}`,
 				);
 
 				if (!response.ok) {
 					const errorData = await response.json();
 
 					throw new Error(
-						errorData.detail || `HTTP error! status: ${response.status}`
+						errorData.detail || `HTTP error! status: ${response.status}`,
 					);
 				}
 
@@ -209,7 +282,7 @@ function PatientProfile() {
 
 		try {
 			const response = await fetch(
-				`http://localhost:8000/api/patients/${data.patient.patient_id}/notes`,
+				`http://localhost:8000/api/patients/${patient_serial}/notes`,
 				{
 					method: 'POST',
 					headers: {
@@ -221,7 +294,7 @@ function PatientProfile() {
 						note_text: newNoteText,
 						doctor_serial_number: data.clinical_notes[0]?.doctor_serial_number,
 					}),
-				}
+				},
 			);
 
 			if (!response.ok) {
@@ -248,6 +321,34 @@ function PatientProfile() {
 	};
 
 	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
+
+	const getAiOverview = async () => {
+		try {
+			setLoading(true);
+
+			const response = await fetch(
+				`http://localhost:8000/api/agents/overview/${patient_serial}`,
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to get AI overview');
+			}
+
+			const result = await response.json();
+
+			setOverview(result);
+		} catch (error) {
+			setError(error as string);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		if (isAiSidebarOpen) {
+			getAiOverview();
+		}
+	}, [isAiSidebarOpen]);
 
 	if (loading)
 		return <div className='loading-state'>Loading Patient Profile...</div>;
@@ -400,8 +501,8 @@ function PatientProfile() {
 							</button>
 						</div>
 						<div className='notes-timeline'>
-							{data.clinical_notes.length > 0 ? (
-								data.clinical_notes.map((note) => (
+							{data?.clinical_notes?.length > 0 ? (
+								data?.clinical_notes?.map((note) => (
 									<div key={note.note_id} className='note-entry'>
 										<div className='note-header'>
 											<span
@@ -412,13 +513,13 @@ function PatientProfile() {
 												{note?.note_type?.replace(/_/g, ' ').toUpperCase()}
 											</span>
 											<span className='note-date'>
-												{formatDate(note.created_at)}
+												{formatDate(note?.created_at)}
 											</span>
 										</div>
 										<div className='note-author'>
-											By Dr. {note.doctor_first_name} {note.doctor_last_name}
+											By Dr. {note?.doctor_first_name} {note?.doctor_last_name}
 										</div>
-										<div className='note-text'>{note.note_text}</div>
+										<div className='note-text'>{note?.note_text}</div>
 									</div>
 								))
 							) : (
@@ -577,7 +678,6 @@ function PatientProfile() {
 
 			<div className={`ai-sidebar ${isAiSidebarOpen ? 'open' : ''}`}>
 				<div className='ai-header'>
-					<h3>AI Assistant</h3>
 					<button
 						className='ai-close-btn'
 						onClick={() => setIsAiSidebarOpen(false)}
@@ -588,27 +688,18 @@ function PatientProfile() {
 				<div className='ai-body'>
 					<div className='ai-placeholder-content'>
 						<div className='ai-message ai-ai'>
-							<p>
-								Hello! I'm ready to help analyze patient data or draft notes.
-							</p>
+							<p>{overview?.ai_overview?.overview}</p>
+						</div>
+						<div>
+							{overview?.ai_overview?.suggested_questions?.map(
+								(question: string, index: number) => (
+									<p className='ai-message' key={index}>
+										{question}
+									</p>
+								),
+							)}
 						</div>
 					</div>
-				</div>
-				<div className='ai-input-area'>
-					<input type='text' placeholder='Ask AI Agent...' />
-					<button className='ai-send-btn' disabled>
-						<svg
-							width='18'
-							height='18'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-						>
-							<line x1='22' y1='2' x2='11' y2='13'></line>
-							<polygon points='22 2 15 22 11 13 2 9 22 2'></polygon>
-						</svg>
-					</button>
 				</div>
 			</div>
 		</div>

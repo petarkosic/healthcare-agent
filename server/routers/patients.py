@@ -1,14 +1,12 @@
 import os
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
-from datetime import date, datetime
 import psycopg
-from uuid import UUID
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from rag.rag_service import RAGService
+from models.notes import Note
+from models.patients import PatientFullResponse
 
 
 load_dotenv()
@@ -26,127 +24,6 @@ DB_CONFIG = {
 }
 
 
-class PatientBase(BaseModel):
-    patient_id: UUID
-    patient_serial_number: str
-    first_name: str
-    last_name: str
-    date_of_birth: date
-    gender: Optional[str] = None
-    blood_type: Optional[str] = None
-    email: Optional[str] = None
-    phone: Optional[str] = None
-    address: Optional[str] = None
-    emergency_contact_name: Optional[str] = None
-    emergency_contact_phone: Optional[str] = None
-    allergies: Optional[List[str]] = None
-    chronic_conditions: Optional[List[str]] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
-class VisitResponse(BaseModel):
-    visit_id: UUID
-    patient_serial_number: str
-    doctor_serial_number: str
-    visit_date: datetime
-    visit_type: str
-    chief_complaint: Optional[str] = None
-    status: str
-    duration_minutes: Optional[int] = None
-    location: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    doctor_first_name: Optional[str] = None
-    doctor_last_name: Optional[str] = None
-    specialty: Optional[str] = None
-
-class VitalSignsResponse(BaseModel):
-    vital_id: UUID
-    visit_id: UUID
-    measurement_time: datetime
-    blood_pressure_systolic: Optional[int] = None
-    blood_pressure_diastolic: Optional[int] = None
-    heart_rate: Optional[int] = None
-    temperature: Optional[float] = None
-    respiratory_rate: Optional[int] = None
-    oxygen_saturation: Optional[float] = None
-    weight_kg: Optional[float] = None
-    height_cm: Optional[float] = None
-    bmi: Optional[float] = None
-    pain_level: Optional[int] = None
-    notes: Optional[str] = None
-    visit_date: Optional[datetime] = None
-
-class MedicationResponse(BaseModel):
-    medication_id: UUID
-    patient_serial_number: str
-    doctor_serial_number: Optional[str] = None
-    medication_name: str
-    generic_name: Optional[str] = None
-    dosage: str
-    frequency: str
-    start_date: date
-    end_date: Optional[date] = None
-    status: str
-    prescribed_for: Optional[str] = None
-    instructions: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    prescriber_first_name: Optional[str] = None
-    prescriber_last_name: Optional[str] = None
-
-class LabResultResponse(BaseModel):
-    lab_id: UUID
-    patient_serial_number: str
-    visit_id: Optional[UUID] = None
-    test_name: str
-    result_value: str
-    unit: Optional[str] = None
-    reference_range: Optional[str] = None
-    result_status: Optional[str] = None
-    tested_date: datetime
-    received_date: Optional[datetime] = None
-    ordering_doctors_serial_number: Optional[str] = None
-    created_at: Optional[datetime] = None
-    ordering_doctor_first_name: Optional[str] = None
-    ordering_doctor_last_name: Optional[str] = None
-
-class ClinicalNoteResponse(BaseModel):
-    note_id: UUID
-    visit_id: UUID
-    doctor_serial_number: str
-    note_type: str
-    note_text: str
-    summary: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    doctor_first_name: Optional[str] = None
-    doctor_last_name: Optional[str] = None
-    visit_date: Optional[datetime] = None
-
-class DiagnosisResponse(BaseModel):
-    diagnosis_id: UUID
-    patient_serial_number: str
-    visit_id: Optional[UUID] = None
-    diagnosis_code: Optional[str] = None
-    diagnosis_name: str
-    diagnosis_type: Optional[str] = None
-    status: str
-    diagnosed_date: date
-    resolved_date: Optional[date] = None
-    diagnosing_doctors_serial_number: Optional[str] = None
-    created_at: Optional[datetime] = None
-    diagnosing_doctor_first_name: Optional[str] = None
-    diagnosing_doctor_last_name: Optional[str] = None
-
-class PatientFullResponse(BaseModel):
-    patient: PatientBase
-    visits: List[VisitResponse]
-    vital_signs: List[VitalSignsResponse]
-    medications: List[MedicationResponse]
-    lab_results: List[LabResultResponse]
-    clinical_notes: List[ClinicalNoteResponse]
-    diagnoses: List[DiagnosisResponse]
 
 router = APIRouter(
     prefix="/patients",
@@ -306,13 +183,6 @@ async def get_patient(patient_serial_number: str):
             status_code=500, 
             detail=f"Error fetching patient data: {str(e)}"
         )
-
-class Note(BaseModel):
-    visit_id: UUID
-    note_type: str
-    note_text: str
-    doctor_serial_number: str
-    summary: Optional[str] = None
 
 @router.post("/{patient_serial}/notes", )
 async def set_note(patient_serial: str, note: Note):

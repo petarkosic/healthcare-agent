@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from rag.rag_service import RAGService
+from models.agents import AIOverviewResponse
 
 load_dotenv()
 
@@ -199,7 +200,7 @@ router = APIRouter(
 )
 
 
-@router.get("/overview/{patient_serial}")
+@router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 async def get_overview(patient_serial: str):
 
     docs = rag.get_patient_overview(patient_serial=patient_serial)

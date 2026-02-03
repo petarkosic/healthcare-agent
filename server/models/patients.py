@@ -45,9 +45,9 @@ class VitalSignsResponse(BaseModel):
     blood_pressure_systolic: int = Field(ge=50, le=250)
     blood_pressure_diastolic: int = Field(ge=30, le=200)
     heart_rate: int = Field(ge=30, le=250)
-    temperature: float = Field(ge=30, le=45)
+    temperature: float = Field(ge=30.0, le=45.0)
     respiratory_rate: int = Field(ge=5, le=60)
-    oxygen_saturation: float = Field(ge=70, le=100)
+    oxygen_saturation: float = Field(ge=70.0, le=100.0)
     weight_kg: float
     height_cm: float
     bmi: float = Field(ge=5, le=80)
@@ -79,7 +79,7 @@ class LabResultResponse(BaseModel):
     visit_id: UUID
     test_name: str
     result_value: str
-    unit: str
+    unit: Optional[str] = None
     reference_range: str
     result_status: Literal['normal', 'abnormal', 'critical', 'pending']
     tested_date: datetime

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 
@@ -20,7 +20,7 @@ class LatestLab(BaseModel):
 	result: str
 	status: Literal['normal', 'abnormal', 'critical', 'pending']
 	test_name: str
-	unit: str
+	unit: Optional[str] = None
 
 class LatestVisit(BaseModel):
 	chief_complaint: str
@@ -36,9 +36,9 @@ class LatestVitals(BaseModel):
 	bmi: float = Field(ge=5, le=80)
 	heart_rate: int = Field(ge=30, le=250)
 	measured_at: str
-	oxygen_saturation: int = Field(ge=70, le=100)
+	oxygen_saturation: float = Field(ge=70.0, le=100.0)
 	pain_level: int = Field(ge=0, le=10)
-	temperature: float = Field(ge=30, le=45)
+	temperature: float = Field(ge=30.0, le=45.0)
 
 class AIOverview(BaseModel):
 	critical_alerts: list[str]

@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Literal, Optional
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class Note(BaseModel):
@@ -8,4 +8,4 @@ class Note(BaseModel):
     note_type: Literal['soap_subjective', 'soap_objective', 'soap_assessment', 'soap_plan','progress_note', 'consult_note', 'discharge_summary', 'procedure_note']
     note_text: str
     doctor_serial_number: str
-    summary: str
+    summary: Optional[str] = None

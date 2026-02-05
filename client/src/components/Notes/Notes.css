@@ -23,6 +23,10 @@
 	border: 1px solid var(--border-color);
 }
 
+.note-entry:hover {
+	background: #f1f5f9;
+}
+
 .note-header {
 	display: flex;
 	justify-content: space-between;

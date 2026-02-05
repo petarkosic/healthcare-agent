@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { PatientFullResponse } from '../../types/types';
+import type { ClinicalNote, PatientFullResponse } from '../../types/types';
 import { formatDate } from '../../utils/utils';
 import { useParams } from 'react-router';
 import './Notes.css';
@@ -12,6 +12,8 @@ type NotesProps = {
 
 export const Notes = ({ data, setError, setData }: NotesProps) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
+
 	const [newNoteType, setNewNoteType] = useState('progress_note');
 	const [newNoteText, setNewNoteText] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +83,12 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 				<div className='notes-timeline'>
 					{data?.clinical_notes?.length > 0 ? (
 						data?.clinical_notes?.map((note) => (
-							<div key={note.note_id} className='note-entry'>
+							<div
+								key={note.note_id}
+								className='note-entry'
+								onClick={() => setSelectedNote(note)}
+								style={{ cursor: 'pointer' }}
+							>
 								<div className='note-header'>
 									<span
 										className={`note-type-badge type-${
@@ -160,6 +167,60 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 								</button>
 							</div>
 						</form>
+					</div>
+				</div>
+			)}
+
+			{selectedNote && (
+				<div className='modal-overlay' onClick={() => setSelectedNote(null)}>
+					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
+						<div className='modal-header'>
+							<h2>Note Details</h2>
+							<button
+								className='modal-close'
+								onClick={() => setSelectedNote(null)}
+							>
+								&times;
+							</button>
+						</div>
+						<div className='modal-body'>
+							<div className='note-header'>
+								<span
+									className={`note-type-badge type-${
+										selectedNote?.note_type?.split('_')[1] || 'generic'
+									}`}
+								>
+									{selectedNote?.note_type?.replace(/_/g, ' ').toUpperCase()}
+								</span>
+								<span className='note-date'>
+									{formatDate(selectedNote?.created_at)}
+								</span>
+							</div>
+							<div className='note-author' style={{ marginBottom: '1rem' }}>
+								By Dr. {selectedNote?.doctor_first_name}{' '}
+								{selectedNote?.doctor_last_name}
+							</div>
+							<div
+								className='note-text'
+								style={{
+									width: '100%',
+									whiteSpace: 'pre-wrap',
+									maxHeight: '60vh',
+									overflowY: 'auto',
+								}}
+							>
+								{selectedNote?.note_text}
+							</div>
+						</div>
+						<div className='modal-actions'>
+							<button
+								type='button'
+								className='btn-primary'
+								onClick={() => setSelectedNote(null)}
+							>
+								Close
+							</button>
+						</div>
 					</div>
 				</div>
 			)}

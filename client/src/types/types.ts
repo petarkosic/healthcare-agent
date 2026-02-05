@@ -121,7 +121,7 @@ export interface Diagnosis {
 	visit_id: string;
 }
 
-interface ClinicalNote {
+export interface ClinicalNote {
 	created_at: string;
 	doctor_first_name: string;
 	doctor_last_name: string;

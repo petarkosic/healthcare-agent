@@ -1,0 +1,35 @@
+.card-vitals {
+	grid-column: span 8;
+}
+
+.vitals-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 1.5rem;
+}
+
+.vital-box {
+	display: flex;
+	flex-direction: column;
+	border-bottom: 1px solid #f1f5f9;
+	padding-bottom: 0.5rem;
+}
+
+.vital-box .label {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.vital-box .value {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: #0f172a;
+}
+
+.vital-box .value small {
+	font-size: 0.8rem;
+	color: var(--text-light);
+	font-weight: 400;
+}

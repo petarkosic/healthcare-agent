@@ -1,0 +1,34 @@
+.card-diagnoses {
+	grid-column: span 12;
+}
+
+.diagnoses-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.diagnoses-list li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #f8fafc;
+	padding: 0.75rem;
+	border-radius: 6px;
+}
+
+.diag-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.diag-meta {
+	display: flex;
+	gap: 1rem;
+	font-size: 0.85rem;
+	align-items: center;
+}

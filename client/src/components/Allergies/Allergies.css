@@ -1,0 +1,12 @@
+.allergy-banner {
+	background-color: var(--danger-bg);
+	border: 1px solid #fca5a5;
+	color: #991b1b;
+	padding: 1rem 1.5rem;
+	border-radius: 8px;
+	margin-bottom: 2rem;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	font-weight: 500;
+}

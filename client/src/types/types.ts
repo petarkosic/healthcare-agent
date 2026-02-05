@@ -2,6 +2,19 @@ export type Error = {
 	message: string;
 };
 
+export interface TPatients {
+	patient_serial_number: number;
+	full_name: string;
+	age: number;
+	gender: string;
+	blood_type: string;
+	allergies: string[];
+	chronic_conditions: string[];
+	total_visits: number;
+	last_visit_date: string;
+	active_medications_count: number;
+}
+
 interface PatientBase {
 	address: string;
 	allergies: string[];
@@ -21,7 +34,7 @@ interface PatientBase {
 	updated_at: string;
 }
 
-interface Visit {
+export interface Visit {
 	chief_complaint: string;
 	created_at: string;
 	doctor_first_name: string;
@@ -38,7 +51,7 @@ interface Visit {
 	visit_type: string;
 }
 
-interface VitalSigns {
+export interface VitalSigns {
 	blood_pressure_diastolic: number;
 	blood_pressure_systolic: number;
 	bmi: number;
@@ -92,7 +105,7 @@ interface LabResult {
 	visit_id: string;
 }
 
-interface Diagnosis {
+export interface Diagnosis {
 	created_at: string;
 	diagnosed_date: string;
 	diagnosing_doctor_first_name: string;

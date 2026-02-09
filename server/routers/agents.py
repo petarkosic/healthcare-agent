@@ -1,13 +1,13 @@
 import os
 import json
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from rag.rag_service import RAGService
-from models.agents import AIOverviewResponse
+from models.agents import AIOverviewResponse, OverviewRequest
 
 load_dotenv()
 
@@ -236,6 +236,135 @@ async def get_overview(patient_serial: str):
         }
 
 
+@router.post('/recommendations')
+async def get_recommendations(request: OverviewRequest):
+    if not request.overview:
+        raise HTTPException(status_code=400, detail="Overview is required")
+
+    prompt = f"""
+        Based on this overview, provide patient recommendations: {request.overview}. 
+        
+        Return only valid JSON with the following format:
+        {{
+            "recommendations": [
+                {{
+                    "recommendation": "string",
+                    "reason": "string",
+                    "priority": "string"
+                }},
+                {{
+                    "recommendation": "string",
+                    "reason": "string",
+                    "priority": "string"
+                }}
+            ]
+        }}
+
+        Guidelines:
+        1. Recommendation Format:
+            - MUST be specific, executable instructions starting with an action verb
+            - GOOD: "Start lisinopril 10 mg daily for blood pressure control"
+            - GOOD: "Schedule follow-up appointment in 4 weeks"
+            - BAD: "Consider blood pressure management" (too vague)
+            - BAD: "Patient needs better medication adherence" (not actionable)
+
+        2. Reason Format:
+            - Briefly cite the clinical justification from the overview
+            - Include relevant metrics if available (e.g., "BP 150/95", "HbA1c 8.2%")
+            - Maximum 1-2 sentences
+
+        3. Priority Levels (choose one):
+            - "urgent": Requires immediate attention (next 24-48 hours)
+            - "high": Important for next visit/update
+            - "routine": Standard care or maintenance
+
+        4. Additional Rules:
+            - Generate 3-5 recommendations maximum unless critical issues require more
+            - Do NOT include patient names or identifiers
+            - Prioritize urgency and importance
+            - Base ALL recommendations ONLY on information in the overview
+            - If no clear recommendations can be made, return an empty array instead
+    """
+
+
+    try:
+        response = client.chat.completions.create(
+            model="gemini-2.5-flash",
+            messages=[
+                {"role": "system", "content": "You are a clinical briefing assistant. Provide concise recommendations for patients. Return only valid JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.0
+        )
+
+        llm_output = json.loads(response.choices[0].message.content)
+
+        return llm_output
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post('/medications')
+async def get_medications(request: OverviewRequest):
+    if not request.overview:
+        raise HTTPException(status_code=400, detail="Overview is required")
+
+    prompt = f"""
+        Based on this overview, provide patient medications alternatives: {request.overview}. 
+        
+        Return only valid JSON with the following format:
+        {{
+            "medications": [
+                "current_medications": [
+                    {{
+                        "name": "string", 
+                        "dosage": "string", 
+                        "frequency": "string"
+                    }}
+                ],
+                "prescribed_changes": [
+                    {{
+                        "action": "string", 
+                        "name": "string", 
+                        "dosage": "string", 
+                        "frequency": "string", 
+                        "reason": "string"
+                    }}
+                ]
+            ],
+        }}
+
+        Guidelines:
+        - Action must be: "add", "increase", "decrease", "continue", "discontinue", or "change"
+            - "add" to add a new medication
+            - "increase" to increase the dosage of an existing medication
+            - "decrease" to decrease the dosage of an existing medication
+            - "continue" to continue an existing medication
+            - "discontinue" to discontinue an existing medication
+            - "change" to change the frequency of an existing medication
+        - Dosage format: "1000mg", "20mg", "500mg/5ml", "1 capsule", "10 units", etc.
+        - Frequency format: "daily", "twice daily", "weekly", "as needed", etc.
+        - For reasons, summarize briefly from the note
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gemini-2.5-flash",
+            messages=[
+                {"role": "system", "content": "You are a clinical briefing assistant. Provide concise, accurate overviews for patients. Return only valid JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.0
+        )
+
+        llm_output = json.loads(response.choices[0].message.content)
+
+        return llm_output
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 def build_prompt(pg_data: dict, chroma_context: list) -> str:
     meds = pg_data.get('active_medications', []) or []
     meds_str = "\n".join([f"- {m['name']}: {m['dosage']} {m['frequency']}" for m in meds]) if meds else "No active medications"
@@ -261,5 +390,5 @@ def build_prompt(pg_data: dict, chroma_context: list) -> str:
             CLINICAL HISTORY SUMMARIES:
             {chroma_text}
 
-            Generate a JSON with: overview, critical_alerts (array), suggested_questions (array), stability (stable/unstable).
+            Generate a JSON with: overview including current medication dosages, critical_alerts (array), suggested_questions (array), stability (stable/unstable).
             """

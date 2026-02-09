@@ -64,3 +64,6 @@ class AIOverviewResponse(BaseModel):
     ai_overview: AIOverview
     raw_data: RawData
     chroma_sources: int
+
+class OverviewRequest(BaseModel):
+    overview: str

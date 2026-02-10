@@ -73,3 +73,25 @@
 	border-left: 3px solid var(--accent-blue-hover);
 	cursor: pointer;
 }
+
+.ai-quick-action-button.active {
+	background-color: #007bff;
+	color: white;
+}
+
+.ai-quick-action-button.disabled {
+	pointer-events: none;
+	opacity: 0.6;
+}
+
+.ai-close-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.ai-loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px;
+}

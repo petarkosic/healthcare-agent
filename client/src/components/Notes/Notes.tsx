@@ -114,13 +114,22 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 			</div>
 
 			{isModalOpen && (
-				<div className='modal-overlay' onClick={() => setIsModalOpen(false)}>
+				<div
+					className='modal-overlay'
+					onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+					style={{ cursor: isSubmitting ? 'not-allowed' : 'default' }}
+				>
 					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
 						<div className='modal-header'>
 							<h2>Add Clinical Note</h2>
 							<button
 								className='modal-close'
-								onClick={() => setIsModalOpen(false)}
+								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+								disabled={isSubmitting}
+								style={{
+									cursor: isSubmitting ? 'not-allowed' : 'pointer',
+									opacity: isSubmitting ? 0.5 : 1,
+								}}
 							>
 								&times;
 							</button>
@@ -131,6 +140,7 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 								<select
 									value={newNoteType}
 									onChange={(e) => setNewNoteType(e.target.value)}
+									disabled={isSubmitting}
 								>
 									<option value='progress_note'>Progress Note</option>
 									<option value='soap_subjective'>SOAP - Subjective</option>
@@ -148,13 +158,18 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 									onChange={(e) => setNewNoteText(e.target.value)}
 									placeholder='Enter clinical observations...'
 									required
+									disabled={isSubmitting}
 								></textarea>
 							</div>
 							<div className='modal-actions'>
 								<button
 									type='button'
 									className='btn-secondary'
-									onClick={() => setIsModalOpen(false)}
+									onClick={
+										isSubmitting ? undefined : () => setIsModalOpen(false)
+									}
+									disabled={isSubmitting}
+									style={{ cursor: isSubmitting ? 'not-allowed' : 'default' }}
 								>
 									Cancel
 								</button>
@@ -162,6 +177,7 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 									type='submit'
 									className='btn-primary'
 									disabled={isSubmitting}
+									style={{ cursor: isSubmitting ? 'not-allowed' : 'default' }}
 								>
 									{isSubmitting ? 'Saving...' : 'Save Note'}
 								</button>

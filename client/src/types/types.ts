@@ -215,3 +215,36 @@ export interface Overview {
 	raw_data: RawData;
 	chroma_sources: number;
 }
+
+export type Recommendation = {
+	recommendation: string;
+	reason: string;
+	priority: string;
+};
+
+export type MedicationChange = {
+	action: string;
+	name: string;
+	dosage: string;
+	frequency: string;
+	reason: string;
+};
+
+type CurrentMedication = {
+	name: string;
+	dosage: string;
+	frequency: string;
+};
+
+export type RecommendationsResponse = {
+	recommendations?: Recommendation[];
+};
+
+export type MedicationsResponse = {
+	medications: {
+		current_medications: CurrentMedication[];
+		prescribed_changes: MedicationChange[];
+	};
+};
+
+export type ResponseData = RecommendationsResponse | MedicationsResponse;

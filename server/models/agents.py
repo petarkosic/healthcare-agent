@@ -43,27 +43,17 @@ class LatestVitals(BaseModel):
 class AIOverview(BaseModel):
 	critical_alerts: list[str]
 	overview: str
-	stability: str
 	suggested_questions: list[str]
-
-class RawData(BaseModel):
-	active_diagnoses: list[ActiveDiagnoses]
-	active_medications: list[ActiveMedications]
-	alergies: list[str] = None
-	blood_type: str
-	chronic_conditions: list[str] = None
-	full_name: str
-	gender: str
-	latest_lab: LatestLab
-	latest_visit: LatestVisit
-	latest_vitals: LatestVitals
-	patient_serial_number: str
 
 class AIOverviewResponse(BaseModel):
     patient_serial: str
     ai_overview: AIOverview
-    raw_data: RawData
     chroma_sources: int
 
 class OverviewRequest(BaseModel):
     overview: str
+
+class OverviewPromptResponse(BaseModel):
+    overview: str
+    critical_alerts: list[str]
+    suggested_questions: list[str]

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from rag.rag_service import RAGService
-from models.agents import AIOverviewResponse, OverviewRequest
+from models.agents import AIOverviewResponse, OverviewPromptResponse, OverviewRequest
 
 load_dotenv()
 
@@ -231,7 +231,6 @@ async def get_overview(patient_serial: str):
     return {
             "patient_serial": patient_serial,
             "ai_overview": llm_output,
-            "raw_data": patient_data,
             "chroma_sources": len(docs)
         }
 
@@ -365,7 +364,7 @@ async def get_medications(request: OverviewRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def build_prompt(pg_data: dict, chroma_context: list) -> str:
+def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
     meds = pg_data.get('active_medications', []) or []
     meds_str = "\n".join([f"- {m['name']}: {m['dosage']} {m['frequency']}" for m in meds]) if meds else "No active medications"
     
@@ -390,5 +389,15 @@ def build_prompt(pg_data: dict, chroma_context: list) -> str:
             CLINICAL HISTORY SUMMARIES:
             {chroma_text}
 
-            Generate a JSON with: overview including current medication dosages, critical_alerts (array), suggested_questions (array), stability (stable/unstable).
+            Return only valid JSON with the following format:
+            {{
+                "overview": "string",
+                "critical_alerts": ["string"],
+                "suggested_questions": ["string"],
+            }}
+
+            Guidelines:
+            - Overview must be a summary of the patient's last visit, including any relevant medications and any critical alerts.
+            - Critical alerts must be a list of alerts that require immediate attention, such as pain, fever, or blood pressure.
+            - Suggested questions must be a list of questions that the doctor could ask the patient to better understand the patient's condition.
             """

@@ -125,3 +125,15 @@ class PatientFullResponse(BaseModel):
     lab_results: List[LabResultResponse]
     clinical_notes: List[ClinicalNoteResponse]
     diagnoses: List[DiagnosisResponse]
+
+class SetVisit(BaseModel):
+    patient_serial_number: str
+    doctor_serial_number: str
+    visit_type: Literal['checkup', 'followup', 'emergency', 'specialist', 'vaccination', 'routine', 'urgent_care', 'surgical', 'telehealth']
+    location: Literal['Clinic', 'Hospital', 'Telehealth', 'Home Visit', 'Urgent Care']
+
+class UpdateVisit(BaseModel):
+    chief_complaint: str
+    status: Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']
+    duration_minutes: int
+    visit_id: UUID

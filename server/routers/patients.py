@@ -6,7 +6,7 @@ from openai import OpenAI
 
 from rag.rag_service import RAGService
 from models.notes import Note
-from models.patients import PatientFullResponse
+from models.patients import PatientFullResponse, SetVisit, UpdateVisit
 
 
 load_dotenv()
@@ -253,3 +253,72 @@ async def set_note(patient_serial: str, note: Note):
             status_code=500, 
             detail=f"Error adding note: {str(e)}"
         )
+    
+
+@router.post('/visits')
+async def set_visit(visit: SetVisit):
+    try:
+        with psycopg.connect(**DB_CONFIG) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO visits 
+                    (visit_id, patient_serial_number, doctor_serial_number, visit_date, visit_type, status, location, created_at)
+                    VALUES (gen_random_uuid(), %s, %s, DATE_TRUNC('second', now()), %s, 'in-progress', %s, DATE_TRUNC('second', now()))
+                    RETURNING visit_id
+                """, (
+                    visit.patient_serial_number,
+                    visit.doctor_serial_number,
+                    visit.visit_type,
+                    visit.location
+                ))
+                
+                visit_id = cur.fetchone()[0]
+                conn.commit()
+                
+                return {
+                    "message": "Visit added successfully",
+                    "visit_id": visit_id
+                }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error adding visit: {str(e)}"
+        )
+    
+@router.put('/visits')
+async def update_visit(visit: UpdateVisit):
+    try:
+        with psycopg.connect(**DB_CONFIG) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE visits 
+                    SET 
+                        chief_complaint = %s, 
+                        status = %s, 
+                        duration_minutes = %s, 
+                        updated_at = DATE_TRUNC('second', now())
+                    WHERE visit_id = %s
+                """, (
+                    visit.chief_complaint,
+                    visit.status,
+                    visit.duration_minutes,
+                    visit.visit_id
+                ))
+                
+                conn.commit()
+                
+                return {
+                    "message": "Visit updated successfully"
+                }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error updating visit: {str(e)}"
+        )
+    

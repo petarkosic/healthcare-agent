@@ -24,3 +24,9 @@ export const getInitials = (name: string) => {
 		.substring(0, 2)
 		.toUpperCase();
 };
+
+export const secondsToRoundedMinutes = (seconds: number): number => {
+	const minutes = seconds / 60;
+
+	return Math.ceil(minutes / 5) * 5;
+};

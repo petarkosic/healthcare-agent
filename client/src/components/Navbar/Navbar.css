@@ -133,7 +133,7 @@
 	background: var(--navbar-danger-text);
 	color: white;
 	border: none;
-	padding: 0.35rem 0.75rem;
+	padding: 0.4rem 0.75rem;
 	border-radius: 6px;
 	font-size: 0.8rem;
 	font-weight: 500;
@@ -236,4 +236,58 @@
 
 .btn-start-timer:hover {
 	background: var(--navbar-accent-blue-hover);
+}
+
+.session-end-form {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.input-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	position: relative;
+}
+
+.complaint-input {
+	padding: 8px 12px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-size: 14px;
+	width: 200px;
+	transition: border-color 0.2s;
+	background: white;
+}
+
+.complaint-input:focus {
+	outline: none;
+	border-color: #007bff;
+	color: var(--navbar-text-muted);
+}
+
+.error {
+	position: absolute;
+	top: 1.75rem;
+	left: 0;
+	font-size: 12px;
+	color: var(--navbar-danger-text);
+}
+
+.btn-confirm-end {
+	background-color: var(--navbar-accent-blue);
+	color: white;
+	border: none;
+	padding: 0.4rem 0.75rem;
+	border-radius: 6px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+	box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+}
+
+.btn-confirm-end:hover {
+	background-color: var(--navbar-accent-blue-hover);
 }

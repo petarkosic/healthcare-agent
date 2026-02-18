@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { useSession } from '../../context/SessionContext';
 import './Navbar.css';
+import { secondsToRoundedMinutes } from '../../utils/utils';
 
 const VISIT_TYPES = [
 	{ value: 'checkup', label: 'Checkup' },
@@ -27,6 +28,10 @@ export const Navbar = () => {
 	const [showTypeSelect, setShowTypeSelect] = useState(false);
 	const [selectedType, setSelectedType] = useState('checkup');
 	const [selectedLocation, setSelectedLocation] = useState('Clinic');
+	const [showEndForm, setShowEndForm] = useState(false);
+	const [chiefComplaint, setChiefComplaint] = useState('');
+	const [currentVisitId, setCurrentVisitId] = useState(null);
+	const [error, setError] = useState('');
 
 	const location = useLocation();
 	const { session, formatTime, endSession, startSession, elapsedTime } =
@@ -36,15 +41,101 @@ export const Navbar = () => {
 		setShowTypeSelect(true);
 	};
 
-	const handleStartSession = () => {
-		startSession(selectedType, selectedLocation);
-		setShowTypeSelect(false);
+	const handleStartSession = async () => {
+		try {
+			const response = await fetch(
+				'http://localhost:8000/api/patients/visits',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						patient_serial_number: location.pathname.split('/')[2],
+						doctor_serial_number: 'Dr7TUydx',
+						visit_type: selectedType,
+						location: selectedLocation,
+					}),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to start session');
+			}
+
+			const data = await response.json();
+
+			setCurrentVisitId(data.visit_id);
+
+			startSession(selectedType, selectedLocation);
+			setShowTypeSelect(false);
+		} catch (error) {
+			console.error(error);
+			alert('Failed to start session');
+		}
 	};
 
 	const handleCancelSelect = () => {
 		setShowTypeSelect(false);
 		setSelectedType('checkup');
 		setSelectedLocation('Clinic');
+	};
+
+	const handleEndClick = () => {
+		setShowEndForm(true);
+	};
+
+	const handleConfirmEnd = async () => {
+		if (chiefComplaint.trim() === '') {
+			setError('Main complaint cannot be empty');
+			return;
+		}
+
+		const sessionData = {
+			duration_minutes: secondsToRoundedMinutes(elapsedTime),
+			chief_complaint: chiefComplaint,
+			status: 'completed',
+		};
+
+		try {
+			if (currentVisitId) {
+				const response = await fetch(
+					'http://localhost:8000/api/patients/visits',
+					{
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							visit_id: currentVisitId,
+							...sessionData,
+						}),
+					},
+				);
+
+				if (!response.ok) {
+					throw new Error('Failed to update visit');
+				}
+
+				setChiefComplaint('');
+				setShowEndForm(false);
+				setError('');
+				setCurrentVisitId(null);
+				endSession();
+			}
+		} catch (err) {
+			console.error(err);
+			alert('Failed to end session');
+		}
+
+		setChiefComplaint('');
+		setShowEndForm(false);
+		endSession();
+	};
+
+	const handleCancelEnd = () => {
+		setShowEndForm(false);
+		setChiefComplaint('');
 	};
 
 	return (
@@ -73,15 +164,47 @@ export const Navbar = () => {
 				<div className='navbar-center'>
 					{session ? (
 						<div className='session-active'>
-							<div className='session-info'>
-								<span className='session-type'>
-									{session.type} - {session.location}
-								</span>
-								<span className='session-timer'>{formatTime(elapsedTime)}</span>
-							</div>
-							<button onClick={endSession} className='btn-end-session'>
-								End Session
-							</button>
+							{showEndForm ? (
+								<div className='session-end-form'>
+									<div className='input-wrapper'>
+										<input
+											type='text'
+											placeholder='Main complaint...'
+											value={chiefComplaint}
+											onChange={(e) => {
+												setChiefComplaint(e.target.value);
+												if (error) setError('');
+											}}
+											className='complaint-input'
+											autoFocus
+										/>
+										{error && <span className='error'>{error}</span>}
+									</div>
+									<button onClick={handleCancelEnd} className='btn-cancel'>
+										Cancel
+									</button>
+									<button
+										onClick={handleConfirmEnd}
+										className='btn-confirm-end'
+									>
+										Save and End
+									</button>
+								</div>
+							) : (
+								<>
+									<div className='session-info'>
+										<span className='session-type'>
+											{session.type} - {session.location}
+										</span>
+										<span className='session-timer'>
+											{formatTime(elapsedTime)}
+										</span>
+									</div>
+									<button onClick={handleEndClick} className='btn-end-session'>
+										End Session
+									</button>
+								</>
+							)}
 						</div>
 					) : showTypeSelect ? (
 						<div className='session-select'>

@@ -298,8 +298,7 @@ async def update_visit(visit: UpdateVisit):
                     SET 
                         chief_complaint = %s, 
                         status = %s, 
-                        duration_minutes = %s, 
-                        updated_at = DATE_TRUNC('second', now())
+                        duration_minutes = %s
                     WHERE visit_id = %s
                 """, (
                     visit.chief_complaint,

@@ -189,7 +189,7 @@ CREATE TRIGGER trigger_calculate_bmi
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = CURRENT_TIMESTAMP(0);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

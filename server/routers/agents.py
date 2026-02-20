@@ -8,6 +8,7 @@ from openai import OpenAI
 
 from rag.rag_service import RAGService
 from models.agents import AIOverviewResponse, OverviewPromptResponse, OverviewRequest
+from utils.cache import cache, hash_key
 
 load_dotenv()
 
@@ -202,6 +203,11 @@ router = APIRouter(
 
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 async def get_overview(patient_serial: str):
+    cache_key = f"overview:{patient_serial}"
+    cached = cache.get(cache_key)
+
+    if cached:
+        return cached
 
     docs = rag.get_patient_overview(patient_serial=patient_serial)
 
@@ -212,33 +218,47 @@ async def get_overview(patient_serial: str):
             patient_data = cur.fetchone()
 
             if not patient_data:
-                raise ValueError(f"Patient with serial number {patient_serial} not found in database.")
-        
+                raise ValueError(
+                    f"Patient with serial number {patient_serial} not found in database."
+                )
+
     prompt = build_prompt(patient_data, docs)
 
     response = client.chat.completions.create(
-            model="gemini-2.5-flash",
-            messages=[
-                {"role": "system", "content": "You are a clinical briefing assistant. Provide concise, accurate overviews for patients. Return only valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.0
-        )
-        
+        model="gemini-2.5-flash",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a clinical briefing assistant. Provide concise, accurate overviews for patients. Return only valid JSON.",
+},
+            {"role": "user", "content": prompt},
+        ],
+        response_format={"type": "json_object"},
+        temperature=0.0,
+    )
+
     llm_output = json.loads(response.choices[0].message.content)
 
-    return {
-            "patient_serial": patient_serial,
-            "ai_overview": llm_output,
-            "chroma_sources": len(docs)
-        }
+    result = {
+        "patient_serial": patient_serial,
+        "ai_overview": llm_output,
+        "chroma_sources": len(docs),
+    }
+
+    cache.set(cache_key, result)
+
+    return result
 
 
-@router.post('/recommendations')
+@router.post("/recommendations")
 async def get_recommendations(request: OverviewRequest):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
+
+    cache_key = f"recommendations:{hash_key(request.overview)}"
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
 
     prompt = f"""
         Based on this overview, provide patient recommendations: {request.overview}. 
@@ -285,28 +305,38 @@ async def get_recommendations(request: OverviewRequest):
             - If no clear recommendations can be made, return an empty array instead
     """
 
-
     try:
         response = client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
-                {"role": "system", "content": "You are a clinical briefing assistant. Provide concise recommendations for patients. Return only valid JSON."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are a clinical briefing assistant. Provide concise recommendations for patients. Return only valid JSON.",
+                },
+                {"role": "user", "content": prompt},
             ],
             response_format={"type": "json_object"},
-            temperature=0.0
+            temperature=0.0,
         )
 
         llm_output = json.loads(response.choices[0].message.content)
+
+        cache.set(cache_key, llm_output)
 
         return llm_output
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post('/medications')
+
+@router.post("/medications")
 async def get_medications(request: OverviewRequest):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
+
+    cache_key = f"medications:{hash_key(request.overview)}"
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
 
     prompt = f"""
         Based on this overview, provide patient medications alternatives: {request.overview}. 
@@ -316,7 +346,8 @@ async def get_medications(request: OverviewRequest):
             "medications": [
                 "current_medications": [
                     {{
-                        "name": "string", 
+                        "name": "string",
+                        "generic_name": "string",
                         "dosage": "string", 
                         "frequency": "string"
                     }}
@@ -325,6 +356,7 @@ async def get_medications(request: OverviewRequest):
                     {{
                         "action": "string", 
                         "name": "string", 
+                        "generic_name": "string",
                         "dosage": "string", 
                         "frequency": "string", 
                         "reason": "string"
@@ -350,14 +382,19 @@ async def get_medications(request: OverviewRequest):
         response = client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
-                {"role": "system", "content": "You are a clinical briefing assistant. Provide concise, accurate overviews for patients. Return only valid JSON."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are a clinical briefing assistant. Provide concise, accurate overviews for patients. Return only valid JSON.",
+                },
+                {"role": "user", "content": prompt},
             ],
             response_format={"type": "json_object"},
-            temperature=0.0
+            temperature=0.0,
         )
 
         llm_output = json.loads(response.choices[0].message.content)
+
+        cache.set(cache_key, llm_output)
 
         return llm_output
     except Exception as e:
@@ -365,11 +402,19 @@ async def get_medications(request: OverviewRequest):
 
 
 def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
-    meds = pg_data.get('active_medications', []) or []
-    meds_str = "\n".join([f"- {m['name']}: {m['dosage']} {m['frequency']}" for m in meds]) if meds else "No active medications"
-    
-    chroma_text = "\n".join(chroma_context) if chroma_context else "No previous summaries available."
-    
+    meds = pg_data.get("active_medications", []) or []
+    meds_str = (
+        "\n".join([f"- {m['name']}: {m['dosage']} {m['frequency']}" for m in meds])
+        if meds
+        else "No active medications"
+    )
+
+    chroma_text = (
+        "\n".join(chroma_context)
+        if chroma_context
+        else "No previous summaries available."
+    )
+
     return f"""
             Provide a clinical briefing for this patient:
 

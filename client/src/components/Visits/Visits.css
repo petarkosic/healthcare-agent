@@ -1,0 +1,24 @@
+.visits-timeline {
+	max-height: 400px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.data-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.data-table th {
+	text-align: left;
+	padding: 1rem;
+	background: #f8fafc;
+	color: #475569;
+	font-weight: 600;
+}
+
+.data-table td {
+	padding: 1rem;
+	border-bottom: 1px solid #e2e8f0;
+}

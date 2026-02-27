@@ -2,6 +2,13 @@
 	padding: 1rem 0;
 }
 
+.recommendations-title {
+	font-size: 1rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+	color: #333;
+}
+
 .recommendation-item {
 	margin-bottom: 1rem;
 	padding: 0.75rem;
@@ -12,6 +19,8 @@
 .recommendation-priority {
 	font-weight: bold;
 	margin-bottom: 0.5rem;
+	display: flex;
+	align-items: center;
 }
 
 .recommendation-priority .priority {
@@ -33,4 +42,212 @@
 .recommendation-priority .priority.routine {
 	background: #007bff;
 	color: white;
+}
+
+.recommendation-text {
+	margin-bottom: 0.5rem;
+	font-size: 0.9rem;
+	color: #333;
+}
+
+.recommendation-reason {
+	font-size: 0.85rem;
+	color: #666;
+	font-style: italic;
+}
+
+.follow-up-hint {
+	margin-top: 0.5rem;
+	font-size: 0.8rem;
+	color: var(--accent-blue, #007bff);
+	background: rgba(0, 123, 255, 0.1);
+	padding: 0.25rem 0.5rem;
+	border-radius: 3px;
+	display: inline-block;
+}
+
+.follow-up {
+	margin-left: auto;
+}
+
+.follow-up button {
+	background-color: var(--accent-blue);
+	color: white;
+	border: none;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	cursor: pointer;
+	font-weight: 500;
+	transition: all 0.15s ease;
+	margin-left: auto;
+}
+
+.follow-up button:hover {
+	background-color: var(--accent-blue-hover);
+}
+
+.schedule-mode {
+	background: rgba(0, 123, 255, 0.08);
+	border: 1px solid rgba(0, 123, 255, 0.2);
+}
+
+.schedule-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.schedule-icon {
+	font-size: 1.1rem;
+}
+
+.schedule-title {
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--accent-blue, #007bff);
+}
+
+.schedule-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.schedule-label {
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: #333;
+}
+
+.schedule-datetime-input {
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 0.85rem;
+	font-family: inherit;
+	box-sizing: border-box;
+}
+
+.schedule-datetime-input:focus {
+	outline: none;
+	border-color: var(--accent-blue, #007bff);
+	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.schedule-suggestion {
+	font-size: 0.8rem;
+	color: #666;
+	background: #fff;
+	padding: 0.5rem;
+	border-radius: 3px;
+	border: 1px solid #e0e0e0;
+	margin: 0;
+}
+
+.schedule-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.schedule-actions button {
+	flex: 1;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	border: none;
+}
+
+.btn-confirm {
+	background-color: var(--accent-blue);
+	color: white;
+}
+
+.btn-confirm:hover {
+	background-color: var(--accent-blue-hover);
+}
+
+.btn-confirm:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+}
+
+.btn-cancel {
+	background-color: #fff;
+	color: #333;
+	border: 1px solid #ddd !important;
+}
+
+.btn-cancel:hover {
+	background-color: #f5f5f5;
+}
+
+.btn-cancel:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.success-mode {
+	background: rgba(40, 167, 69, 0.08);
+	border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.success-content {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.success-icon {
+	font-size: 1.2rem;
+	color: #28a745;
+	background: rgba(40, 167, 69, 0.15);
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-weight: bold;
+}
+
+.success-text {
+	flex: 1;
+}
+
+.success-text strong {
+	display: block;
+	font-size: 0.9rem;
+	color: #28a745;
+	margin-bottom: 0.25rem;
+}
+
+.success-text p {
+	margin: 0;
+	font-size: 0.8rem;
+	color: #666;
+}
+
+.btn-back {
+	width: 100%;
+	padding: 0.5rem 1rem;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	background-color: #fff;
+	color: #333;
+	border: 1px solid #ddd;
+}
+
+.btn-back:hover {
+	background-color: #f5f5f5;
 }

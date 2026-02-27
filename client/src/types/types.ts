@@ -220,6 +220,10 @@ export type Recommendation = {
 	recommendation: string;
 	reason: string;
 	priority: string;
+	follow_up?: {
+		offset_days: number;
+		reason: string;
+	};
 };
 
 export type MedicationChange = {

@@ -5,6 +5,8 @@ import type {
 	ResponseData,
 } from '../../types/types';
 import './SidebarRecommendations.css';
+import { formatDateTimeLocal } from '../../utils/utils';
+import { useLocation } from 'react-router';
 
 type SidebarRecommendationsProps = {
 	data: ResponseData | null;
@@ -19,36 +21,74 @@ const isRecommendationsResponse = (
 export const SidebarRecommendations = ({
 	data,
 }: SidebarRecommendationsProps) => {
-	const [viewMode, setViewMode] = useState('card');
+	const [viewMode, setViewMode] = useState<'card' | 'schedule' | 'success'>(
+		'card',
+	);
 	const [selectedDate, setSelectedDate] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const [selectedRecommendation, setSelectedRecommendation] =
+		useState<Recommendation | null>(null);
+
+	const location = useLocation();
+	const patient_id = location.pathname.split('/')[2];
 
 	if (!data || !isRecommendationsResponse(data)) return null;
 
-	const handleViewModeChange = () => {
+	const handleViewModeChange = (item: Recommendation) => {
+		setSelectedRecommendation(item);
+
 		if (viewMode === 'card') {
-			if (data?.follow_up?.offset_days) {
-				const suggestedDate = new Date();
+			const suggestedDate = new Date();
+
+			if (item?.follow_up?.offset_days) {
 				suggestedDate.setDate(
-					suggestedDate.getDate() + data?.follow_up?.offset_days,
+					suggestedDate.getDate() + item.follow_up.offset_days,
 				);
 				// Format for datetime-local input: YYYY-MM-DDTHH:mm
-				const formatted = suggestedDate.toISOString().slice(0, 16);
+				const formatted = formatDateTimeLocal(suggestedDate);
+
 				setSelectedDate(formatted);
-				setViewMode('schedule');
 			}
+
+			setViewMode('schedule');
 		}
 	};
 
 	const handleCancel = () => {
 		setViewMode('card');
+		setSelectedRecommendation(null);
 		setSelectedDate('');
 	};
 
 	const handleConfirm = async () => {
 		setIsLoading(true);
+
 		try {
-			// TODO: Replace with actual API call
+			const startDate = new Date(selectedDate);
+			// Default 30 minutes duration for a visit
+			const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
+
+			const response = await fetch(
+				'http://localhost:8000/api/agents/schedule-followup',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						summary: patient_id,
+						start_time: startDate.toISOString(),
+						end_time: endDate.toISOString(),
+						description: selectedRecommendation?.reason,
+					}),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to add note');
+			}
+
+			await response.json();
 
 			setViewMode('success');
 		} catch (error) {
@@ -64,32 +104,33 @@ export const SidebarRecommendations = ({
 		<div className='recommendations-container'>
 			<h4>Recommendations</h4>
 
-			{viewMode == 'card' && (
-				{data?.recommendations?.map((item: Recommendation, index: number) => (	
-				<div className='recommendation-item' key={index}>
-					<div className='recommendation-priority'>
-						<div>
-							Priority:{' '}
-							<span className={`priority ${item.priority}`}>
-								{item.priority}
-							</span>
-						</div>
-
-						{viewMode == 'card' && item.follow_up && (
-							<div className='follow-up'>
-								<button onClick={handleViewModeChange}>&#128197;</button>
+			{viewMode == 'card' &&
+				data?.recommendations?.map((item: Recommendation, index: number) => (
+					<div className='recommendation-item' key={index}>
+						<div className='recommendation-priority'>
+							<div>
+								Priority:{' '}
+								<span className={`priority ${item.priority}`}>
+									{item.priority}
+								</span>
 							</div>
-						)}
+
+							{item.follow_up && (
+								<div className='follow-up'>
+									<button onClick={() => handleViewModeChange(item)}>
+										&#128197;
+									</button>
+								</div>
+							)}
+						</div>
+						<div className='recommendation-text'>
+							<strong>{item.recommendation}</strong>
+						</div>
+						<div className='recommendation-reason'>
+							<em>Reason: {item.reason}</em>
+						</div>
 					</div>
-					<div className='recommendation-text'>
-						<strong>{item.recommendation}</strong>
-					</div>
-					<div className='recommendation-reason'>
-						<em>Reason: {item.reason}</em>
-					</div>
-				</div>
 				))}
-			)}
 
 			{viewMode === 'schedule' && data && (
 				<div className='recommendation-item schedule-mode'>
@@ -110,10 +151,10 @@ export const SidebarRecommendations = ({
 						/>
 
 						<p className='schedule-suggestion'>
-							<strong>Suggested:</strong> {data.follow_up?.offset_days} days
-							from now
+							<strong>Suggested:</strong>{' '}
+							{selectedRecommendation?.follow_up?.offset_days} days from now
 							<br />
-							<em>{data.follow_up?.reason}</em>
+							<em>{selectedRecommendation?.follow_up?.reason}</em>
 						</p>
 
 						<div className='schedule-actions'>

@@ -1,52 +1,58 @@
+import os
 import uuid
 from typing import List
 
+import chromadb
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 VECTOR_DB_PATH = "./chroma_db"
 
+CHROMA_HOST = os.getenv("CHROMA_HOST")
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
+
+
 class RAGService:
     def __init__(
-            self,
-            collection_name: str = "patient_notes",
-            persist_directory: str = VECTOR_DB_PATH,
-            hf_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+        self,
+        collection_name: str = "patient_notes",
+        persist_directory: str = VECTOR_DB_PATH,
+        hf_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
     ):
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=hf_model_name
-        )
+        self.embeddings = HuggingFaceEmbeddings(model_name=hf_model_name)
 
-        self.vectorstore = Chroma(
-            collection_name=collection_name,
-            persist_directory=persist_directory,
-            embedding_function=self.embeddings
-        )
+        if CHROMA_HOST:
+            chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
+            self.vectorstore = Chroma(
+                client=chroma_client,
+                collection_name=collection_name,
+                embedding_function=self.embeddings,
+            )
+        else:
+            self.vectorstore = Chroma(
+                collection_name=collection_name,
+                persist_directory=persist_directory,
+                embedding_function=self.embeddings,
+            )
 
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
-            separators=["\n\n", "\n", ". ", " ", ""]
+            separators=["\n\n", "\n", ". ", " ", ""],
         )
 
-    def upsert_patient_note(
-        self,
-        patient_serial: str,
-        note_summary: str
-    ):
+    def upsert_patient_note(self, patient_serial: str, note_summary: str):
         print(f"Upserting patient note for patient {patient_serial}...")
 
         self.delete_patient_note(patient_serial=patient_serial)
 
-        return self.add_patient_note(patient_serial=patient_serial, note_summary=note_summary)
+        return self.add_patient_note(
+            patient_serial=patient_serial, note_summary=note_summary
+        )
 
-    def get_patient_overview(
-        self,
-        patient_serial: str,
-        k: int = 6
-    ) -> List[str]:
-        query = f"patient medical overview for patient {patient_serial}"
+    def get_patient_overview(self, patient_serial: str, k: int = 6) -> List[str]:
+        query = f"Patient medical overview for patient {patient_serial}"
 
         docs = self.vectorstore.similarity_search(
             query=query,
@@ -55,12 +61,8 @@ class RAGService:
         )
 
         return [doc.page_content for doc in docs]
-    
-    def add_patient_note(
-        self,
-        patient_serial: str,
-        note_summary: str
-    ) -> List[str]:
+
+    def add_patient_note(self, patient_serial: str, note_summary: str) -> List[str]:
         chunks = self.splitter.split_text(note_summary)
 
         if not chunks:
@@ -72,21 +74,19 @@ class RAGService:
         self.vectorstore.add_texts(
             texts=chunks,
             metadatas=[{"patient_serial": patient_serial}] * len(chunks),
-            ids=ids
+            ids=ids,
         )
 
         print(f"Successfully added {len(chunks)} chunks for patient {patient_serial}.")
 
         return ids
 
-    def delete_patient_note(self, patient_serial: str) -> bool:    
+    def delete_patient_note(self, patient_serial: str) -> bool:
         try:
-            result = self.vectorstore.delete(
-                where={"patient_serial": patient_serial}
-            )
+            result = self.vectorstore.delete(where={"patient_serial": patient_serial})
 
             print(f"Deletion result for patient {patient_serial}: {result}")
-            
+
             return True
         except Exception as e:
             print(f"Error deleting data for patient {patient_serial}: {e}")

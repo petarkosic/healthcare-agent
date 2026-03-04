@@ -201,6 +201,11 @@ async def set_note(patient_serial: str, note: Note):
     """
 
     try:
+        rag.upsert_patient_note(
+            patient_serial=str(patient_serial),
+            note_summary=note.note_text
+        )
+
         resp = client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
@@ -209,11 +214,6 @@ async def set_note(patient_serial: str, note: Note):
         )
 
         summary = resp.choices[0].message.content.strip()
-
-        rag.upsert_patient_note(
-            patient_serial=str(patient_serial),
-            note_summary=summary
-        )
 
     except Exception as e:
         raise HTTPException(

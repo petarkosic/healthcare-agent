@@ -76,21 +76,30 @@ export const SidebarRecommendations = ({
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						summary: patient_id,
+						patient_serial_number: patient_id,
+						doctor_serial_number: 'Dr7TUydx',
+						visit_date: selectedDate,
+						visit_type: 'followup',
+						summary: selectedRecommendation?.follow_up?.reason,
 						start_time: startDate.toISOString(),
 						end_time: endDate.toISOString(),
-						description: selectedRecommendation?.reason,
+						description:
+							selectedRecommendation?.reason || 'Follow-up appointment',
 					}),
 				},
 			);
 
 			if (!response.ok) {
-				throw new Error('Failed to add note');
+				throw new Error('Failed to schedule visit');
 			}
 
-			await response.json();
+			const res = await response.json();
 
-			setViewMode('success');
+			if (res.success) {
+				setViewMode('success');
+			} else {
+				throw new Error(res.error || 'Failed to schedule');
+			}
 		} catch (error) {
 			console.error('Scheduling failed:', error);
 			alert('Failed to schedule. Please try again.');

@@ -3,3 +3,5 @@
 /postgres-data
 /**/*__pycache__
 /**/*chroma_db
+/**/*credentials.json
+/**/*token.json

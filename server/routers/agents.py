@@ -1,9 +1,12 @@
 import os
 import json
+from pathlib import Path
 from fastapi import APIRouter, HTTPException
 import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
+
+from models.agents import FollowUpRequest
 from openai import OpenAI
 
 from rag.rag_service import RAGService
@@ -24,6 +27,172 @@ DB_CONFIG = {
     "password": os.getenv("POSTGRES_PASSWORD"),
 }
 
+def schedule_visit_db(
+    patient_serial_number: str,
+    doctor_serial_number: str,
+    visit_date: str,
+    visit_type: str,
+    chief_complaint: str,
+    duration_minutes: int = 30,
+):
+    with psycopg.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO visits (patient_serial_number, doctor_serial_number, visit_date, visit_type, chief_complaint, status, duration_minutes, location)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING visit_id
+                """,
+                (
+                    patient_serial_number,
+                    doctor_serial_number,
+                    visit_date,
+                    visit_type,
+                    chief_complaint,
+                    "scheduled",
+                    duration_minutes,
+                    "Clinic A",
+                ),
+            )
+
+            visit_id = cur.fetchone()[0]
+
+            conn.commit()
+
+            return str(visit_id)
+
+
+def create_calendar_event(
+    summary: str, start_time: str, end_time: str, description: str = None
+):
+    service = authenticate_google_calendar()
+
+    event = {
+        "summary": summary,
+        "description": description or "",
+        "start": {"dateTime": start_time, "timeZone": "GMT+01:00"},
+        "end": {"dateTime": end_time, "timeZone": "GMT+01:00"},
+    }
+
+    try:
+        created_event = (
+            service.events().insert(calendarId="primary", body=event).execute()
+        )
+
+        return {
+            "htmlLink": created_event.get("htmlLink"),
+            "eventId": created_event.get("id"),
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "schedule_visit_db",
+            "description": "Save the scheduled visit to the PostgreSQL database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "patient_serial_number": {
+                        "type": "string",
+                        "description": "Patient serial number",
+                    },
+                    "doctor_serial_number": {
+                        "type": "string",
+                        "description": "Doctor serial number",
+                    },
+                    "visit_date": {
+                        "type": "string",
+                        "description": "Visit date and time in ISO 8601 format",
+                    },
+                    "visit_type": {
+                        "type": "string",
+                        "description": "Type of visit (e.g., followup, checkup)",
+                    },
+                    "chief_complaint": {
+                        "type": "string",
+                        "description": "Chief complaint or reason for visit",
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "description": "Duration of visit in minutes (default 30)",
+                    },
+                },
+                "required": [
+                    "patient_serial_number",
+                    "doctor_serial_number",
+                    "visit_date",
+                    "visit_type",
+                    "chief_complaint",
+                ],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_calendar_event",
+            "description": "Create a Google Calendar event for the follow-up appointment",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "summary": {"type": "string", "description": "Patient serial number"},
+                    "start_time": {
+                        "type": "string",
+                        "description": "Start time in ISO 8601 format",
+                    },
+                    "end_time": {
+                        "type": "string",
+                        "description": "End time in ISO 8601 format",
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Event description",
+                    },
+                },
+                "required": ["summary", "start_time", "end_time"],
+            },
+        },
+    },
+]
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
+
+BASE_DIR = Path(__file__).resolve().parent
+CREDENTIALS_PATH = BASE_DIR / "credentials.json"
+TOKEN_PATH = BASE_DIR / "token.json"
+
+def authenticate_google_calendar():
+    creds = None
+
+    if TOKEN_PATH.exists():
+        with open(TOKEN_PATH, "rb") as token:
+            creds = Credentials.from_authorized_user_info(
+                info=json.load(token), scopes=SCOPES
+            )
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                str(CREDENTIALS_PATH), SCOPES
+            )
+            creds = flow.run_local_server(port=0)
+
+        with open(TOKEN_PATH, "wb") as token:
+            token.write(creds.to_json())
+
+    return build("calendar", "v3", credentials=creds)
 
 postgres_query = """
 WITH 
@@ -230,7 +399,7 @@ async def get_overview(patient_serial: str):
             {
                 "role": "system",
                 "content": "You are a clinical briefing assistant. Provide concise, accurate overviews for patients. Return only valid JSON.",
-},
+        },
             {"role": "user", "content": prompt},
         ],
         response_format={"type": "json_object"},
@@ -261,20 +430,25 @@ async def get_recommendations(request: OverviewRequest):
         return cached
 
     prompt = f"""
-        Based on this overview, provide patient recommendations: {request.overview}. 
-        
+        Based on this overview, provide patient recommendations: {request.overview}.
+
         Return only valid JSON with the following format:
         {{
             "recommendations": [
                 {{
                     "recommendation": "string",
                     "reason": "string",
-                    "priority": "string"
+                    "priority": "string",
+                    "follow_up": {{
+                        "offset_days": "int",
+                        "reason": "string",
+                    }}
                 }},
                 {{
                     "recommendation": "string",
                     "reason": "string",
-                    "priority": "string"
+                    "priority": "string",
+                    "follow_up": null
                 }}
             ]
         }}
@@ -297,7 +471,13 @@ async def get_recommendations(request: OverviewRequest):
             - "high": Important for next visit/update
             - "routine": Standard care or maintenance
 
-        4. Additional Rules:
+        4. Follow-up Format:
+            - If applicable, include a follow-up date and reason
+            - followup.offset_days = "int" (e.g. 14, 28) (if the recommendation says "follow up in 2 weeks" then offset_days = 14, if "follow up in 4 weeks" then offset_days = 28, etc.)
+            - followup.reason = "string"
+            - If not applicable, return null
+
+        5. Additional Rules:
             - Generate 3-5 recommendations maximum unless critical issues require more
             - Do NOT include patient names or identifiers
             - Prioritize urgency and importance
@@ -335,12 +515,13 @@ async def get_medications(request: OverviewRequest):
 
     cache_key = f"medications:{hash_key(request.overview)}"
     cached = cache.get(cache_key)
+
     if cached:
         return cached
 
     prompt = f"""
-        Based on this overview, provide patient medications alternatives: {request.overview}. 
-        
+        Based on this overview, provide patient medications alternatives: {request.overview}.
+
         Return only valid JSON with the following format:
         {{
             "medications": [
@@ -348,17 +529,17 @@ async def get_medications(request: OverviewRequest):
                     {{
                         "name": "string",
                         "generic_name": "string",
-                        "dosage": "string", 
+                        "dosage": "string",
                         "frequency": "string"
                     }}
                 ],
                 "prescribed_changes": [
                     {{
-                        "action": "string", 
-                        "name": "string", 
+                        "action": "string",
+                        "name": "string",
                         "generic_name": "string",
-                        "dosage": "string", 
-                        "frequency": "string", 
+                        "dosage": "string",
+                        "frequency": "string",
                         "reason": "string"
                     }}
                 ]
@@ -399,6 +580,77 @@ async def get_medications(request: OverviewRequest):
         return llm_output
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/schedule-followup")
+async def schedule_visit(follow_up: FollowUpRequest):
+    prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
+
+        Patient Serial: {follow_up.patient_serial_number}
+        Doctor Serial: {follow_up.doctor_serial_number}
+        Visit Date: {follow_up.visit_date}
+        Visit Type: {follow_up.visit_type}
+        Summary: {follow_up.summary}
+        Description: {follow_up.description}
+        Start Time: {follow_up.start_time}
+        End Time: {follow_up.end_time}
+
+        Please execute the following tools to schedule this visit:
+        1. First, call schedule_visit_db to save the visit to the PostgreSQL database
+        2. Then, call create_calendar_event to create a Google Calendar event
+
+        Make sure to call both tools with the provided information."""
+
+    try:
+        response = client.chat.completions.create(
+            model="gemini-2.5-flash",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a medical scheduling assistant. Execute the tools to schedule patient visits.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            tools=tools,
+            tool_choice="required",
+        )
+
+        tool_calls = response.choices[0].message.tool_calls
+        results = []
+
+        if tool_calls:
+            for tool_call in tool_calls:
+                function_name = tool_call.function.name
+                arguments = json.loads(tool_call.function.arguments)
+
+                if function_name == "schedule_visit_db":
+                    result = schedule_visit_db(
+                        patient_serial_number=arguments.get("patient_serial_number"),
+                        doctor_serial_number=arguments.get("doctor_serial_number"),
+                        visit_date=arguments.get("visit_date"),
+                        visit_type=arguments.get("visit_type"),
+                        chief_complaint=arguments.get("chief_complaint"),
+                        duration_minutes=arguments.get("duration_minutes", 30),
+                    )
+                    results.append({"tool": "schedule_visit_db", "result": result})
+
+                elif function_name == "create_calendar_event":
+                    result = create_calendar_event(
+                        summary=arguments.get("summary"),
+                        start_time=arguments.get("start_time"),
+                        end_time=arguments.get("end_time"),
+                        description=arguments.get("description"),
+                    )
+                    results.append({"tool": "create_calendar_event", "result": result})
+
+        return {
+            "success": True,
+            "message": "Visit scheduled successfully",
+            "tools_executed": results,
+        }
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:

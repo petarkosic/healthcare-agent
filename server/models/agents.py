@@ -57,3 +57,13 @@ class OverviewPromptResponse(BaseModel):
     overview: str
     critical_alerts: list[str]
     suggested_questions: list[str]
+
+class FollowUpRequest(BaseModel):
+	patient_serial_number: str = Field(description='Patient serial number')
+	doctor_serial_number: str = Field(description='Doctor serial number')
+	visit_date: str = Field(description='Visit date in ISO 8601 format')
+	visit_type: str = Field(default='followup', description='Type of visit')
+	summary: str = Field(description='Visit summary/title')
+	start_time: str = Field(description='Start time in ISO 8601 format')
+	end_time: str = Field(description='End time in ISO 8601 format')
+	description: str = Field(default='', description='Visit description')

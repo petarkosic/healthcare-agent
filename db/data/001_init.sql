@@ -1,5 +1,3 @@
-CREATE DATABASE "healthcare_agent";
-
 \c healthcare_agent
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -7,14 +7,15 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.124.0",
     "chromadb>=0.4.0",
+    "google-api-python-client>=2.190.0",
+    "google-auth-httplib2>=0.3.0",
+    "google-auth-oauthlib>=1.2.4",
     "langchain>=1.2.6",
     "langchain-chroma>=1.1.0",
-    "langchain-huggingface>=1.2.0",
     "langchain-text-splitters>=1.1.0",
     "openai>=2.8.1",
     "psycopg[binary]>=3.3.2",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
-    "sentence-transformers>=5.2.0",
     "uvicorn>=0.38.0",
 ]

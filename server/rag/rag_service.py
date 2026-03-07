@@ -4,7 +4,6 @@ from typing import List
 
 import chromadb
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 VECTOR_DB_PATH = "./chroma_db"
@@ -18,22 +17,17 @@ class RAGService:
         self,
         collection_name: str = "patient_notes",
         persist_directory: str = VECTOR_DB_PATH,
-        hf_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
     ):
-        self.embeddings = HuggingFaceEmbeddings(model_name=hf_model_name)
-
         if CHROMA_HOST:
             chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
             self.vectorstore = Chroma(
                 client=chroma_client,
                 collection_name=collection_name,
-                embedding_function=self.embeddings,
             )
         else:
             self.vectorstore = Chroma(
                 collection_name=collection_name,
                 persist_directory=persist_directory,
-                embedding_function=self.embeddings,
             )
 
         self.splitter = RecursiveCharacterTextSplitter(

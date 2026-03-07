@@ -4,31 +4,40 @@ services:
     container_name: ha-postgres
     shm_size: 128mb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-healthcare_agent}
     volumes:
-      - ./postgres-data:/var/lib/postgresql/18/docker
+      - postgres-data:/var/lib/postgresql/18/docker
       - ./db/data:/docker-entrypoint-initdb.d
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     networks:
       - ha-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  server:
-    build: ./server
-    container_name: ha-server
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: ha-chroma
     ports:
-      - '8000:8000'
-    depends_on:
-      - postgres
+      - '8001:8000'
+    volumes:
+      - chroma-data:/chroma/chroma_db
     networks:
       - ha-network
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:8000/api/v1/heartbeat || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 networks:
   ha-network:
@@ -36,3 +45,4 @@ networks:
 
 volumes:
   postgres-data:
+  chroma-data:

@@ -1,0 +1,63 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: ha-server-dev
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-healthcare_agent}
+      API_KEY: ${API_KEY}
+      BASE_URL: ${BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
+      CHROMA_HOST: chroma
+      CHROMA_PORT: 8000
+    volumes:
+      - ./server:/app
+      - server-cache:/app/.cache
+    ports:
+      - '8000:8000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chroma:
+        condition: service_started
+    networks:
+      - ha-network
+    command:
+      [
+        'uv',
+        'run',
+        'fastapi',
+        'dev',
+        '--host',
+        '0.0.0.0',
+        '--port',
+        '8000',
+        '--reload',
+      ]
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: ha-client-dev
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    networks:
+      - ha-network
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: ['npm', 'run', 'dev', '--', '--host', '0.0.0.0']
+
+networks:
+  ha-network:
+    driver: bridge
+
+volumes:
+  server-cache:

@@ -5,7 +5,7 @@ from routers import patients
 from routers import agents
 
 origins = [
-    "http://localhost:3000",
+    "http://localhost:8080",
 ]
 
 app = FastAPI()

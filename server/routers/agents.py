@@ -683,7 +683,7 @@ def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
             ACTIVE MEDICATIONS:
             {meds_str}
 
-            CLINICAL HISTORY SUMMARIES:
+            PREVIOUS VISIT NOTES:
             {chroma_text}
 
             Return only valid JSON with the following format:
@@ -694,7 +694,7 @@ def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
             }}
 
             Guidelines:
-            - Overview must be a summary of the patient's last visit, including any relevant medications and any critical alerts.
+            - Overview must be a summary of the patient's last visit, previous visit notes, any relevant medications and any critical alerts.
             - Critical alerts must be a list of alerts that require immediate attention, such as pain, fever, or blood pressure.
             - Suggested questions must be a list of questions that the doctor could ask the patient to better understand the patient's condition.
             """

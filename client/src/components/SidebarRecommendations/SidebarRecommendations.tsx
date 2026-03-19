@@ -77,7 +77,7 @@ export const SidebarRecommendations = ({
 					},
 					body: JSON.stringify({
 						patient_serial_number: patient_id,
-						doctor_serial_number: 'Dr7TUydx',
+						doctor_serial_number: 'Dsn90mA2',
 						visit_date: selectedDate,
 						visit_type: 'followup',
 						summary: selectedRecommendation?.follow_up?.reason,

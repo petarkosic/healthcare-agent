@@ -21,11 +21,12 @@ pats AS (
   RETURNING patient_id, patient_serial_number, first_name, last_name
 ),
 
+-- For doctor_serial_number, use generate_login_id('D')
 docs AS (
   INSERT INTO doctors (
     doctor_serial_number, first_name, last_name, specialty, license_number, email, phone, created_at
   ) VALUES
-    (generate_login_id('D'), 'Alan', 'Parker', 'Internal Medicine', 'IM-2025-0001', 'alan.parker@internal.example.com', '+1-555-900-0100', now() - INTERVAL '90 days')
+    ('Dsn90mA2', 'Alan', 'Parker', 'Internal Medicine', 'IM-2025-0001', 'alan.parker@internal.example.com', '+1-555-900-0100', now() - INTERVAL '90 days')
   RETURNING doctor_id, doctor_serial_number, first_name, last_name
 ),
 

@@ -84,6 +84,7 @@ flowchart TB
 - **AI/LLM**: Gemini 2.5 Flash (via Google AI Studio)
 - **RAG**: LangChain with ChromaDB embeddings
 - **ORM**: psycopg
+- **Observability**: Langfuse
 
 ### Frontend
 
@@ -100,6 +101,7 @@ flowchart TB
 - **Follow-up Scheduling**: Automated visit scheduling with Google Calendar integration
 - **RAG-powered Context**: Retrieval-augmented generation using ChromaDB for historical note context
 - **Caching**: In-memory caching for improved performance on repeated queries
+- **Observability**: Langfuse for monitoring and tracing
 
 ## Prerequisites
 
@@ -107,6 +109,7 @@ flowchart TB
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - Google AI Studio API key (for AI features)
 - Google Cloud Project with Calendar API enabled (for scheduling features)
+- [Langfuse account](https://langfuse.com)
 
 ## Quick Start
 
@@ -126,15 +129,18 @@ cp .env.example .env
 
 #### Environment Variables
 
-| Variable            | Description                    | Default                                                    |
-| ------------------- | ------------------------------ | ---------------------------------------------------------- |
-| `POSTGRES_USER`     | PostgreSQL username            | `postgres`                                                 |
-| `POSTGRES_PASSWORD` | PostgreSQL password            | `postgres`                                                 |
-| `POSTGRES_HOST`     | PostgreSQL host                | `postgres`                                                 |
-| `POSTGRES_PORT`     | PostgreSQL port                | `5432`                                                     |
-| `POSTGRES_DB`       | Database name                  | `healthcare_agent`                                         |
-| `API_KEY`           | Google AI Studio API key       | -                                                          |
-| `BASE_URL`          | OpenAI-compatible API endpoint | `https://generativelanguage.googleapis.com/v1beta/openai/` |
+| Variable              | Description                    | Default                                                    |
+| --------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `POSTGRES_USER`       | PostgreSQL username            | `postgres`                                                 |
+| `POSTGRES_PASSWORD`   | PostgreSQL password            | `postgres`                                                 |
+| `POSTGRES_HOST`       | PostgreSQL host                | `postgres`                                                 |
+| `POSTGRES_PORT`       | PostgreSQL port                | `5432`                                                     |
+| `POSTGRES_DB`         | Database name                  | `healthcare_agent`                                         |
+| `API_KEY`             | Google AI Studio API key       | -                                                          |
+| `BASE_URL`            | OpenAI-compatible API endpoint | `https://generativelanguage.googleapis.com/v1beta/openai/` |
+| `LANGFUSE_SECRET_KEY` | Langfuse secret key            | -                                                          |
+| `LANGFUSE_PUBLIC_KEY` | Langfuse public key            | -                                                          |
+| `LANGFUSE_BASE_URL`   | Langfuse base URL              | `https://cloud.langfuse.com`                               |
 
 ### 3. Run with Docker Compose
 
@@ -226,7 +232,7 @@ healthcare-agent/
 
 Planned improvements:
 
-- [ ] **Observability**: Tracing, metrics and structured logging
+- [x] **Observability**: Tracing, metrics and structured logging
 - [ ] **Authentication & Authorization**: Add secure API access with role-based permissions
 - [ ] **Audit Logging**: Implement HIPAA-compliant audit trails
 - [ ] **Performance Optimization**: Implement better caching and optimization

@@ -2,16 +2,15 @@ import os
 from fastapi import APIRouter, HTTPException
 import psycopg
 from dotenv import load_dotenv
-from openai import OpenAI
+from langfuse import observe
 
 from rag.rag_service import RAGService
 from models.notes import Note
 from models.patients import PatientFullResponse, SetVisit, UpdateVisit
+from utils.openai_client import openai_client
 
 
 load_dotenv()
-
-client = OpenAI(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
 
 rag = RAGService()
 
@@ -185,6 +184,7 @@ async def get_patient(patient_serial_number: str):
         )
 
 @router.post("/{patient_serial}/notes", )
+@observe()
 async def set_note(patient_serial: str, note: Note):
     if not note.visit_id or not note.note_type or not note.note_text or not note.doctor_serial_number:
         raise HTTPException(
@@ -206,7 +206,7 @@ async def set_note(patient_serial: str, note: Note):
             note_summary=note.note_text
         )
 
-        resp = client.chat.completions.create(
+        resp = openai_client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
                 {"role": "user", "content": prompt}

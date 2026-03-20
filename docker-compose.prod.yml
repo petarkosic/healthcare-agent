@@ -14,6 +14,9 @@ services:
       BASE_URL: ${BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
       CHROMA_HOST: chroma
       CHROMA_PORT: 8000
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-https://cloud.langfuse.com}
     ports:
       - '8000:8000'
     depends_on:

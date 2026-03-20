@@ -5,6 +5,7 @@ from typing import List
 import chromadb
 from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langfuse import observe
 
 VECTOR_DB_PATH = "./chroma_db"
 
@@ -36,6 +37,7 @@ class RAGService:
             separators=["\n\n", "\n", ". ", " ", ""],
         )
 
+    @observe(as_type="span")
     def upsert_patient_note(self, patient_serial: str, note_summary: str):
         print(f"Upserting patient note for patient {patient_serial}...")
 
@@ -45,6 +47,7 @@ class RAGService:
             patient_serial=patient_serial, note_summary=note_summary
         )
 
+    @observe(as_type="retriever")
     def get_patient_overview(self, patient_serial: str, k: int = 6) -> List[str]:
         query = f"Patient medical overview for patient {patient_serial}"
 
@@ -56,6 +59,7 @@ class RAGService:
 
         return [doc.page_content for doc in docs]
 
+    @observe(as_type="span")
     def add_patient_note(self, patient_serial: str, note_summary: str) -> List[str]:
         chunks = self.splitter.split_text(note_summary)
 
@@ -75,6 +79,7 @@ class RAGService:
 
         return ids
 
+    @observe(as_type="span")
     def delete_patient_note(self, patient_serial: str) -> bool:
         try:
             result = self.vectorstore.delete(where={"patient_serial": patient_serial})

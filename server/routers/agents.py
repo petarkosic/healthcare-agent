@@ -6,16 +6,15 @@ import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv
 
-from models.agents import FollowUpRequest
-from openai import OpenAI
+from langfuse import observe
 
+from models.agents import FollowUpRequest
+from utils.openai_client import openai_client
 from rag.rag_service import RAGService
 from models.agents import AIOverviewResponse, OverviewPromptResponse, OverviewRequest
 from utils.cache import cache, hash_key
 
 load_dotenv()
-
-client = OpenAI(api_key=os.getenv("API_KEY"), base_url=os.getenv("BASE_URL"))
 
 rag = RAGService()
 
@@ -27,6 +26,7 @@ DB_CONFIG = {
     "password": os.getenv("POSTGRES_PASSWORD"),
 }
 
+@observe(as_type="span")
 def schedule_visit_db(
     patient_serial_number: str,
     doctor_serial_number: str,
@@ -62,6 +62,7 @@ def schedule_visit_db(
             return str(visit_id)
 
 
+@observe(as_type="span")
 def create_calendar_event(
     summary: str, start_time: str, end_time: str, description: str = None
 ):
@@ -371,6 +372,7 @@ router = APIRouter(
 
 
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
+@observe()
 async def get_overview(patient_serial: str):
     cache_key = f"overview:{patient_serial}"
     cached = cache.get(cache_key)
@@ -393,7 +395,7 @@ async def get_overview(patient_serial: str):
 
     prompt = build_prompt(patient_data, docs)
 
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model="gemini-2.5-flash",
         messages=[
             {
@@ -420,6 +422,7 @@ async def get_overview(patient_serial: str):
 
 
 @router.post("/recommendations")
+@observe()
 async def get_recommendations(request: OverviewRequest):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
@@ -486,7 +489,7 @@ async def get_recommendations(request: OverviewRequest):
     """
 
     try:
-        response = client.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
                 {
@@ -509,6 +512,7 @@ async def get_recommendations(request: OverviewRequest):
 
 
 @router.post("/medications")
+@observe()
 async def get_medications(request: OverviewRequest):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
@@ -560,7 +564,7 @@ async def get_medications(request: OverviewRequest):
     """
 
     try:
-        response = client.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
                 {
@@ -583,6 +587,7 @@ async def get_medications(request: OverviewRequest):
 
 
 @router.post("/schedule-followup")
+@observe(as_type="chain")
 async def schedule_visit(follow_up: FollowUpRequest):
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
 
@@ -602,7 +607,7 @@ async def schedule_visit(follow_up: FollowUpRequest):
         Make sure to call both tools with the provided information."""
 
     try:
-        response = client.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gemini-2.5-flash",
             messages=[
                 {
@@ -653,6 +658,7 @@ async def schedule_visit(follow_up: FollowUpRequest):
         return {"success": False, "error": str(e)}
 
 
+@observe(as_type="span")
 def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
     meds = pg_data.get("active_medications", []) or []
     meds_str = (

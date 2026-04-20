@@ -1,7 +1,5 @@
 import os
-import psycopg
 from psycopg_pool import ConnectionPool
-from psycopg.rows import dict_row
 from dotenv import load_dotenv
 from contextlib import contextmanager
 from typing import Generator, Optional

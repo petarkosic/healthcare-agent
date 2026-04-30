@@ -11,6 +11,7 @@ import { Labs } from '../Labs/Labs';
 import { Diagnoses } from '../Diagnoses/Diagnoses';
 import { Visits } from '../Visits/Visits';
 import { Sidebar } from '../Sidebar/Sidebar';
+import { API_BASE } from '../../lib/api';
 
 function PatientProfile() {
 	const [data, setData] = useState<PatientFullResponse | null>(null);
@@ -27,7 +28,7 @@ function PatientProfile() {
 		const fetchPatient = async () => {
 			try {
 				const response = await fetch(
-					`http://localhost:8000/api/patients/${patient_serial}`,
+					`${API_BASE}/api/patients/${patient_serial}`,
 				);
 
 				if (!response.ok) {

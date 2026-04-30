@@ -7,6 +7,7 @@ import type {
 import './SidebarRecommendations.css';
 import { formatDateTimeLocal } from '../../utils/utils';
 import { useLocation } from 'react-router';
+import { API_BASE } from '../../lib/api';
 
 type SidebarRecommendationsProps = {
 	data: ResponseData | null;
@@ -68,26 +69,23 @@ export const SidebarRecommendations = ({
 			// Default 30 minutes duration for a visit
 			const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
 
-			const response = await fetch(
-				'http://localhost:8000/api/agents/schedule-followup',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						patient_serial_number: patient_id,
-						doctor_serial_number: 'Dsn90mA2',
-						visit_date: selectedDate,
-						visit_type: 'followup',
-						summary: selectedRecommendation?.follow_up?.reason,
-						start_time: startDate.toISOString(),
-						end_time: endDate.toISOString(),
-						description:
-							selectedRecommendation?.reason || 'Follow-up appointment',
-					}),
+			const response = await fetch(`${API_BASE}/api/agents/schedule-followup`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			);
+				body: JSON.stringify({
+					patient_serial_number: patient_id,
+					doctor_serial_number: 'Dsn90mA2',
+					visit_date: selectedDate,
+					visit_type: 'followup',
+					summary: selectedRecommendation?.follow_up?.reason,
+					start_time: startDate.toISOString(),
+					end_time: endDate.toISOString(),
+					description:
+						selectedRecommendation?.reason || 'Follow-up appointment',
+				}),
+			});
 
 			if (!response.ok) {
 				throw new Error('Failed to schedule visit');

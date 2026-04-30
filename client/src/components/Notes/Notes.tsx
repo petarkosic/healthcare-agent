@@ -3,6 +3,7 @@ import type { ClinicalNote, PatientFullResponse } from '../../types/types';
 import { formatDate } from '../../utils/utils';
 import { useParams } from 'react-router';
 import './Notes.css';
+import { API_BASE } from '../../lib/api';
 
 type NotesProps = {
 	data: PatientFullResponse;
@@ -33,7 +34,7 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 
 		try {
 			const response = await fetch(
-				`http://localhost:8000/api/patients/${patient_serial}/notes`,
+				`${API_BASE}/api/patients/${patient_serial}/notes`,
 				{
 					method: 'POST',
 					headers: {

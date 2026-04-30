@@ -4,6 +4,7 @@ import './Sidebar.css';
 import type { Overview, ResponseData } from '../../types/types';
 import { SidebarRecommendations } from '../SidebarRecommendations/SidebarRecommendations';
 import { SidebarMedications } from '../SidebarMedications/SidebarMedications';
+import { API_BASE } from '../../lib/api';
 
 type SidebarProps = {
 	isAiSidebarOpen: boolean;
@@ -28,7 +29,7 @@ export const Sidebar = ({
 	const getAiOverview = async () => {
 		try {
 			const response = await fetch(
-				`http://localhost:8000/api/agents/overview/${patient_serial}`,
+				`${API_BASE}/api/agents/overview/${patient_serial}`,
 			);
 
 			if (!response.ok) {
@@ -63,18 +64,15 @@ export const Sidebar = ({
 		setIsActionLoading(true);
 
 		try {
-			const response = await fetch(
-				`http://localhost:8000/api/agents/${action}`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						overview: overview?.ai_overview.overview,
-					}),
+			const response = await fetch(`${API_BASE}/api/agents/${action}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			);
+				body: JSON.stringify({
+					overview: overview?.ai_overview.overview,
+				}),
+			});
 
 			if (!response.ok) {
 				throw new Error('Failed to add note');

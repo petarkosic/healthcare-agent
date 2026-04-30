@@ -1,10 +1,10 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import patients
-from routers import agents
+from routers import agents, auth, patients
 from utils.langfuse_client import langfuse
 
 
@@ -19,6 +19,11 @@ origins = [
     "http://localhost:3000",
 ]
 
+extra = os.getenv("ALLOWED_ORIGINS", "")
+
+if extra:
+    origins.extend(o.strip() for o in extra.split(",") if o.strip())
+
 app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
@@ -31,3 +36,4 @@ app.add_middleware(
 
 app.include_router(patients.router, prefix="/api")
 app.include_router(agents.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")

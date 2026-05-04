@@ -12,6 +12,7 @@ import { Diagnoses } from '../Diagnoses/Diagnoses';
 import { Visits } from '../Visits/Visits';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { API_BASE } from '../../lib/api';
+import { useAuth } from '../../context/Auth/AuthProvider';
 
 function PatientProfile() {
 	const [data, setData] = useState<PatientFullResponse | null>(null);
@@ -21,6 +22,7 @@ function PatientProfile() {
 	const [error, setError] = useState<string | null>('');
 
 	const { id: patient_serial } = useParams();
+	const { token } = useAuth();
 
 	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
 
@@ -29,6 +31,9 @@ function PatientProfile() {
 			try {
 				const response = await fetch(
 					`${API_BASE}/api/patients/${patient_serial}`,
+					{
+						headers: { Authorization: `Bearer ${token}` },
+					},
 				);
 
 				if (!response.ok) {

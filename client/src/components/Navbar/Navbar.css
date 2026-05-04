@@ -14,32 +14,39 @@
 	--navbar-border-radius: 8px;
 }
 
+body {
+	background: white;
+}
+
 .navbar {
-	width: 1440px;
+	max-width: 500px;
+	background: var(--bg-card);
+	border-bottom: 1px solid var(--border);
+	position: sticky;
+	top: 0;
+	z-index: 50;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 0 2rem;
 	height: 64px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: var(--navbar-primary-bg);
-	border-bottom: 1px solid var(--navbar-border-color);
-	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-	z-index: 40;
 }
 
 .navbar-left {
 	display: flex;
 	align-items: center;
 	min-width: 120px;
-	padding: 0 1rem;
 }
 
 .navbar-brand {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	color: var(--navbar-accent-blue);
-	font-weight: 600;
+	font-weight: 700;
 	font-size: 1.1rem;
+	color: var(--text-main);
 	text-decoration: none;
 	transition: color 0.15s ease;
 }
@@ -67,7 +74,7 @@
 	gap: 0.75rem;
 	min-width: 120px;
 	justify-content: flex-end;
-	padding: 0 1rem;
+	/* padding: 0 1rem; */
 }
 
 .doctor-info {
@@ -92,6 +99,31 @@
 	color: var(--navbar-text-muted);
 	font-weight: 600;
 	font-size: 0.85rem;
+}
+
+.doctor-nav-name {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--text-main);
+}
+
+.lp-btn-outline {
+	background: transparent;
+	border: 1px solid var(--border);
+	color: var(--text-main);
+	padding: 0.4375rem 0.875rem;
+	border-radius: var(--radius-sm);
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+}
+
+.lp-btn-outline:hover {
+	background: var(--bg-body);
+	border-color: var(--secondary);
 }
 
 /* Session Active State */

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { useSession } from '../../context/SessionContext';
 import './Navbar.css';
-import { secondsToRoundedMinutes } from '../../utils/utils';
+import { getInitials, secondsToRoundedMinutes } from '../../utils/utils';
+import { useAuth } from '../../context/Auth/AuthProvider';
+import { API_BASE } from '../../lib/api';
 
 const VISIT_TYPES = [
 	{ value: 'checkup', label: 'Checkup' },
@@ -36,6 +38,7 @@ export const Navbar = () => {
 	const location = useLocation();
 	const { session, formatTime, endSession, startSession, elapsedTime } =
 		useSession();
+	const { doctorSerialNumber, doctorName, openModal, logout } = useAuth();
 
 	const handleStartClick = () => {
 		setShowTypeSelect(true);
@@ -43,21 +46,18 @@ export const Navbar = () => {
 
 	const handleStartSession = async () => {
 		try {
-			const response = await fetch(
-				'http://localhost:8000/api/patients/visits',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						patient_serial_number: location.pathname.split('/')[2],
-						doctor_serial_number: 'Dr7TUydx',
-						visit_type: selectedType,
-						location: selectedLocation,
-					}),
+			const response = await fetch(`${API_BASE}/api/patients/visits`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			);
+				body: JSON.stringify({
+					patient_serial_number: location.pathname.split('/')[2],
+					doctor_serial_number: 'Dr7TUydx',
+					visit_type: selectedType,
+					location: selectedLocation,
+				}),
+			});
 
 			if (!response.ok) {
 				throw new Error('Failed to start session');
@@ -99,19 +99,16 @@ export const Navbar = () => {
 
 		try {
 			if (currentVisitId) {
-				const response = await fetch(
-					'http://localhost:8000/api/patients/visits',
-					{
-						method: 'PUT',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							visit_id: currentVisitId,
-							...sessionData,
-						}),
+				const response = await fetch(`${API_BASE}/api/patients/visits`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
 					},
-				);
+					body: JSON.stringify({
+						visit_id: currentVisitId,
+						...sessionData,
+					}),
+				});
 
 				if (!response.ok) {
 					throw new Error('Failed to update visit');
@@ -142,21 +139,18 @@ export const Navbar = () => {
 		<nav className='navbar'>
 			<div className='navbar-left'>
 				<Link to='/' className='navbar-brand'>
-					<svg
-						xmlns='http://www.w3.org/2000/svg'
-						className='navbar-brand-icon'
-						fill='none'
-						viewBox='0 0 24 24'
-						stroke='currentColor'
-					>
-						<path
-							strokeLinecap='round'
-							strokeLinejoin='round'
-							strokeWidth={2}
-							d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
-						/>
-					</svg>
-					Home
+					<span className='lp-logo-icon'>
+						<svg
+							viewBox='0 0 24 24'
+							fill='none'
+							stroke='currentColor'
+							strokeWidth='2'
+							aria-hidden='true'
+						>
+							<path d='M22 12h-4l-3 9L9 3l-3 9H2' strokeLinejoin='round' />
+						</svg>
+					</span>
+					HealthAgent
 				</Link>
 			</div>
 
@@ -262,14 +256,23 @@ export const Navbar = () => {
 				</div>
 			)}
 
-			<div className='navbar-right'>
-				<div className='doctor-info'>
-					<p className='doctor-specialty'>Cardiology</p>
+			{location.pathname == '/' && (
+				<div className='lp-nav-actions'>
+					{doctorSerialNumber ? (
+						<>
+							<div className='doctor-avatar'>{getInitials(doctorName!)}</div>
+							<span className='doctor-nav-name'>{doctorName}</span>
+							<button className='lp-btn lp-btn-outline' onClick={logout}>
+								Sign Out
+							</button>
+						</>
+					) : (
+						<button className='lp-btn lp-btn-primary' onClick={openModal}>
+							Sign In
+						</button>
+					)}
 				</div>
-				<div className='doctor-avatar'>
-					<span>DS</span>
-				</div>
-			</div>
+			)}
 		</nav>
 	);
 };

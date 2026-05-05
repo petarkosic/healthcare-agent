@@ -9,7 +9,7 @@
 	border-radius: var(--radius-md);
 	padding: 1.5rem;
 	display: grid;
-	grid-template-columns: 240px 160px 1fr 220px;
+	grid-template-columns: 240px 160px 220px;
 	align-items: center;
 	gap: 1.5rem;
 	transition:
@@ -61,55 +61,6 @@
 	gap: 0.5rem;
 	font-size: 0.9rem;
 	color: var(--secondary);
-}
-
-.blood-type {
-	background-color: #fee2e2;
-	color: #dc2626;
-	padding: 2px 8px;
-	border-radius: 4px;
-	font-weight: 700;
-	font-size: 0.8rem;
-	width: fit-content;
-	text-transform: uppercase;
-}
-
-.history {
-	display: flex;
-	flex-direction: column;
-	gap: 0.6rem;
-}
-
-.tag-group {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	align-items: center;
-}
-
-.tag-label {
-	font-size: 0.75rem;
-	font-weight: 600;
-	color: var(--text-muted);
-	min-width: 60px;
-}
-
-.tag {
-	font-size: 0.75rem;
-	padding: 2px 8px;
-	border-radius: 100px;
-	font-weight: 500;
-}
-
-.tag.allergy {
-	background-color: var(--danger-bg);
-	color: var(--danger-text);
-	border: 1px solid #fecaca;
-}
-
-.tag.condition {
-	background-color: var(--neutral-badge);
-	color: var(--neutral-text);
 }
 
 .stats {
@@ -176,13 +127,6 @@
 		flex-direction: row;
 		width: 100%;
 		justify-content: space-between;
-	}
-
-	.history {
-		width: 100%;
-		background-color: var(--bg-body);
-		padding: 1rem;
-		border-radius: var(--radius-sm);
 	}
 
 	.stats {

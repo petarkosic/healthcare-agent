@@ -7,9 +7,6 @@ export interface TPatients {
 	full_name: string;
 	age: number;
 	gender: string;
-	blood_type: string;
-	allergies: string[];
-	chronic_conditions: string[];
 	total_visits: number;
 	last_visit_date: string;
 	active_medications_count: number;

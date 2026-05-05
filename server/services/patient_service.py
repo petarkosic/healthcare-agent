@@ -16,11 +16,29 @@ class PatientService:
         return patient_repository.get_patient_full(patient_serial_number)
     
     @observe()
-    def get_patients(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
-        """Get list of patients"""
+    def get_patients(self, doctor_serial_number: str, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+        """Get a list of patients for a particular doctor"""
         with patient_repository.db_manager.get_connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT * FROM patient_summary LIMIT %s OFFSET %s", (limit, offset))
+                cur.execute(
+                    """
+                    SELECT
+                        p.patient_serial_number,
+                        p.first_name || ' ' || p.last_name AS full_name,
+                        EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth)) AS age,
+                        p.gender,
+                        COUNT(DISTINCT v.visit_id) AS total_visits,
+                        MAX(v.visit_date) AS last_visit_date,
+                        COUNT(DISTINCT m.medication_id) AS active_medications_count
+                    FROM patients p
+                    JOIN visits v ON p.patient_serial_number = v.patient_serial_number
+                    LEFT JOIN medications m ON p.patient_serial_number = m.patient_serial_number AND m.status = 'active'
+                    WHERE v.doctor_serial_number = %s
+                    GROUP BY p.patient_serial_number, p.first_name, p.last_name, p.date_of_birth, p.gender
+                    LIMIT %s OFFSET %s
+                    """,
+                    (doctor_serial_number, limit, offset),
+                )
 
                 columns = [desc[0] for desc in cur.description]
 

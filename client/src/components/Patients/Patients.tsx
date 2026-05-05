@@ -92,42 +92,6 @@ export const Patients = () => {
 						<div>
 							{patient.age}y • {patient.gender}
 						</div>
-						<div className='blood-type'>{patient.blood_type}</div>
-					</div>
-
-					<div className='history'>
-						<div className='tag-group'>
-							<span className='tag-label'>Allergies:</span>
-							{patient.allergies && patient.allergies.length > 0 ? (
-								patient.allergies.map((allergy: string, index: number) => (
-									<span key={index} className='tag allergy'>
-										{allergy}
-									</span>
-								))
-							) : (
-								<span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-									None known
-								</span>
-							)}
-						</div>
-
-						<div className='tag-group'>
-							<span className='tag-label'>Conditions:</span>
-							{patient.chronic_conditions &&
-							patient.chronic_conditions.length > 0 ? (
-								patient.chronic_conditions.map(
-									(condition: string, index: number) => (
-										<span key={index} className='tag condition'>
-											{condition}
-										</span>
-									),
-								)
-							) : (
-								<span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-									None reported
-								</span>
-							)}
-						</div>
 					</div>
 
 					<div className='stats'>

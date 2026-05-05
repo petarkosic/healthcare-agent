@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from dotenv import load_dotenv
 from langfuse import observe
 
@@ -19,14 +19,14 @@ router = APIRouter(
 )
 
 @router.get("/")
-async def get_patients():
+async def get_patients(doctor_serial_number: str = Query(...)):
     try:
-        patients = patient_service.get_patients()
+        patients = patient_service.get_patients(doctor_serial_number=doctor_serial_number)
 
         return patients
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Error fetching patients: {str(e)}"
         )
 

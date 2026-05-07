@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import type { TPatients } from '../../types/types';
 import { getInitials } from '../../utils/utils';
+import { Search } from '../Search/Search';
 import './Patients.css';
 import { useAuth } from '../../context/Auth/AuthProvider';
 import { API_BASE } from '../../lib/api';
@@ -46,7 +47,6 @@ export const Patients = () => {
 			} catch (err) {
 				if (err instanceof Error && err.name !== 'AbortError') {
 					console.error('Error fetching patients:', err);
-
 					setError('Failed to load patients. Please try again.');
 				}
 			} finally {
@@ -69,49 +69,53 @@ export const Patients = () => {
 	if (error) return <div className='error'>{error}</div>;
 
 	return (
-		<div className='patient-list'>
-			{patients.map((patient) => (
-				<article
-					key={patient.patient_serial_number}
-					className='patient-card'
-					onClick={() => {
-						handlePatientClick(patient.patient_serial_number);
-					}}
-				>
-					<div className='identity'>
-						<div className='avatar'>{getInitials(patient.full_name)}</div>
-						<div className='info'>
-							<h3>{patient.full_name}</h3>
-							<span className='serial'>
-								ID: #{patient.patient_serial_number}
-							</span>
-						</div>
-					</div>
+		<div className='patients-page'>
+			<Search />
 
-					<div className='vitals'>
-						<div>
-							{patient.age}y • {patient.gender}
+			<div className='patient-list'>
+				{patients.map((patient) => (
+					<article
+						key={patient.patient_serial_number}
+						className='patient-card'
+						onClick={() => {
+							handlePatientClick(patient.patient_serial_number);
+						}}
+					>
+						<div className='identity'>
+							<div className='avatar'>{getInitials(patient.full_name)}</div>
+							<div className='info'>
+								<h3>{patient.full_name}</h3>
+								<span className='serial'>
+									ID: #{patient.patient_serial_number}
+								</span>
+							</div>
 						</div>
-					</div>
 
-					<div className='stats'>
-						<div className='stat-item'>
-							<span className='stat-val'>{patient.total_visits}</span>
-							<span className='stat-lbl'>Visits</span>
+						<div className='vitals'>
+							<div>
+								{patient.age}y • {patient.gender}
+							</div>
 						</div>
-						<div className='stat-item'>
-							<span className='stat-val'>
-								{patient.active_medications_count}
-							</span>
-							<span className='stat-lbl'>Active Meds</span>
+
+						<div className='stats'>
+							<div className='stat-item'>
+								<span className='stat-val'>{patient.total_visits}</span>
+								<span className='stat-lbl'>Visits</span>
+							</div>
+							<div className='stat-item'>
+								<span className='stat-val'>
+									{patient.active_medications_count}
+								</span>
+								<span className='stat-lbl'>Active Meds</span>
+							</div>
+							<div className='last-visit'>
+								Last Visit:{' '}
+								{new Date(patient.last_visit_date).toLocaleDateString()}
+							</div>
 						</div>
-						<div className='last-visit'>
-							Last Visit:{' '}
-							{new Date(patient.last_visit_date).toLocaleDateString()}
-						</div>
-					</div>
-				</article>
-			))}
+					</article>
+				))}
+			</div>
 		</div>
 	);
 };

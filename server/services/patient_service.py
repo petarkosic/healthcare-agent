@@ -45,6 +45,41 @@ class PatientService:
                 return [dict(zip(columns, row)) for row in cur.fetchall()]
     
     @observe()
+    def search_patient_by_serial(
+        self,
+        patient_serial_number: str,
+        doctor_serial_number: str,
+    ) -> List[Dict[str, Any]]:
+        """Search for a patient by serial number"""
+        with patient_repository.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        p.patient_serial_number,
+                        p.first_name || ' ' || p.last_name AS full_name,
+                        EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth)) AS age,
+                        p.gender,
+                        COUNT(DISTINCT v.visit_id) AS total_visits,
+                        MAX(v.visit_date) AS last_visit_date,
+                        COUNT(DISTINCT m.medication_id) AS active_medications_count
+                    FROM patients p
+                    JOIN visits v ON p.patient_serial_number = v.patient_serial_number
+                    LEFT JOIN medications m ON p.patient_serial_number = m.patient_serial_number
+                        AND m.status = 'active'
+                    WHERE v.doctor_serial_number = %s
+                    AND p.patient_serial_number = %s
+                    GROUP BY p.patient_serial_number, p.first_name, p.last_name,
+                            p.date_of_birth, p.gender
+                    """,
+                    (doctor_serial_number, patient_serial_number),
+                )
+
+                columns = [desc[0] for desc in cur.description]
+                
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+    @observe()
     def create_visit(self, visit_data: SetVisit) -> Dict[str, Any]:
         """Create a new visit"""
         visit_id = visit_repository.create_visit(

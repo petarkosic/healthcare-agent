@@ -30,6 +30,23 @@ async def get_patients(doctor_serial_number: str = Query(...)):
             detail=f"Error fetching patients: {str(e)}"
         )
 
+@router.get("/search")
+async def search_patient(
+    patient_serial_number: str = Query(...),
+    doctor_serial_number: str = Query(...),
+):
+    try:
+        results = patient_service.search_patient_by_serial(
+            patient_serial_number=patient_serial_number,
+            doctor_serial_number=doctor_serial_number,
+        )
+        
+        return results
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error searching for patient: {str(e)}"
+        )
 
 
 @router.get("/{patient_serial_number}", response_model=PatientFullResponse)

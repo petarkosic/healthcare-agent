@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useSession } from '../../context/SessionContext';
 import './Navbar.css';
 import { getInitials, secondsToRoundedMinutes } from '../../utils/utils';
@@ -36,6 +36,7 @@ export const Navbar = () => {
 	const [error, setError] = useState('');
 
 	const location = useLocation();
+	const navigate = useNavigate();
 	const { session, formatTime, endSession, startSession, elapsedTime } =
 		useSession();
 	const { doctorSerialNumber, doctorName, openModal, logout } = useAuth();
@@ -133,6 +134,11 @@ export const Navbar = () => {
 	const handleCancelEnd = () => {
 		setShowEndForm(false);
 		setChiefComplaint('');
+	};
+
+	const doctorLogout = () => {
+		logout();
+		navigate('/');
 	};
 
 	return (
@@ -256,23 +262,21 @@ export const Navbar = () => {
 				</div>
 			)}
 
-			{location.pathname == '/' && (
-				<div className='lp-nav-actions'>
-					{doctorSerialNumber ? (
-						<>
-							<div className='doctor-avatar'>{getInitials(doctorName!)}</div>
-							<span className='doctor-nav-name'>{doctorName}</span>
-							<button className='lp-btn lp-btn-outline' onClick={logout}>
-								Sign Out
-							</button>
-						</>
-					) : (
-						<button className='lp-btn lp-btn-primary' onClick={openModal}>
-							Sign In
+			<div className='lp-nav-actions'>
+				{doctorSerialNumber ? (
+					<>
+						<div className='doctor-avatar'>{getInitials(doctorName!)}</div>
+						<span className='doctor-nav-name'>{doctorName}</span>
+						<button className='lp-btn lp-btn-outline' onClick={doctorLogout}>
+							Sign Out
 						</button>
-					)}
-				</div>
-			)}
+					</>
+				) : (
+					<button className='lp-btn lp-btn-primary' onClick={openModal}>
+						Sign In
+					</button>
+				)}
+			</div>
 		</nav>
 	);
 };

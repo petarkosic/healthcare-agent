@@ -2,9 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from jose import jwt
-from passlib.context import CryptContext
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import bcrypt
 
 _SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-super-secret")
 _ALGORITHM = "HS256"
@@ -12,11 +10,15 @@ _TOKEN_EXPIRE_HOURS = 24
 
 
 def hash_password(password: str) -> str:
-    return _pwd_context.hash(password)
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt(rounds=10)
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return _pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
 
 
 def create_token(doctor_serial_number: str, doctor_name: str) -> str:

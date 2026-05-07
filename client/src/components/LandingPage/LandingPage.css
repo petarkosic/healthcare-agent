@@ -31,7 +31,7 @@
 }
 
 .lp-inner {
-	max-width: 1100px;
+	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 2rem;
 }
@@ -46,7 +46,7 @@
 }
 
 .lp-nav-inner {
-	max-width: 1100px;
+	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 2rem;
 	height: 64px;
@@ -340,7 +340,7 @@
 }
 
 .lp-footer-inner {
-	max-width: 1100px;
+	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 2rem;
 	display: flex;

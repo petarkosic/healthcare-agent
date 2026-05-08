@@ -37,7 +37,8 @@ export const ProfileHeader = ({ data }: ProfileHeaderProps) => {
 					<small>Emergency Contact</small>
 					<div>
 						{data.patient.emergency_contact_name}
-						<br />({data.patient.emergency_contact_phone})
+						<br />
+						{data.patient.emergency_contact_phone}
 					</div>
 				</div>
 			</div>

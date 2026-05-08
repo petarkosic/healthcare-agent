@@ -1,0 +1,167 @@
+.add-patient-page {
+	padding: 2rem;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.add-patient-header {
+	margin-bottom: 2rem;
+}
+
+.add-patient-header h2 {
+	font-size: 1.75rem;
+	font-weight: 700;
+	color: var(--text-main);
+	margin: 0.5rem 0 0 0;
+}
+
+.back-link {
+	font-size: 0.875rem;
+	color: var(--primary);
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.back-link:hover {
+	opacity: 0.8;
+}
+
+.add-patient-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.form-section {
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	padding: 1.5rem;
+}
+
+.form-section legend {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 0 0.5rem;
+}
+
+.form-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.form-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+	margin-top: 1rem;
+}
+
+.form-row .form-field {
+	margin-top: 0;
+}
+
+.form-field label {
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--text-main);
+}
+
+label:has(+ input[required])::after {
+	content: ' *';
+	color: red;
+}
+
+label:has(+ select[required])::after {
+	content: ' *';
+	color: red;
+}
+
+.form-field input,
+.form-field select {
+	padding: 0.5625rem 0.75rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	font-size: 0.9375rem;
+	color: var(--text-main);
+	background: var(--bg-body);
+	transition: border-color 0.15s ease;
+	outline: none;
+	font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+	border-color: var(--primary);
+}
+
+.form-error {
+	background: var(--danger-bg, #fee2e2);
+	color: var(--danger-text, #dc2626);
+	border: 1px solid #fecaca;
+	border-radius: var(--radius-sm);
+	padding: 0.75rem 1rem;
+	font-size: 0.875rem;
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	padding-top: 0.5rem;
+}
+
+.ap-btn-primary {
+	background: var(--primary);
+	color: #fff;
+	border: none;
+	border-radius: var(--radius-sm);
+	padding: 0.625rem 1.5rem;
+	font-size: 0.9375rem;
+	font-weight: 500;
+	font-family: inherit;
+	cursor: pointer;
+	transition: opacity 0.15s ease;
+}
+
+.ap-btn-primary:hover:not(:disabled) {
+	opacity: 0.88;
+}
+
+.ap-btn-primary:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.ap-btn-secondary {
+	display: inline-flex;
+	align-items: center;
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	padding: 0.625rem 1.5rem;
+	font-size: 0.9375rem;
+	font-weight: 500;
+	color: var(--text-main);
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+
+.ap-btn-secondary:hover {
+	background: var(--bg-body);
+	color: var(--text-main);
+}
+
+@media (max-width: 600px) {
+	.form-row {
+		grid-template-columns: 1fr;
+	}
+}

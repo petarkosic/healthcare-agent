@@ -4,7 +4,7 @@ from langfuse import observe
 
 from rag.rag_service import RAGService
 from models.notes import Note
-from models.patients import PatientFullResponse, SetVisit, UpdateVisit
+from models.patients import PatientFullResponse, SetVisit, UpdateVisit, CreatePatient
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
 
@@ -28,6 +28,18 @@ async def get_patients(doctor_serial_number: str = Query(...)):
         raise HTTPException(
             status_code=500,
             detail=f"Error fetching patients: {str(e)}"
+        )
+
+@router.post("/")
+async def create_patient(patient: CreatePatient):
+    try:
+        result = patient_service.create_patient(patient)
+        
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creating patient: {str(e)}"
         )
 
 @router.get("/search")

@@ -20,8 +20,9 @@
 
 /* App Wrapper - handles the sidebar push layout */
 .app-wrapper {
-	width: 1440px;
+	width: 1200px;
 	min-height: 100vh;
+	margin: 0 auto;
 	display: flex;
 	background: #f8fafc;
 	position: relative;

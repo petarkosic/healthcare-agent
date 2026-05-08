@@ -6,7 +6,7 @@ from repositories.medication_repository import medication_repository
 from repositories.lab_result_repository import lab_result_repository
 from repositories.clinical_notes_repository import clinical_note_repository
 from repositories.diagnosis_repository import diagnosis_repository
-from models.patients import PatientFullResponse, SetVisit, UpdateVisit
+from models.patients import PatientFullResponse, SetVisit, UpdateVisit, CreatePatient
 from langfuse import observe
 
 class PatientService:
@@ -78,6 +78,50 @@ class PatientService:
                 columns = [desc[0] for desc in cur.description]
                 
                 return [dict(zip(columns, row)) for row in cur.fetchall()]
+
+    @observe()
+    def create_patient(self, patient_data: CreatePatient) -> Dict[str, Any]:
+        """Add new patient"""
+        serial = patient_repository._execute_insert(
+            """
+            INSERT INTO patients (
+                first_name, last_name, date_of_birth, gender, blood_type,
+                email, phone, address, emergency_contact_name, emergency_contact_phone, allergies, chronic_conditions
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING patient_serial_number
+            """,
+            (
+                patient_data.first_name,
+                patient_data.last_name,
+                patient_data.date_of_birth,
+                patient_data.gender,
+                patient_data.blood_type,
+                patient_data.email,
+                patient_data.phone,
+                patient_data.address,
+                patient_data.emergency_contact_name,
+                patient_data.emergency_contact_phone,
+                patient_data.allergies,
+                patient_data.chronic_conditions
+            ),
+        )
+        if not serial:
+            raise Exception("Failed to create patient")
+
+        visit_id = visit_repository.create_visit(
+            patient_serial_number=serial,
+            doctor_serial_number=patient_data.doctor_serial_number,
+            visit_type="checkup",
+            location="Clinic",
+            status="in-progress",
+        )
+
+        return {
+            "message": "Patient created successfully",
+            "patient_serial_number": serial,
+            "visit_id": visit_id,
+        }
 
     @observe()
     def create_visit(self, visit_data: SetVisit) -> Dict[str, Any]:

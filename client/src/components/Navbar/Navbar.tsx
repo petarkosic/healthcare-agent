@@ -32,7 +32,6 @@ export const Navbar = () => {
 	const [selectedLocation, setSelectedLocation] = useState('Clinic');
 	const [showEndForm, setShowEndForm] = useState(false);
 	const [chiefComplaint, setChiefComplaint] = useState('');
-	const [currentVisitId, setCurrentVisitId] = useState(null);
 	const [error, setError] = useState('');
 
 	const location = useLocation();
@@ -54,7 +53,7 @@ export const Navbar = () => {
 				},
 				body: JSON.stringify({
 					patient_serial_number: location.pathname.split('/')[2],
-					doctor_serial_number: 'Dr7TUydx',
+					doctor_serial_number: doctorSerialNumber,
 					visit_type: selectedType,
 					location: selectedLocation,
 				}),
@@ -66,9 +65,7 @@ export const Navbar = () => {
 
 			const data = await response.json();
 
-			setCurrentVisitId(data.visit_id);
-
-			startSession(selectedType, selectedLocation);
+			startSession(selectedType, selectedLocation, data.visit_id);
 			setShowTypeSelect(false);
 		} catch (error) {
 			console.error(error);
@@ -99,14 +96,14 @@ export const Navbar = () => {
 		};
 
 		try {
-			if (currentVisitId) {
+			if (session?.visitId) {
 				const response = await fetch(`${API_BASE}/api/patients/visits`, {
 					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						visit_id: currentVisitId,
+						visit_id: session.visitId,
 						...sessionData,
 					}),
 				});
@@ -114,21 +111,16 @@ export const Navbar = () => {
 				if (!response.ok) {
 					throw new Error('Failed to update visit');
 				}
-
-				setChiefComplaint('');
-				setShowEndForm(false);
-				setError('');
-				setCurrentVisitId(null);
-				endSession();
 			}
+
+			setChiefComplaint('');
+			setShowEndForm(false);
+			setError('');
+			endSession();
 		} catch (err) {
 			console.error(err);
 			alert('Failed to end session');
 		}
-
-		setChiefComplaint('');
-		setShowEndForm(false);
-		endSession();
 	};
 
 	const handleCancelEnd = () => {

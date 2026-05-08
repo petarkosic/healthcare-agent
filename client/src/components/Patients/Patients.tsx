@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import type { TPatients } from '../../types/types';
 import { getInitials } from '../../utils/utils';
 import { Search } from '../Search/Search';
@@ -68,8 +68,26 @@ export const Patients = () => {
 	if (loading) return <div className='loading'>Loading patients...</div>;
 	if (error) return <div className='error'>{error}</div>;
 
+	if (patients.length === 0) {
+		return (
+			<div className='patients-empty'>
+				<p className='patients-empty-msg'>No patients assigned yet.</p>
+				<Link to='/patients/new' className='btn-add-patient'>
+					Add New Patient
+				</Link>
+			</div>
+		);
+	}
+
 	return (
 		<div className='patients-page'>
+			<div className='patients-header'>
+				<h2 className='patients-title'>My Patients</h2>
+				<Link to='/patients/new' className='btn-add-patient'>
+					Add New Patient
+				</Link>
+			</div>
+
 			<Search />
 
 			<div className='patient-list'>

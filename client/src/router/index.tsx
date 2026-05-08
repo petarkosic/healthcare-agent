@@ -5,6 +5,7 @@ import { Navbar } from '../components/Navbar/Navbar';
 import './layout.css';
 import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
 import { Patients } from '../components/Patients/Patients';
+import { AddPatient } from '../components/AddPatient/AddPatient';
 
 const router = createBrowserRouter([
 	{
@@ -29,7 +30,15 @@ const router = createBrowserRouter([
 				path: '/patients',
 				element: (
 					<ProtectedRoute>
-						<Patients />,
+						<Patients />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: '/patients/new',
+				element: (
+					<ProtectedRoute>
+						<AddPatient />
 					</ProtectedRoute>
 				),
 			},

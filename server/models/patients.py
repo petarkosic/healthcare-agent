@@ -126,6 +126,21 @@ class PatientFullResponse(BaseModel):
     clinical_notes: List[ClinicalNoteResponse]
     diagnoses: List[DiagnosisResponse]
 
+class CreatePatient(BaseModel):
+    doctor_serial_number: str
+    first_name: str
+    last_name: str
+    date_of_birth: date
+    gender: Literal['Male', 'Female']
+    blood_type: Literal['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+    email: str
+    phone: str
+    address: str
+    emergency_contact_name: str
+    emergency_contact_phone: str
+    allergies: list[str] = []
+    chronic_conditions: list[str] = []
+
 class SetVisit(BaseModel):
     patient_serial_number: str
     doctor_serial_number: str

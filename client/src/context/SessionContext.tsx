@@ -6,13 +6,14 @@ interface Session {
 	startTime: number;
 	type: string;
 	location: string;
+	visitId: string | null;
 }
 
 interface SessionContextType {
 	session: Session | null;
 	elapsedTime: number;
 	formatTime: (seconds: number) => string;
-	startSession: (type: string, location: string) => void;
+	startSession: (type: string, location: string, visitId?: string) => void;
 	endSession: () => void;
 }
 
@@ -44,11 +45,12 @@ export const SessionProvider = ({
 		};
 	}, [session]);
 
-	const startSession = (type: string, location: string) => {
+	const startSession = (type: string, location: string, visitId?: string) => {
 		setSession({
 			startTime: Date.now(),
 			type,
 			location,
+			visitId: visitId ?? null,
 		});
 	};
 

@@ -55,6 +55,18 @@ class VitalSignsResponse(BaseModel):
     notes: str
     visit_date: datetime
 
+class AddMedication(BaseModel):
+    doctor_serial_number: str
+    medication_name: str
+    generic_name: str
+    dosage: str
+    frequency: str
+    start_date: str
+    prescribed_for: str
+    instructions: str
+    end_date: Optional[str] = None
+    status: Literal['active', 'discontinued', 'completed', 'hold'] = 'active'
+
 class MedicationResponse(BaseModel):
     medication_id: UUID
     patient_serial_number: str

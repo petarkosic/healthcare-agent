@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './PatientProfile.css';
 import { useParams } from 'react-router';
 import type { PatientFullResponse } from '../../types/types';
@@ -13,6 +13,7 @@ import { Visits } from '../Visits/Visits';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { API_BASE } from '../../lib/api';
 import { useAuth } from '../../context/Auth/AuthProvider';
+import { useSession } from '../../context/SessionContext';
 
 function PatientProfile() {
 	const [data, setData] = useState<PatientFullResponse | null>(null);
@@ -23,41 +24,52 @@ function PatientProfile() {
 
 	const { id: patient_serial } = useParams();
 	const { token } = useAuth();
+	const { session } = useSession();
+	const sessionMounted = useRef(false);
 
 	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
 
-	useEffect(() => {
-		const fetchPatient = async () => {
-			try {
-				const response = await fetch(
-					`${API_BASE}/api/patients/${patient_serial}`,
-					{
-						headers: { Authorization: `Bearer ${token}` },
-					},
+	const fetchPatient = async () => {
+		try {
+			const response = await fetch(
+				`${API_BASE}/api/patients/${patient_serial}`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+
+			if (!response.ok) {
+				const errorData = await response.json();
+
+				throw new Error(
+					errorData.detail || `HTTP error! status: ${response.status}`,
 				);
-
-				if (!response.ok) {
-					const errorData = await response.json();
-
-					throw new Error(
-						errorData.detail || `HTTP error! status: ${response.status}`,
-					);
-				}
-
-				const result = await response.json();
-
-				setData(result);
-			} catch (error) {
-				const err = error as Error;
-
-				setError(err.message);
-			} finally {
-				setLoading(false);
 			}
-		};
+
+			const result = await response.json();
+
+			setData(result);
+		} catch (error) {
+			const err = error as Error;
+			setError(err.message);
+		}
+	};
+
+	useEffect(() => {
+		setLoading(true);
+
+		fetchPatient().finally(() => setLoading(false));
+	}, [patient_serial]);
+
+	useEffect(() => {
+		if (!sessionMounted.current) {
+			sessionMounted.current = true;
+
+			return;
+		}
 
 		fetchPatient();
-	}, [patient_serial]);
+	}, [session?.visitId]);
 
 	if (loading)
 		return <div className='loading-state'>Loading Patient Profile...</div>;
@@ -102,7 +114,7 @@ function PatientProfile() {
 
 					<Medications data={data} />
 
-					<Notes data={data} setError={setError} setData={setData} />
+					<Notes data={data} setError={setError} refetch={fetchPatient} />
 
 					<Labs data={data} />
 

@@ -4,14 +4,16 @@ import { formatDate } from '../../utils/utils';
 import { useParams } from 'react-router';
 import './Notes.css';
 import { API_BASE } from '../../lib/api';
+import { useSession } from '../../context/SessionContext';
+import { useAuth } from '../../context/Auth/AuthProvider';
 
 type NotesProps = {
 	data: PatientFullResponse;
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	setData: React.Dispatch<React.SetStateAction<PatientFullResponse | null>>;
+	refetch: () => Promise<void>;
 };
 
-export const Notes = ({ data, setError, setData }: NotesProps) => {
+export const Notes = ({ data, setError, refetch }: NotesProps) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
 
@@ -20,6 +22,8 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const { id: patient_serial } = useParams();
+	const { session } = useSession();
+	const { doctorSerialNumber } = useAuth();
 
 	const handleAddNote = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -41,10 +45,10 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						visit_id: data.clinical_notes[0]?.visit_id,
+						visit_id: session?.visitId,
 						note_type: newNoteType,
 						note_text: newNoteText,
-						doctor_serial_number: data.clinical_notes[0]?.doctor_serial_number,
+						doctor_serial_number: doctorSerialNumber,
 					}),
 				},
 			);
@@ -53,16 +57,7 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 				throw new Error('Failed to add note');
 			}
 
-			const newNote = await response.json();
-
-			setData((prevData) => {
-				if (!prevData) return null;
-
-				return {
-					...prevData,
-					clinical_notes: [newNote, ...prevData.clinical_notes],
-				};
-			});
+			await refetch();
 		} catch (error) {
 			setError(error as string);
 		} finally {
@@ -77,9 +72,14 @@ export const Notes = ({ data, setError, setData }: NotesProps) => {
 			<div className='card card-notes'>
 				<div className='card-header-row'>
 					<h3>Clinical Notes</h3>
-					<button className='btn-primary' onClick={() => setIsModalOpen(true)}>
-						+ New Note
-					</button>
+					{doctorSerialNumber && session && (
+						<button
+							className='btn-primary'
+							onClick={() => setIsModalOpen(true)}
+						>
+							New Note
+						</button>
+					)}
 				</div>
 				<div className='notes-timeline'>
 					{data?.clinical_notes?.length > 0 ? (

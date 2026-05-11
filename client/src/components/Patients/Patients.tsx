@@ -5,6 +5,7 @@ import { getInitials } from '../../utils/utils';
 import { Search } from '../Search/Search';
 import './Patients.css';
 import { useAuth } from '../../context/Auth/AuthProvider';
+import { useSession } from '../../context/SessionContext';
 import { API_BASE } from '../../lib/api';
 
 export const Patients = () => {
@@ -12,6 +13,7 @@ export const Patients = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { doctorSerialNumber, token } = useAuth();
+	const { session } = useSession();
 
 	const navigate = useNavigate();
 
@@ -94,7 +96,7 @@ export const Patients = () => {
 				{patients.map((patient) => (
 					<article
 						key={patient.patient_serial_number}
-						className='patient-card'
+						className={`patient-card${session?.patientSerialNumber === String(patient.patient_serial_number) ? ' patient-card--active' : ''}`}
 						onClick={() => {
 							handlePatientClick(patient.patient_serial_number);
 						}}
@@ -106,6 +108,12 @@ export const Patients = () => {
 								<span className='serial'>
 									ID: #{patient.patient_serial_number}
 								</span>
+								{session?.patientSerialNumber ===
+									String(patient.patient_serial_number) && (
+									<span className='session-active-badge'>
+										Session in progress
+									</span>
+								)}
 							</div>
 						</div>
 

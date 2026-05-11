@@ -36,6 +36,7 @@ export const Navbar = () => {
 
 	const location = useLocation();
 	const navigate = useNavigate();
+	const isPatientProfile = /^\/patients\/[^/]+$/.test(location.pathname);
 	const { session, formatTime, endSession, startSession, elapsedTime } =
 		useSession();
 	const { doctorSerialNumber, doctorName, openModal, logout } = useAuth();
@@ -65,7 +66,12 @@ export const Navbar = () => {
 
 			const data = await response.json();
 
-			startSession(selectedType, selectedLocation, data.visit_id);
+			startSession(
+				selectedType,
+				selectedLocation,
+				data.visit_id,
+				location.pathname.split('/')[2],
+			);
 			setShowTypeSelect(false);
 		} catch (error) {
 			console.error(error);
@@ -152,7 +158,7 @@ export const Navbar = () => {
 				</Link>
 			</div>
 
-			{location.pathname! != '/' && (
+			{(session || isPatientProfile) && location.pathname !== '/' && (
 				<div className='navbar-center'>
 					{session ? (
 						<div className='session-active'>

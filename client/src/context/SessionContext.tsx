@@ -1,19 +1,28 @@
-import { createContext, useState, useContext, useEffect, useMemo } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 /* eslint-disable react-refresh/only-export-components */
+
+const SESSION_STORAGE_KEY = 'healthcare_active_session';
 
 interface Session {
 	startTime: number;
 	type: string;
 	location: string;
 	visitId: string | null;
+	patientSerialNumber: string | null;
 }
 
 interface SessionContextType {
 	session: Session | null;
 	elapsedTime: number;
 	formatTime: (seconds: number) => string;
-	startSession: (type: string, location: string, visitId?: string) => void;
+	startSession: (
+		type: string,
+		location: string,
+		visitId?: string,
+		patientSerialNumber?: string,
+	) => void;
 	endSession: () => void;
 }
 
@@ -24,8 +33,13 @@ export const SessionProvider = ({
 }: {
 	children: React.ReactNode;
 }) => {
-	const [session, setSession] = useState<Session | null>(null);
-	const [elapsedTime, setElapsedTime] = useState<number>(0);
+	const [session, setSession] = useLocalStorage<Session | null>(
+		SESSION_STORAGE_KEY,
+		null,
+	);
+	const [elapsedTime, setElapsedTime] = useState<number>(() =>
+		session ? Math.floor((Date.now() - session.startTime) / 1000) : 0,
+	);
 
 	useEffect(() => {
 		let intervalId: number | undefined;
@@ -45,12 +59,18 @@ export const SessionProvider = ({
 		};
 	}, [session]);
 
-	const startSession = (type: string, location: string, visitId?: string) => {
+	const startSession = (
+		type: string,
+		location: string,
+		visitId?: string,
+		patientSerialNumber?: string,
+	) => {
 		setSession({
 			startTime: Date.now(),
 			type,
 			location,
 			visitId: visitId ?? null,
+			patientSerialNumber: patientSerialNumber ?? null,
 		});
 	};
 
@@ -69,16 +89,13 @@ export const SessionProvider = ({
 		return `${h}:${m}:${s}`;
 	};
 
-	const value = useMemo<SessionContextType>(
-		() => ({
-			session,
-			elapsedTime,
-			formatTime,
-			startSession,
-			endSession,
-		}),
-		[session, elapsedTime],
-	);
+	const value = {
+		session,
+		elapsedTime,
+		formatTime,
+		startSession,
+		endSession,
+	};
 
 	return (
 		<SessionContext.Provider value={value}>{children}</SessionContext.Provider>

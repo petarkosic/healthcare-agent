@@ -4,7 +4,7 @@ from langfuse import observe
 
 from rag.rag_service import RAGService
 from models.notes import Note
-from models.patients import PatientFullResponse, SetVisit, UpdateVisit, CreatePatient, AddMedication
+from models.patients import AddVitalSigns, PatientFullResponse, SetVisit, UpdateVisit, CreatePatient, AddMedication
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
 
@@ -120,7 +120,6 @@ async def set_note(patient_serial: str, note: Note):
         )
 
     try:
-        # Use the patient service to add the clinical note
         result = patient_service.add_clinical_note(
             visit_id=str(note.visit_id),
             doctor_serial_number=note.doctor_serial_number,
@@ -153,11 +152,23 @@ async def add_medication(patient_serial: str, medication: AddMedication):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding medication: {str(e)}")
 
+@router.post("/{patient_serial}/vitals")
+async def add_vitals(patient_serial: str, vitals: AddVitalSigns):
+    try:
+        vitals_data = vitals.model_dump(exclude={"visit_id"}, exclude_none=True)
+        result = patient_service.add_vital_signs(
+            visit_id=vitals.visit_id,
+            vital_signs_data=vitals_data,
+        )
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding vitals: {str(e)}")
+
 
 @router.post('/visits')
 async def set_visit(visit: SetVisit):
     try:
-        # Use the patient service to create the visit
         result = patient_service.create_visit(visit)
         
         return result
@@ -173,7 +184,6 @@ async def set_visit(visit: SetVisit):
 @router.put('/visits')
 async def update_visit(visit: UpdateVisit):
     try:
-        # Use the patient service to update the visit
         result = patient_service.update_visit(visit)
         
         return result

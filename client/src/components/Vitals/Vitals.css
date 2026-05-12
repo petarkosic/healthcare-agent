@@ -18,8 +18,19 @@
 .vital-box .label {
 	font-size: 0.75rem;
 	color: var(--text-muted);
-	text-transform: uppercase;
 	letter-spacing: 0.05em;
+}
+
+.vital-box .label:hover::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	font-size: 0.75rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--bg-card);
+	color: var(--text-main);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	white-space: nowrap;
 }
 
 .vital-box .value {

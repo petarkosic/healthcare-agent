@@ -110,7 +110,11 @@ function PatientProfile() {
 				)}
 
 				<div className='profile-grid'>
-					<Vitals latestVitals={latestVitals} />
+					<Vitals
+						latestVitals={latestVitals}
+						setError={setError}
+						refetch={fetchPatient}
+					/>
 
 					<Medications data={data} setError={setError} refetch={fetchPatient} />
 

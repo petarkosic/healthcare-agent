@@ -77,7 +77,7 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 							className='btn-primary'
 							onClick={() => setIsModalOpen(true)}
 						>
-							New Note
+							Add Note
 						</button>
 					)}
 				</div>

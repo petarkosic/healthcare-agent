@@ -67,6 +67,19 @@ class AddMedication(BaseModel):
     end_date: Optional[str] = None
     status: Literal['active', 'discontinued', 'completed', 'hold'] = 'active'
 
+class AddVitalSigns(BaseModel):
+    visit_id: str
+    blood_pressure_systolic: Optional[int] = None
+    blood_pressure_diastolic: Optional[int] = None
+    heart_rate: Optional[int] = None
+    temperature: Optional[float] = None
+    respiratory_rate: Optional[int] = None
+    oxygen_saturation: Optional[float] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    pain_level: Optional[int] = None
+    notes: Optional[str] = ''
+
 class MedicationResponse(BaseModel):
     medication_id: UUID
     patient_serial_number: str

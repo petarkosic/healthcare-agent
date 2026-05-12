@@ -316,6 +316,20 @@ export const AuthModal = () => {
 						</button>
 
 						<p className='modal-switch'>
+							<button
+								type='button'
+								onClick={() => {
+									setSerialNumber('Dsn90mA2');
+									setLoginPassword('123123123');
+								}}
+							>
+								Sign in with default credentials
+							</button>
+							<br />
+							<small>Testing purposes only</small>
+						</p>
+
+						<p className='modal-switch'>
 							Don't have an account?{' '}
 							<button type='button' onClick={() => switchView('signup')}>
 								Sign up

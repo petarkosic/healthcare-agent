@@ -1,4 +1,5 @@
 import type { PatientFullResponse } from '../../types/types';
+import { formatDateOnly } from '../../utils/utils';
 import './Visits.css';
 
 type VisitsProps = {
@@ -23,7 +24,7 @@ export const Visits = ({ data }: VisitsProps) => {
 					<tbody>
 						{data.visits.map((visit) => (
 							<tr key={visit.visit_id}>
-								<td>{new Date(visit.visit_date).toLocaleString()}</td>
+								<td>{formatDateOnly(visit.visit_date)}</td>
 								<td style={{ textTransform: 'capitalize' }}>
 									{visit?.visit_type?.replace('_', ' ')}
 								</td>

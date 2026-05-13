@@ -91,6 +91,16 @@ class AddLabResult(BaseModel):
     tested_date: str
     received_date: str
 
+class AddDiagnosis(BaseModel):
+    visit_id: str
+    diagnosing_doctors_serial_number: str
+    diagnosis_code: str
+    diagnosis_name: str
+    diagnosis_type: Literal['primary', 'secondary', 'chronic', 'acute']
+    status: Literal['active', 'resolved', 'chronic']
+    diagnosed_date: str
+    resolved_date: Optional[str] = None
+
 class MedicationResponse(BaseModel):
     medication_id: UUID
     patient_serial_number: str

@@ -84,6 +84,11 @@ label:has(+ select[required])::after {
 	color: red;
 }
 
+label:has(+ textarea[required])::after {
+	content: ' *';
+	color: red;
+}
+
 .form-field input,
 .form-field select {
 	padding: 0.5625rem 0.75rem;

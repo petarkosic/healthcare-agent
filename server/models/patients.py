@@ -80,6 +80,17 @@ class AddVitalSigns(BaseModel):
     pain_level: Optional[int] = None
     notes: Optional[str] = ''
 
+class AddLabResult(BaseModel):
+    visit_id: str
+    ordering_doctors_serial_number: str
+    test_name: str
+    result_value: str
+    unit: Optional[str] = None
+    reference_range: str
+    result_status: Literal['normal', 'abnormal', 'critical', 'pending']
+    tested_date: str
+    received_date: str
+
 class MedicationResponse(BaseModel):
     medication_id: UUID
     patient_serial_number: str

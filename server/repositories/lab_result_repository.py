@@ -25,20 +25,21 @@ class LabResultRepository(BaseRepository):
 
                 return [dict(zip(lab_columns, row)) for row in cur.fetchall()]
     
-    def create_lab_result(self, patient_serial_number: str, visit_id: str, 
+    def create_lab_result(self, patient_serial_number: str, visit_id: str,
                          test_name: str, result_value: str, unit: Optional[str],
                          reference_range: str, result_status: str,
-                         ordering_doctors_serial_number: str, tested_date: str) -> Optional[str]:
+                         ordering_doctors_serial_number: str,
+                         tested_date: str, received_date: str) -> Optional[str]:
         """Create a new lab result record"""
         with self.db_manager.get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    INSERT INTO lab_results 
-                    (lab_id, patient_serial_number, visit_id, test_name, result_value, 
+                    INSERT INTO lab_results
+                    (lab_id, patient_serial_number, visit_id, test_name, result_value,
                      unit, reference_range, result_status, tested_date, received_date,
                      ordering_doctors_serial_number, created_at)
-                    VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, %s, %s, %s, 
-                            DATE_TRUNC('second', now()), %s, DATE_TRUNC('second', now()))
+                    VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, %s, %s, %s,
+                            %s, %s, DATE_TRUNC('second', now()))
                     RETURNING lab_id
                 """, (
                     patient_serial_number,
@@ -48,8 +49,9 @@ class LabResultRepository(BaseRepository):
                     unit,
                     reference_range,
                     result_status,
-                    ordering_doctors_serial_number,
-                    tested_date
+                    tested_date,
+                    received_date,
+                    ordering_doctors_serial_number
                 ))
                 
                 lab_id = cur.fetchone()[0]

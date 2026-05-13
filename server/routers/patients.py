@@ -4,7 +4,7 @@ from langfuse import observe
 
 from rag.rag_service import RAGService
 from models.notes import Note
-from models.patients import AddVitalSigns, PatientFullResponse, SetVisit, UpdateVisit, CreatePatient, AddMedication
+from models.patients import AddLabResult, AddVitalSigns, PatientFullResponse, SetVisit, UpdateVisit, CreatePatient, AddMedication
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
 
@@ -164,6 +164,24 @@ async def add_vitals(patient_serial: str, vitals: AddVitalSigns):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding vitals: {str(e)}")
+
+@router.post("/{patient_serial}/labs")
+async def add_lab(patient_serial: str, lab: AddLabResult):
+    try:
+        lab_data = lab.model_dump(exclude={"visit_id", "ordering_doctors_serial_number"})        
+        result = patient_service.add_lab_result(
+            patient_serial_number=patient_serial,
+            visit_id=lab.visit_id,
+            lab_data={
+                **lab_data,
+                "ordering_doctors_serial_number": lab.ordering_doctors_serial_number,
+            },
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding lab result: {str(e)}")
+
 
 
 @router.post('/visits')

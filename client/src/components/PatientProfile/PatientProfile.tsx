@@ -120,7 +120,7 @@ function PatientProfile() {
 
 					<Notes data={data} setError={setError} refetch={fetchPatient} />
 
-					<Labs data={data} />
+					<Labs data={data} setError={setError} refetch={fetchPatient} />
 
 					<Diagnoses data={data} />
 

@@ -116,9 +116,7 @@ function PatientProfile() {
 
 				<ProfileHeader data={data} />
 
-				{data.patient.allergies && data.patient.allergies.length > 0 && (
-					<Allergies data={data} />
-				)}
+				<Allergies data={data} setError={setError} refetch={fetchPatient} />
 
 				<div className='profile-grid'>
 					<Vitals

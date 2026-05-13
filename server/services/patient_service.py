@@ -246,5 +246,14 @@ class PatientService:
             }
         else:
             raise Exception("Failed to add diagnosis")
+            
+    @observe()
+    def update_allergies(self, patient_serial_number: str, allergies: list[str]) -> Dict[str, Any]:
+        success = patient_repository.update_allergies(patient_serial_number, allergies)
+
+        if not success:
+            raise Exception("Patient not found or update failed")
+
+        return {"message": "Allergies updated successfully"}
 
 patient_service = PatientService()

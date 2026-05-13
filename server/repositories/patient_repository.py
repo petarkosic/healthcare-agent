@@ -141,4 +141,16 @@ class PatientRepository(BaseRepository[PatientBase]):
 
         return [dict(zip(diag_columns, row)) for row in cursor.fetchall()]
 
+    def update_allergies(self, patient_serial_number: str, allergies: list[str]) -> bool:
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE patients SET allergies = %s WHERE patient_serial_number = %s",
+                    (allergies, patient_serial_number)
+                )
+
+                conn.commit()
+                
+                return cur.rowcount > 0
+
 patient_repository = PatientRepository()

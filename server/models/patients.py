@@ -198,3 +198,6 @@ class UpdateVisit(BaseModel):
     status: Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']
     duration_minutes: int
     visit_id: UUID
+
+class UpdateAllergies(BaseModel):
+    allergies: list[str]

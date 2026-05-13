@@ -25,16 +25,21 @@ function PatientProfile() {
 	const { id: patient_serial } = useParams();
 	const { token } = useAuth();
 	const { session } = useSession();
-	const sessionMounted = useRef(false);
+
+	// sentinel '__init__' on first run → records current visitId, skips fetch.
+	// On subsequent runs, only fetches when visitId actually changed.
+	// Survives StrictMode's double-invoke because the ref value persists across cleanup — second run sees same visitId, no change, no fetch.
+	const prevVisitId = useRef<string | null | undefined>('__init__');
 
 	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
 
-	const fetchPatient = async () => {
+	const fetchPatient = async (signal?: AbortSignal) => {
 		try {
 			const response = await fetch(
 				`${API_BASE}/api/patients/${patient_serial}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
+					signal,
 				},
 			);
 
@@ -50,25 +55,31 @@ function PatientProfile() {
 
 			setData(result);
 		} catch (error) {
+			if (error instanceof Error && error.name === 'AbortError') return;
 			const err = error as Error;
 			setError(err.message);
 		}
 	};
 
 	useEffect(() => {
+		const controller = new AbortController();
 		setLoading(true);
-
-		fetchPatient().finally(() => setLoading(false));
+		fetchPatient(controller.signal).finally(() => {
+			if (!controller.signal.aborted) setLoading(false);
+		});
+		return () => controller.abort();
 	}, [patient_serial]);
 
 	useEffect(() => {
-		if (!sessionMounted.current) {
-			sessionMounted.current = true;
-
+		const current = session?.visitId ?? null;
+		if (prevVisitId.current === '__init__') {
+			prevVisitId.current = current;
 			return;
 		}
-
-		fetchPatient();
+		if (current !== prevVisitId.current) {
+			prevVisitId.current = current;
+			fetchPatient();
+		}
 	}, [session?.visitId]);
 
 	if (loading)

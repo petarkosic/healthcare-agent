@@ -102,13 +102,19 @@ export const Vitals = ({ latestVitals, setError, refetch }: VitalsProps) => {
 			<div className='card card-vitals'>
 				<div className='card-header-row'>
 					<h3>Latest Vitals</h3>
-					{doctorSerialNumber && session && (
-						<button
-							className='btn-primary'
-							onClick={() => setIsModalOpen(true)}
+					{doctorSerialNumber && (
+						<span
+							className={!session ? 'btn-tooltip-wrap' : undefined}
+							data-tooltip={!session ? 'Start a session to add vitals' : undefined}
 						>
-							Add Vitals
-						</button>
+							<button
+								className='btn-primary'
+								onClick={() => setIsModalOpen(true)}
+								disabled={!session}
+							>
+								Add Vitals
+							</button>
+						</span>
 					)}
 				</div>
 				{latestVitals ? (

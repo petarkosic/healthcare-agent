@@ -73,13 +73,19 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 			<div className='card card-notes'>
 				<div className='card-header-row'>
 					<h3>Clinical Notes</h3>
-					{doctorSerialNumber && session && (
-						<button
-							className='btn-primary'
-							onClick={() => setIsModalOpen(true)}
+					{doctorSerialNumber && (
+						<span
+							className={!session ? 'btn-tooltip-wrap' : undefined}
+							data-tooltip={!session ? 'Start a session to add notes' : undefined}
 						>
-							Add Note
-						</button>
+							<button
+								className='btn-primary'
+								onClick={() => setIsModalOpen(true)}
+								disabled={!session}
+							>
+								Add Note
+							</button>
+						</span>
 					)}
 				</div>
 				<div className='notes-timeline'>

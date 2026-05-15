@@ -85,10 +85,19 @@ export const Allergies = ({ data, setError, refetch }: AllergiesProps) => {
 						? data.patient.allergies.join(', ')
 						: 'None recorded'}
 				</div>
-				{doctorSerialNumber && session && (
-					<button className='allergy-edit-btn' onClick={openModal}>
-						Edit
-					</button>
+				{doctorSerialNumber && (
+					<span
+						className={!session ? 'btn-tooltip-wrap' : undefined}
+						data-tooltip={!session ? 'Start a session to update allergies' : undefined}
+					>
+						<button
+							className='allergy-edit-btn'
+							onClick={openModal}
+							disabled={!session}
+						>
+							Edit
+						</button>
+					</span>
 				)}
 			</div>
 

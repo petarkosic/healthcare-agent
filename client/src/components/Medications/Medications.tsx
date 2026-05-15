@@ -92,13 +92,19 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 			<div className='card card-meds'>
 				<div className='card-header-row'>
 					<h3>Active Medications</h3>
-					{doctorSerialNumber && session && (
-						<button
-							className='btn-primary'
-							onClick={() => setIsModalOpen(true)}
+					{doctorSerialNumber && (
+						<span
+							className={!session ? 'btn-tooltip-wrap' : undefined}
+							data-tooltip={!session ? 'Start a session to add medications' : undefined}
 						>
-							Add Medication
-						</button>
+							<button
+								className='btn-primary'
+								onClick={() => setIsModalOpen(true)}
+								disabled={!session}
+							>
+								Add Medication
+							</button>
+						</span>
 					)}
 				</div>
 				<div className='meds-list'>

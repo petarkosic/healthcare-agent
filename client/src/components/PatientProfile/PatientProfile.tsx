@@ -94,7 +94,10 @@ function PatientProfile() {
 					<button
 						className='ai-toggle-btn'
 						onClick={() => setIsAiSidebarOpen(!isAiSidebarOpen)}
-						title={'Open AI Assistant'}
+						disabled={!session}
+						data-tooltip={
+							!session ? 'Start a session to use AI Assistant' : undefined
+						}
 					>
 						<svg
 							width='24'

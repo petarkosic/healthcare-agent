@@ -87,13 +87,19 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 			<div className='card card-labs'>
 				<div className='card-header-row'>
 					<h3>Lab Results</h3>
-					{doctorSerialNumber && session && (
-						<button
-							className='btn-primary'
-							onClick={() => setIsModalOpen(true)}
+					{doctorSerialNumber && (
+						<span
+							className={!session ? 'btn-tooltip-wrap' : undefined}
+							data-tooltip={!session ? 'Start a session to add lab results' : undefined}
 						>
-							Add Lab Result
-						</button>
+							<button
+								className='btn-primary'
+								onClick={() => setIsModalOpen(true)}
+								disabled={!session}
+							>
+								Add Lab Result
+							</button>
+						</span>
 					)}
 				</div>
 				<table className='mini-table'>

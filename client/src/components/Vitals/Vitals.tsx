@@ -65,6 +65,7 @@ export const Vitals = ({ latestVitals, setError, refetch }: VitalsProps) => {
 				`${API_BASE}/api/patients/${patient_serial}/vitals`,
 				{
 					method: 'POST',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						visit_id: session!.visitId,

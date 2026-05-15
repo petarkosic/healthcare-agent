@@ -23,13 +23,16 @@ export const Sidebar = ({
 		'recommendations' | 'medications' | null
 	>(null);
 	const [isActionLoading, setIsActionLoading] = useState(false);
+	const [isOverviewLoading, setIsOverviewLoading] = useState(false);
 
 	const { id: patient_serial } = useParams();
 
 	const getAiOverview = async () => {
+		setIsOverviewLoading(true);
 		try {
 			const response = await fetch(
 				`${API_BASE}/api/agents/overview/${patient_serial}`,
+				{ credentials: 'include' },
 			);
 
 			if (!response.ok) {
@@ -41,6 +44,8 @@ export const Sidebar = ({
 			setOverview(result);
 		} catch (error) {
 			setError(error as string);
+		} finally {
+			setIsOverviewLoading(false);
 		}
 	};
 
@@ -52,6 +57,11 @@ export const Sidebar = ({
 			setData(null);
 		}
 	}, [isAiSidebarOpen]);
+
+	const handleBack = () => {
+		setActiveView(null);
+		setData(null);
+	};
 
 	const handleQuickAction = async (
 		action: 'recommendations' | 'medications',
@@ -66,6 +76,7 @@ export const Sidebar = ({
 		try {
 			const response = await fetch(`${API_BASE}/api/agents/${action}`, {
 				method: 'POST',
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -92,6 +103,15 @@ export const Sidebar = ({
 	return (
 		<div className={`ai-sidebar ${isAiSidebarOpen ? 'open' : ''}`}>
 			<div className='ai-header'>
+				{activeView && (
+					<button
+						className='ai-back-btn'
+						onClick={handleBack}
+						disabled={isActionLoading}
+					>
+						&#8592; Overview
+					</button>
+				)}
 				<button
 					className='ai-close-btn'
 					onClick={() => setIsAiSidebarOpen(false)}
@@ -101,13 +121,21 @@ export const Sidebar = ({
 				</button>
 			</div>
 			<div className='ai-body'>
-				{activeView && !data && (
+				{isOverviewLoading && (
 					<div className='ai-loading'>
+						<span className='ai-spinner' />
+						<p>Analyzing patient data...</p>
+					</div>
+				)}
+
+				{activeView && !data && !isOverviewLoading && (
+					<div className='ai-loading'>
+						<span className='ai-spinner' />
 						<p>Getting {activeView}...</p>
 					</div>
 				)}
 
-				{!activeView && overview?.ai_overview && (
+				{!activeView && !isOverviewLoading && overview?.ai_overview && (
 					<div className='ai-placeholder-content'>
 						<div className='ai-message ai-ai'>
 							<p>{overview?.ai_overview?.overview}</p>
@@ -124,9 +152,9 @@ export const Sidebar = ({
 					</div>
 				)}
 
-				{!activeView && !overview?.ai_overview && (
+				{!activeView && !isOverviewLoading && !overview?.ai_overview && (
 					<div className='ai-message'>
-						<p>Getting an overview...</p>
+						<p>No overview available.</p>
 					</div>
 				)}
 

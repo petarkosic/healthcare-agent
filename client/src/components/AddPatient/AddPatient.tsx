@@ -27,7 +27,7 @@ export const AddPatient = () => {
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const { token, doctorSerialNumber } = useAuth();
+	const { doctorSerialNumber } = useAuth();
 	const { startSession } = useSession();
 	const navigate = useNavigate();
 
@@ -54,9 +54,9 @@ export const AddPatient = () => {
 		try {
 			const response = await fetch(`${API_BASE}/api/patients/`, {
 				method: 'POST',
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
 					doctor_serial_number: doctorSerialNumber,

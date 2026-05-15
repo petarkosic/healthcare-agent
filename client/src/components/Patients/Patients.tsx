@@ -12,13 +12,13 @@ export const Patients = () => {
 	const [patients, setPatients] = useState<TPatients[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const { doctorSerialNumber, token } = useAuth();
+	const { doctorSerialNumber } = useAuth();
 	const { session } = useSession();
 
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		if (!doctorSerialNumber || !token) {
+		if (!doctorSerialNumber) {
 			setError('Authentication required');
 			setLoading(false);
 			return;
@@ -28,13 +28,10 @@ export const Patients = () => {
 
 		const fetchPatients = async () => {
 			try {
-				const url = `${API_BASE}/api/patients?doctor_serial_number=${encodeURIComponent(doctorSerialNumber)}`;
+				const url = `${API_BASE}/api/patients`;
 
 				const response = await fetch(url, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-						'Content-Type': 'application/json',
-					},
+					credentials: 'include',
 					signal: controller.signal,
 				});
 
@@ -61,7 +58,7 @@ export const Patients = () => {
 		fetchPatients();
 
 		return () => controller.abort();
-	}, [doctorSerialNumber, token]);
+	}, [doctorSerialNumber]);
 
 	const handlePatientClick = (patientId: number) => {
 		navigate(`/patients/${patientId}`);

@@ -56,6 +56,7 @@ export const Diagnoses = ({ data, setError, refetch }: DiagnosesProps) => {
 				`${API_BASE}/api/patients/${patient_serial}/diagnoses`,
 				{
 					method: 'POST',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						...form,

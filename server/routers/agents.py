@@ -1,11 +1,15 @@
 import json
+import logging
 from pathlib import Path
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 from langfuse import observe
 
 from models.agents import FollowUpRequest
+from utils.auth import get_current_doctor
 from utils.openai_client import openai_client
 from rag.rag_service import RAGService
 from models.agents import AIOverviewResponse, OverviewPromptResponse, OverviewRequest
@@ -354,7 +358,7 @@ router = APIRouter(
 
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 @observe()
-async def get_overview(patient_serial: str):
+async def get_overview(patient_serial: str, doctor: dict = Depends(get_current_doctor)):
     cache_key = f"overview:{patient_serial}"
     cached = cache.get(cache_key)
 
@@ -401,7 +405,7 @@ async def get_overview(patient_serial: str):
 
 @router.post("/recommendations")
 @observe()
-async def get_recommendations(request: OverviewRequest):
+async def get_recommendations(request: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -491,7 +495,7 @@ async def get_recommendations(request: OverviewRequest):
 
 @router.post("/medications")
 @observe()
-async def get_medications(request: OverviewRequest):
+async def get_medications(request: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -566,7 +570,7 @@ async def get_medications(request: OverviewRequest):
 
 @router.post("/schedule-followup")
 @observe(as_type="chain")
-async def schedule_visit(follow_up: FollowUpRequest):
+async def schedule_visit(follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
 
         Patient Serial: {follow_up.patient_serial_number}

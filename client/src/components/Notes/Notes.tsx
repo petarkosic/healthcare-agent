@@ -41,6 +41,7 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 				`${API_BASE}/api/patients/${patient_serial}/notes`,
 				{
 					method: 'POST',
+					credentials: 'include',
 					headers: {
 						'Content-Type': 'application/json',
 					},

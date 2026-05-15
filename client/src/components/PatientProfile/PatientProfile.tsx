@@ -12,7 +12,6 @@ import { Diagnoses } from '../Diagnoses/Diagnoses';
 import { Visits } from '../Visits/Visits';
 import { Sidebar } from '../Sidebar/Sidebar';
 import { API_BASE } from '../../lib/api';
-import { useAuth } from '../../context/Auth/AuthProvider';
 import { useSession } from '../../context/SessionContext';
 
 function PatientProfile() {
@@ -23,7 +22,6 @@ function PatientProfile() {
 	const [error, setError] = useState<string | null>('');
 
 	const { id: patient_serial } = useParams();
-	const { token } = useAuth();
 	const { session } = useSession();
 
 	// sentinel '__init__' on first run → records current visitId, skips fetch.
@@ -38,7 +36,7 @@ function PatientProfile() {
 			const response = await fetch(
 				`${API_BASE}/api/patients/${patient_serial}`,
 				{
-					headers: { Authorization: `Bearer ${token}` },
+					credentials: 'include',
 					signal,
 				},
 			);

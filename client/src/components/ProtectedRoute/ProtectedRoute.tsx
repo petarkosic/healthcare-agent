@@ -2,9 +2,11 @@ import { Navigate } from 'react-router';
 import { useAuth } from '../../context/Auth/AuthProvider';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-	const { token } = useAuth();
+	const { doctorSerialNumber, isLoading } = useAuth();
 
-	if (!token) return <Navigate to='/' replace />;
+	if (isLoading) return null;
+
+	if (!doctorSerialNumber) return <Navigate to='/' replace />;
 
 	return <>{children}</>;
 };

@@ -1,33 +1,40 @@
-import { useCallback, useState } from 'react';
-import { AuthContext, STORAGE_KEY, type AuthState } from './AuthProvider';
+import { useCallback, useEffect, useState } from 'react';
+import { AuthContext } from './AuthProvider';
+import { API_BASE } from '../../lib/api';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-	const [auth, setAuth] = useState<AuthState>(() => {
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			return stored
-				? JSON.parse(stored)
-				: { token: null, doctorSerialNumber: null, doctorName: null };
-		} catch {
-			localStorage.removeItem(STORAGE_KEY);
-			return { token: null, doctorSerialNumber: null, doctorName: null };
-		}
-	});
-
+	const [doctorSerialNumber, setDoctorSerialNumber] = useState<string | null>(
+		null,
+	);
+	const [doctorName, setDoctorName] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
-	const login = useCallback(
-		(token: string, doctorSerialNumber: string, doctorName: string) => {
-			const next = { token, doctorSerialNumber, doctorName };
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-			setAuth(next);
-		},
-		[],
-	);
+	useEffect(() => {
+		fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+			.then((r) => (r.ok ? r.json() : null))
+			.then((data) => {
+				if (data) {
+					setDoctorSerialNumber(data.doctor_serial_number);
+					setDoctorName(data.doctor_name);
+				}
+			})
+			.catch(() => {})
+			.finally(() => setIsLoading(false));
+	}, []);
 
-	const logout = useCallback(() => {
-		localStorage.removeItem(STORAGE_KEY);
-		setAuth({ token: null, doctorSerialNumber: null, doctorName: null });
+	const login = useCallback((serial: string, name: string) => {
+		setDoctorSerialNumber(serial);
+		setDoctorName(name);
+	}, []);
+
+	const logout = useCallback(async () => {
+		await fetch(`${API_BASE}/api/auth/logout`, {
+			method: 'POST',
+			credentials: 'include',
+		});
+		setDoctorSerialNumber(null);
+		setDoctorName(null);
 	}, []);
 
 	const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -35,7 +42,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<AuthContext.Provider
-			value={{ ...auth, isModalOpen, openModal, closeModal, login, logout }}
+			value={{
+				doctorSerialNumber,
+				doctorName,
+				isLoading,
+				isModalOpen,
+				openModal,
+				closeModal,
+				login,
+				logout,
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

@@ -14,7 +14,7 @@ export const Search = () => {
 	const [notFound, setNotFound] = useState(false);
 
 	const debouncedQuery = useDebounce(query.trim(), 600);
-	const { doctorSerialNumber, token } = useAuth();
+	const { doctorSerialNumber } = useAuth();
 	const navigate = useNavigate();
 	const abortRef = useRef<AbortController | null>(null);
 
@@ -36,13 +36,10 @@ export const Search = () => {
 			setNotFound(false);
 
 			try {
-				const url = `${API_BASE}/api/patients/search?patient_serial_number=${encodeURIComponent(debouncedQuery)}&doctor_serial_number=${encodeURIComponent(doctorSerialNumber!)}`;
+				const url = `${API_BASE}/api/patients/search?patient_serial_number=${encodeURIComponent(debouncedQuery)}`;
 
 				const res = await fetch(url, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-						'Content-Type': 'application/json',
-					},
+					credentials: 'include',
 					signal: controller.signal,
 				});
 
@@ -67,7 +64,7 @@ export const Search = () => {
 		};
 
 		search();
-	}, [debouncedQuery, doctorSerialNumber, token]);
+	}, [debouncedQuery, doctorSerialNumber]);
 
 	return (
 		<div className='search-container'>

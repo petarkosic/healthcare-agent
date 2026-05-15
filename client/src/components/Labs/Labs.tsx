@@ -57,6 +57,7 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 				`${API_BASE}/api/patients/${patient_serial}/labs`,
 				{
 					method: 'POST',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						...form,

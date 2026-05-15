@@ -49,6 +49,7 @@ export const Navbar = () => {
 		try {
 			const response = await fetch(`${API_BASE}/api/patients/visits`, {
 				method: 'POST',
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -105,6 +106,7 @@ export const Navbar = () => {
 			if (session?.visitId) {
 				const response = await fetch(`${API_BASE}/api/patients/visits`, {
 					method: 'PUT',
+					credentials: 'include',
 					headers: {
 						'Content-Type': 'application/json',
 					},
@@ -134,8 +136,8 @@ export const Navbar = () => {
 		setChiefComplaint('');
 	};
 
-	const doctorLogout = () => {
-		logout();
+	const doctorLogout = async () => {
+		await logout();
 		navigate('/');
 	};
 

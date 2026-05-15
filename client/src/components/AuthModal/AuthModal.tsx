@@ -78,6 +78,7 @@ export const AuthModal = () => {
 		try {
 			const res = await fetch(`${API_BASE}/api/auth/signup`, {
 				method: 'POST',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					first_name: firstName,
@@ -113,6 +114,7 @@ export const AuthModal = () => {
 		try {
 			const res = await fetch(`${API_BASE}/api/auth/login`, {
 				method: 'POST',
+				credentials: 'include',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					serial_number: serialNumber,
@@ -126,7 +128,7 @@ export const AuthModal = () => {
 				return;
 			}
 
-			login(data.token, data.doctor_serial_number, data.doctor_name);
+			login(data.doctor_serial_number, data.doctor_name);
 			closeModal();
 			navigate('/patients');
 		} catch {

@@ -18,7 +18,12 @@
 }
 
 .ai-header {
-	margin-left: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--border-color);
+	min-height: 48px;
 }
 
 .ai-header .ai-close-btn {
@@ -27,6 +32,28 @@
 	border: 1px solid var(--border-color);
 	font-size: 1.5rem;
 	cursor: pointer;
+	margin-left: auto;
+}
+
+.ai-back-btn {
+	background: none;
+	border: none;
+	color: var(--accent-blue);
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
+	transition: background 0.15s;
+}
+
+.ai-back-btn:hover {
+	background: #eff6ff;
+}
+
+.ai-back-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .ai-body {
@@ -91,7 +118,25 @@
 
 .ai-loading {
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 20px;
+	gap: 0.75rem;
+	padding: 2rem;
+	color: var(--text-muted);
+	font-size: 0.875rem;
+}
+
+.ai-spinner {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	border: 3px solid #e2e8f0;
+	border-top-color: var(--accent-blue);
+	border-radius: 50%;
+	animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
 }

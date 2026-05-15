@@ -58,6 +58,7 @@ export const Allergies = ({ data, setError, refetch }: AllergiesProps) => {
 				`${API_BASE}/api/patients/${patient_serial}/allergies`,
 				{
 					method: 'PUT',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ allergies: draft }),
 				},

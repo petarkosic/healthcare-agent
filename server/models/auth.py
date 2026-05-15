@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
 
 class SignUpRequest(BaseModel):
     first_name: str
@@ -6,15 +7,19 @@ class SignUpRequest(BaseModel):
     email: str
     specialty: str
     license_number: str
-    password: str
+    password: str = Field(min_length=8)
 
 
 class LoginRequest(BaseModel):
     serial_number: str
-    password: str
+    password: str = Field(min_length=1)
 
 
 class AuthResponse(BaseModel):
-    token: str
+    doctor_serial_number: str
+    doctor_name: str
+
+
+class MeResponse(BaseModel):
     doctor_serial_number: str
     doctor_name: str

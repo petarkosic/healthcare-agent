@@ -2,11 +2,11 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '../../context/Auth/AuthProvider';
 
 const CTASection: React.FC = () => {
-	const { token, openModal } = useAuth();
+	const { doctorSerialNumber, openModal } = useAuth();
 	const navigate = useNavigate();
 
 	const handleDashboard = () => {
-		if (token) {
+		if (doctorSerialNumber) {
 			navigate('/patients');
 		} else {
 			openModal();

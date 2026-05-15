@@ -17,6 +17,8 @@ services:
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
       LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
       LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      SECURE_COOKIES: ${SECURE_COOKIES:-false}
     volumes:
       - ./server:/app
       - server-cache:/app/.cache

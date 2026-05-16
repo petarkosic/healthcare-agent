@@ -70,4 +70,37 @@ class MedicationRepository(BaseRepository):
 
                 return str(medication_id)
 
+    def update_medication(self, medication_id: str, patient_serial_number: str, fields: Dict[str, Any]) -> bool:
+        """Update a medication record"""
+        if not fields:
+            return False
+
+        set_clauses = ", ".join(f"{k} = %s" for k in fields)
+        values = list(fields.values()) + [medication_id, patient_serial_number]
+
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE medications SET {set_clauses}, updated_at = DATE_TRUNC('second', now()) "
+                    f"WHERE medication_id = %s AND patient_serial_number = %s",
+                    values,
+                )
+
+                conn.commit()
+
+                return cur.rowcount > 0
+
+    def delete_medication(self, medication_id: str, patient_serial_number: str) -> bool:
+        """Delete a medication record"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM medications WHERE medication_id = %s AND patient_serial_number = %s",
+                    (medication_id, patient_serial_number),
+                )
+
+                conn.commit()
+                
+                return cur.rowcount > 0
+
 medication_repository = MedicationRepository()

@@ -17,6 +17,19 @@
 .med-item {
 	border-left: 3px solid var(--accent-blue);
 	padding-left: 1rem;
+	padding: 0.75rem 0.75rem 0.75rem 1rem;
+	border-radius: 8px;
+	border: 1px solid var(--border-color);
+	border-left: 3px solid var(--accent-blue);
+}
+
+.med-item-clickable {
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.med-item-clickable:hover {
+	background: #f1f5f9;
 }
 
 .med-main {
@@ -34,4 +47,50 @@
 	font-size: 0.9rem;
 	color: #334155;
 	margin-top: 2px;
+}
+
+.med-readonly {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.med-readonly-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	padding: 0.5rem 0;
+	border-bottom: 1px solid #f1f5f9;
+	font-size: 0.9rem;
+	gap: 1rem;
+}
+
+.med-readonly-row:last-child {
+	border-bottom: none;
+}
+
+.med-readonly-label {
+	color: var(--text-muted);
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+.delete-confirm {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	gap: 1rem;
+}
+
+.delete-confirm-text {
+	font-size: 0.875rem;
+	color: #dc2626;
+	font-weight: 500;
+}
+
+.modal-generic {
+	font-size: 0.85rem;
+	font-weight: 400;
+	color: var(--text-muted);
 }

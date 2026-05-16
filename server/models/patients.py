@@ -67,6 +67,14 @@ class AddMedication(BaseModel):
     end_date: Optional[str] = None
     status: Literal['active', 'discontinued', 'completed', 'hold'] = 'active'
 
+class UpdateMedication(BaseModel):
+    dosage: Optional[str] = None
+    frequency: Optional[str] = None
+    end_date: Optional[str] = None
+    status: Optional[Literal['active', 'discontinued', 'completed', 'hold']] = None
+    prescribed_for: Optional[str] = None
+    instructions: Optional[str] = None
+
 class AddVitalSigns(BaseModel):
     visit_id: str
     blood_pressure_systolic: Optional[int] = None

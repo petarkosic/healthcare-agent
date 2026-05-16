@@ -131,7 +131,7 @@ body {
 	align-items: center;
 	gap: 1rem;
 	background: var(--navbar-info-bg);
-	padding: 0.5rem 1rem;
+	padding: 0.4rem 1rem;
 	border-radius: var(--navbar-border-radius);
 	border: 1px solid var(--navbar-border-color);
 }

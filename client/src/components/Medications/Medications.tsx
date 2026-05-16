@@ -12,10 +12,22 @@ type MedicationsProps = {
 	refetch: () => Promise<void>;
 };
 
+type MedicationRow = PatientFullResponse['medications'][number];
+
 export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
-	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [form, setForm] = useState({
+	const [selectedMed, setSelectedMed] = useState<MedicationRow | null>(null);
+	const [confirmingDelete, setConfirmingDelete] = useState(false);
+	const [editForm, setEditForm] = useState({
+		dosage: '',
+		frequency: '',
+		end_date: '',
+		status: 'active',
+		prescribed_for: '',
+		instructions: '',
+	});
+	const [addForm, setAddForm] = useState({
 		medication_name: '',
 		generic_name: '',
 		dosage: '',
@@ -31,16 +43,41 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 	const { session } = useSession();
 	const { doctorSerialNumber } = useAuth();
 
-	const handleChange = (
+	const closeEditModal = () => {
+		setSelectedMed(null);
+		setConfirmingDelete(false);
+	};
+
+	const openEditModal = (med: MedicationRow) => {
+		setSelectedMed(med);
+		setEditForm({
+			dosage: med.dosage,
+			frequency: med.frequency,
+			end_date: med.end_date ? med.end_date.split('T')[0] : '',
+			status: med.status,
+			prescribed_for: med.prescribed_for,
+			instructions: med.instructions,
+		});
+	};
+
+	const handleEditChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>,
 	) => {
-		setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+		setEditForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 	};
 
-	const resetForm = () => {
-		setForm({
+	const handleAddChange = (
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+		>,
+	) => {
+		setAddForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+	};
+
+	const resetAddForm = () => {
+		setAddForm({
 			medication_name: '',
 			generic_name: '',
 			dosage: '',
@@ -53,7 +90,63 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 		});
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleEditSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!selectedMed) return;
+		setError(null);
+		setIsSubmitting(true);
+
+		try {
+			const response = await fetch(
+				`${API_BASE}/api/patients/${patient_serial}/medications/${selectedMed.medication_id}`,
+				{
+					method: 'PUT',
+					credentials: 'include',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						...editForm,
+						end_date: editForm.end_date || null,
+					}),
+				},
+			);
+
+			if (!response.ok) throw new Error('Failed to update medication');
+
+			await refetch();
+			setSelectedMed(null);
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Unknown error');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	const handleDelete = async () => {
+		if (!selectedMed) return;
+		setError(null);
+		setIsSubmitting(true);
+
+		try {
+			const response = await fetch(
+				`${API_BASE}/api/patients/${patient_serial}/medications/${selectedMed.medication_id}`,
+				{
+					method: 'DELETE',
+					credentials: 'include',
+				},
+			);
+
+			if (!response.ok) throw new Error('Failed to delete medication');
+
+			await refetch();
+			closeEditModal();
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Unknown error');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	const handleAddSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError(null);
 		setIsSubmitting(true);
@@ -66,20 +159,18 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						...form,
+						...addForm,
 						doctor_serial_number: doctorSerialNumber,
-						end_date: form.end_date || null,
+						end_date: addForm.end_date || null,
 					}),
 				},
 			);
 
-			if (!response.ok) {
-				throw new Error('Failed to add medication');
-			}
+			if (!response.ok) throw new Error('Failed to add medication');
 
 			await refetch();
-			resetForm();
-			setIsModalOpen(false);
+			resetAddForm();
+			setIsAddModalOpen(false);
 		} catch (error) {
 			setError(error instanceof Error ? error.message : 'Unknown error');
 		} finally {
@@ -95,11 +186,13 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 					{doctorSerialNumber && (
 						<span
 							className={!session ? 'btn-tooltip-wrap' : undefined}
-							data-tooltip={!session ? 'Start a session to add medications' : undefined}
+							data-tooltip={
+								!session ? 'Start a session to add medications' : undefined
+							}
 						>
 							<button
 								className='btn-primary'
-								onClick={() => setIsModalOpen(true)}
+								onClick={() => setIsAddModalOpen(true)}
 								disabled={!session}
 							>
 								Add Medication
@@ -111,7 +204,11 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 					{data.medications
 						.filter((m) => m.status === 'active')
 						.map((med) => (
-							<div key={med.medication_id} className='med-item'>
+							<div
+								key={med.medication_id}
+								className='med-item med-item-clickable'
+								onClick={() => openEditModal(med)}
+							>
 								<div className='med-main'>
 									<strong>{med.medication_name}</strong>{' '}
 									{med.generic_name && (
@@ -126,29 +223,222 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 				</div>
 			</div>
 
-			{isModalOpen && (
+			{selectedMed && (
 				<div
 					className='modal-overlay'
-					onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+					onClick={isSubmitting ? undefined : closeEditModal}
+				>
+					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
+						<div className='modal-header'>
+							<h2>
+								{selectedMed.medication_name}
+								{selectedMed.generic_name && (
+									<span className='modal-generic'>
+										{' '}
+										({selectedMed.generic_name})
+									</span>
+								)}
+							</h2>
+							<button
+								className='modal-close'
+								onClick={isSubmitting ? undefined : closeEditModal}
+								disabled={isSubmitting}
+							>
+								&times;
+							</button>
+						</div>
+						{session ? (
+							<form onSubmit={handleEditSubmit}>
+								<div className='form-group'>
+									<label>Dosage</label>
+									<input
+										name='dosage'
+										value={editForm.dosage}
+										onChange={handleEditChange}
+										placeholder='e.g. 10mg'
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label>Frequency</label>
+									<input
+										name='frequency'
+										value={editForm.frequency}
+										onChange={handleEditChange}
+										placeholder='e.g. once daily'
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label>Status</label>
+									<select
+										name='status'
+										value={editForm.status}
+										onChange={handleEditChange}
+										disabled={isSubmitting}
+									>
+										<option value='active'>Active</option>
+										<option value='hold'>Hold</option>
+										<option value='discontinued'>Discontinued</option>
+										<option value='completed'>Completed</option>
+									</select>
+								</div>
+								<div className='form-group'>
+									<label>End Date (optional)</label>
+									<input
+										type='date'
+										name='end_date'
+										value={editForm.end_date}
+										onChange={handleEditChange}
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label>Prescribed For</label>
+									<input
+										name='prescribed_for'
+										value={editForm.prescribed_for}
+										onChange={handleEditChange}
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label>Instructions</label>
+									<textarea
+										name='instructions'
+										value={editForm.instructions}
+										onChange={handleEditChange}
+										rows={3}
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='modal-actions med-modal-actions'>
+									{confirmingDelete ? (
+										<div className='delete-confirm'>
+											<span className='delete-confirm-text'>
+												Remove this medication?
+											</span>
+											<div className='modal-actions-right'>
+												<button
+													type='button'
+													className='btn-secondary'
+													onClick={() => setConfirmingDelete(false)}
+													disabled={isSubmitting}
+												>
+													Cancel
+												</button>
+												<button
+													type='button'
+													className='btn-danger'
+													onClick={handleDelete}
+													disabled={isSubmitting}
+												>
+													{isSubmitting ? 'Removing...' : 'Yes, Remove'}
+												</button>
+											</div>
+										</div>
+									) : (
+										<>
+											<button
+												type='button'
+												className='btn-danger'
+												onClick={() => setConfirmingDelete(true)}
+												disabled={isSubmitting}
+											>
+												Remove
+											</button>
+											<div className='modal-actions-right'>
+												<button
+													type='button'
+													className='btn-secondary'
+													onClick={isSubmitting ? undefined : closeEditModal}
+													disabled={isSubmitting}
+												>
+													Cancel
+												</button>
+												<button
+													type='submit'
+													className='btn-primary'
+													disabled={isSubmitting}
+												>
+													{isSubmitting ? 'Saving...' : 'Save Changes'}
+												</button>
+											</div>
+										</>
+									)}
+								</div>
+							</form>
+						) : (
+							<div className='modal-body med-readonly'>
+								<div className='med-readonly-row'>
+									<span className='med-readonly-label'>Dosage</span>
+									<span>{selectedMed.dosage}</span>
+								</div>
+								<div className='med-readonly-row'>
+									<span className='med-readonly-label'>Frequency</span>
+									<span>{selectedMed.frequency}</span>
+								</div>
+								<div className='med-readonly-row'>
+									<span className='med-readonly-label'>Status</span>
+									<span>{selectedMed.status}</span>
+								</div>
+								{selectedMed.end_date && (
+									<div className='med-readonly-row'>
+										<span className='med-readonly-label'>End Date</span>
+										<span>{selectedMed.end_date.split('T')[0]}</span>
+									</div>
+								)}
+								<div className='med-readonly-row'>
+									<span className='med-readonly-label'>Prescribed For</span>
+									<span>{selectedMed.prescribed_for}</span>
+								</div>
+								<div className='med-readonly-row'>
+									<span className='med-readonly-label'>Instructions</span>
+									<span>{selectedMed.instructions}</span>
+								</div>
+								<div className='modal-actions'>
+									<button
+										className='btn-primary'
+										onClick={() => setSelectedMed(null)}
+									>
+										Close
+									</button>
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
+
+			{isAddModalOpen && (
+				<div
+					className='modal-overlay'
+					onClick={isSubmitting ? undefined : () => setIsAddModalOpen(false)}
 				>
 					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
 						<div className='modal-header'>
 							<h2>Add Medication</h2>
 							<button
 								className='modal-close'
-								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+								onClick={
+									isSubmitting ? undefined : () => setIsAddModalOpen(false)
+								}
 								disabled={isSubmitting}
 							>
 								&times;
 							</button>
 						</div>
-						<form onSubmit={handleSubmit}>
+						<form onSubmit={handleAddSubmit}>
 							<div className='form-group'>
 								<label>Medication Name</label>
 								<input
 									name='medication_name'
-									value={form.medication_name}
-									onChange={handleChange}
+									value={addForm.medication_name}
+									onChange={handleAddChange}
 									required
 									disabled={isSubmitting}
 								/>
@@ -157,8 +447,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<label>Generic Name</label>
 								<input
 									name='generic_name'
-									value={form.generic_name}
-									onChange={handleChange}
+									value={addForm.generic_name}
+									onChange={handleAddChange}
 									required
 									disabled={isSubmitting}
 								/>
@@ -167,8 +457,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<label>Dosage</label>
 								<input
 									name='dosage'
-									value={form.dosage}
-									onChange={handleChange}
+									value={addForm.dosage}
+									onChange={handleAddChange}
 									placeholder='e.g. 10mg'
 									required
 									disabled={isSubmitting}
@@ -178,8 +468,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<label>Frequency</label>
 								<input
 									name='frequency'
-									value={form.frequency}
-									onChange={handleChange}
+									value={addForm.frequency}
+									onChange={handleAddChange}
 									placeholder='e.g. once daily'
 									required
 									disabled={isSubmitting}
@@ -190,8 +480,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<input
 									type='date'
 									name='start_date'
-									value={form.start_date}
-									onChange={handleChange}
+									value={addForm.start_date}
+									onChange={handleAddChange}
 									required
 									disabled={isSubmitting}
 								/>
@@ -201,8 +491,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<input
 									type='date'
 									name='end_date'
-									value={form.end_date}
-									onChange={handleChange}
+									value={addForm.end_date}
+									onChange={handleAddChange}
 									disabled={isSubmitting}
 								/>
 							</div>
@@ -210,8 +500,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<label>Prescribed For</label>
 								<input
 									name='prescribed_for'
-									value={form.prescribed_for}
-									onChange={handleChange}
+									value={addForm.prescribed_for}
+									onChange={handleAddChange}
 									required
 									disabled={isSubmitting}
 								/>
@@ -220,8 +510,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<label>Instructions</label>
 								<textarea
 									name='instructions'
-									value={form.instructions}
-									onChange={handleChange}
+									value={addForm.instructions}
+									onChange={handleAddChange}
 									rows={3}
 									required
 									disabled={isSubmitting}
@@ -231,8 +521,8 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<label>Status</label>
 								<select
 									name='status'
-									value={form.status}
-									onChange={handleChange}
+									value={addForm.status}
+									onChange={handleAddChange}
 									disabled={isSubmitting}
 								>
 									<option value='active'>Active</option>
@@ -246,7 +536,7 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 									type='button'
 									className='btn-secondary'
 									onClick={
-										isSubmitting ? undefined : () => setIsModalOpen(false)
+										isSubmitting ? undefined : () => setIsAddModalOpen(false)
 									}
 									disabled={isSubmitting}
 								>

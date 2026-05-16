@@ -16,6 +16,7 @@ from models.patients import (
     UpdateVisit,
     CreatePatient,
     AddMedication,
+    UpdateMedication,
     UpdateAllergies,
 )
 from utils.auth import get_current_doctor
@@ -181,6 +182,46 @@ async def add_medication(
     except Exception:
         logger.exception("Error adding medication for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error adding medication")
+
+
+@router.put("/{patient_serial}/medications/{medication_id}")
+async def update_medication(
+    patient_serial: str,
+    medication_id: str,
+    payload: UpdateMedication,
+    doctor: dict = Depends(get_current_doctor),
+):
+    try:
+        _verify_patient_access(patient_serial, doctor["serial"])
+
+        fields = {k: v for k, v in payload.model_dump().items() if v is not None}
+        result = patient_service.update_medication(medication_id, patient_serial, fields)
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error updating medication %s", medication_id)
+        raise HTTPException(status_code=500, detail="Error updating medication")
+
+
+@router.delete("/{patient_serial}/medications/{medication_id}")
+async def delete_medication(
+    patient_serial: str,
+    medication_id: str,
+    doctor: dict = Depends(get_current_doctor),
+):
+    try:
+        _verify_patient_access(patient_serial, doctor["serial"])
+
+        result = patient_service.delete_medication(medication_id, patient_serial)
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error deleting medication %s", medication_id)
+        raise HTTPException(status_code=500, detail="Error deleting medication")
 
 
 @router.post("/{patient_serial}/vitals")

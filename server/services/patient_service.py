@@ -190,6 +190,24 @@ class PatientService:
         else:
             raise Exception("Failed to add medication")
     
+    def update_medication(self, medication_id: str, patient_serial_number: str, fields: Dict[str, Any]) -> Dict[str, Any]:
+        """Update medication"""
+        updated = medication_repository.update_medication(medication_id, patient_serial_number, fields)
+
+        if not updated:
+            raise Exception("Medication not found or not updated")
+
+        return {"message": "Medication updated successfully"}
+
+    def delete_medication(self, medication_id: str, patient_serial_number: str) -> Dict[str, Any]:
+        """Delete medication"""
+        deleted = medication_repository.delete_medication(medication_id, patient_serial_number)
+
+        if not deleted:
+            raise Exception("Medication not found")
+
+        return {"message": "Medication deleted successfully"}
+
     @observe()
     def add_lab_result(self, patient_serial_number: str, visit_id: str,
                       lab_data: Dict[str, Any]) -> Dict[str, Any]:

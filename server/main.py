@@ -9,6 +9,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from middleware.audit import AuditLoggingMiddleware
 from routers import agents, auth, patients
 from utils.langfuse_client import langfuse
 from utils.limiter import limiter
@@ -64,6 +65,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(AuditLoggingMiddleware)
 
 
 @app.exception_handler(Exception)

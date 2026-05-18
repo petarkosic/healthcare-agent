@@ -36,7 +36,7 @@ extra = os.getenv("ALLOWED_ORIGINS", "")
 if extra:
     origins.extend(o.strip() for o in extra.split(",") if o.strip())
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

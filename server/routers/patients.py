@@ -47,7 +47,7 @@ def _verify_patient_access(patient_serial: str, doctor_serial: str) -> None:
                 raise HTTPException(status_code=403, detail="Access denied")
 
 
-@router.get("/")
+@router.get("")
 async def get_patients(doctor: dict = Depends(get_current_doctor)):
     try:
         patients = patient_service.get_patients(doctor_serial_number=doctor["serial"])
@@ -58,7 +58,7 @@ async def get_patients(doctor: dict = Depends(get_current_doctor)):
         raise HTTPException(status_code=500, detail="Error fetching patients")
 
 
-@router.post("/")
+@router.post("")
 async def create_patient(
     patient: CreatePatient, doctor: dict = Depends(get_current_doctor)
 ):

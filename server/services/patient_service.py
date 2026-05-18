@@ -18,31 +18,7 @@ class PatientService:
     @observe()
     def get_patients(self, doctor_serial_number: str, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
         """Get a list of patients for a particular doctor"""
-        with patient_repository.db_manager.get_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT
-                        p.patient_serial_number,
-                        p.first_name || ' ' || p.last_name AS full_name,
-                        EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth)) AS age,
-                        p.gender,
-                        COUNT(DISTINCT v.visit_id) AS total_visits,
-                        MAX(v.visit_date) AS last_visit_date,
-                        COUNT(DISTINCT m.medication_id) AS active_medications_count
-                    FROM patients p
-                    JOIN visits v ON p.patient_serial_number = v.patient_serial_number
-                    LEFT JOIN medications m ON p.patient_serial_number = m.patient_serial_number AND m.status = 'active'
-                    WHERE v.doctor_serial_number = %s
-                    GROUP BY p.patient_serial_number, p.first_name, p.last_name, p.date_of_birth, p.gender
-                    LIMIT %s OFFSET %s
-                    """,
-                    (doctor_serial_number, limit, offset),
-                )
-
-                columns = [desc[0] for desc in cur.description]
-
-                return [dict(zip(columns, row)) for row in cur.fetchall()]
+        return patient_repository.get_patients(doctor_serial_number, limit, offset)
     
     @observe()
     def search_patient_by_serial(
@@ -51,61 +27,12 @@ class PatientService:
         doctor_serial_number: str,
     ) -> List[Dict[str, Any]]:
         """Search for a patient by serial number"""
-        with patient_repository.db_manager.get_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT
-                        p.patient_serial_number,
-                        p.first_name || ' ' || p.last_name AS full_name,
-                        EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth)) AS age,
-                        p.gender,
-                        COUNT(DISTINCT v.visit_id) AS total_visits,
-                        MAX(v.visit_date) AS last_visit_date,
-                        COUNT(DISTINCT m.medication_id) AS active_medications_count
-                    FROM patients p
-                    JOIN visits v ON p.patient_serial_number = v.patient_serial_number
-                    LEFT JOIN medications m ON p.patient_serial_number = m.patient_serial_number
-                        AND m.status = 'active'
-                    WHERE v.doctor_serial_number = %s
-                    AND p.patient_serial_number = %s
-                    GROUP BY p.patient_serial_number, p.first_name, p.last_name,
-                            p.date_of_birth, p.gender
-                    """,
-                    (doctor_serial_number, patient_serial_number),
-                )
-
-                columns = [desc[0] for desc in cur.description]
-                
-                return [dict(zip(columns, row)) for row in cur.fetchall()]
+        return patient_repository.search_by_serial(patient_serial_number, doctor_serial_number)
 
     @observe()
     def create_patient(self, patient_data: CreatePatient) -> Dict[str, Any]:
         """Add new patient"""
-        serial = patient_repository._execute_insert(
-            """
-            INSERT INTO patients (
-                first_name, last_name, date_of_birth, gender, blood_type,
-                email, phone, address, emergency_contact_name, emergency_contact_phone, allergies, chronic_conditions
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING patient_serial_number
-            """,
-            (
-                patient_data.first_name,
-                patient_data.last_name,
-                patient_data.date_of_birth,
-                patient_data.gender,
-                patient_data.blood_type,
-                patient_data.email,
-                patient_data.phone,
-                patient_data.address,
-                patient_data.emergency_contact_name,
-                patient_data.emergency_contact_phone,
-                patient_data.allergies,
-                patient_data.chronic_conditions
-            ),
-        )
+        serial = patient_repository.create_patient(patient_data)
         if not serial:
             raise Exception("Failed to create patient")
 

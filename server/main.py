@@ -10,7 +10,7 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from middleware.audit import AuditLoggingMiddleware
-from routers import agents, auth, patients
+from routers import agents, auth, patients, google_auth
 from utils.langfuse_client import langfuse
 from utils.limiter import limiter
 
@@ -83,3 +83,4 @@ async def health():
 app.include_router(patients.router, prefix="/api")
 app.include_router(agents.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(google_auth.router, prefix="/api")

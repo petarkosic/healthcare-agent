@@ -8,6 +8,7 @@ import './SidebarRecommendations.css';
 import { formatDateTimeLocal } from '../../utils/utils';
 import { useLocation } from 'react-router';
 import { API_BASE } from '../../lib/api';
+import { useAuth } from '../../context/Auth/AuthProvider';
 
 type SidebarRecommendationsProps = {
 	data: ResponseData | null;
@@ -32,6 +33,7 @@ export const SidebarRecommendations = ({
 
 	const location = useLocation();
 	const patient_id = location.pathname.split('/')[2];
+	const { doctorSerialNumber } = useAuth();
 
 	if (!data || !isRecommendationsResponse(data)) return null;
 
@@ -65,18 +67,57 @@ export const SidebarRecommendations = ({
 		setIsLoading(true);
 
 		try {
+			const statusRes = await fetch(`${API_BASE}/api/auth/google/status`, {
+				credentials: 'include',
+			});
+			const { connected } = await statusRes.json();
+
+			if (!connected) {
+				const authRes = await fetch(`${API_BASE}/api/auth/google/authorize`, {
+					credentials: 'include',
+				});
+				const { auth_url } = await authRes.json();
+
+				await new Promise<void>((resolve, reject) => {
+					const popup = window.open(
+						auth_url,
+						'google_oauth',
+						'width=500,height=600',
+					);
+
+					const handler = (e: MessageEvent) => {
+						if (e.data === 'google_connected') {
+							window.removeEventListener('message', handler);
+							popup?.close();
+
+							resolve();
+						} else if (e.data === 'google_auth_failed') {
+							window.removeEventListener('message', handler);
+							popup?.close();
+
+							reject(new Error('Google authorization failed or was denied'));
+						}
+					};
+
+					window.addEventListener('message', handler);
+
+					setTimeout(() => {
+						window.removeEventListener('message', handler);
+						reject(new Error('OAuth timeout'));
+					}, 300000);
+				});
+			}
+
 			const startDate = new Date(selectedDate);
-			// Default 30 minutes duration for a visit
 			const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
 
 			const response = await fetch(`${API_BASE}/api/agents/schedule-followup`, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
 				body: JSON.stringify({
 					patient_serial_number: patient_id,
-					doctor_serial_number: 'Dsn90mA2',
+					doctor_serial_number: doctorSerialNumber,
 					visit_date: selectedDate,
 					visit_type: 'followup',
 					summary: selectedRecommendation?.follow_up?.reason,
@@ -87,9 +128,7 @@ export const SidebarRecommendations = ({
 				}),
 			});
 
-			if (!response.ok) {
-				throw new Error('Failed to schedule visit');
-			}
+			if (!response.ok) throw new Error('Failed to schedule visit');
 
 			const res = await response.json();
 

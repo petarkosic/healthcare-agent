@@ -137,7 +137,7 @@ async def set_note(
         )
 
         resp = openai_client.chat.completions.create(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-flash-lite",
             messages=[{"role": "user", "content": prompt}],
         )
 

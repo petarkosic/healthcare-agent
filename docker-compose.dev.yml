@@ -19,6 +19,11 @@ services:
       LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       SECURE_COOKIES: ${SECURE_COOKIES:-false}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
+      FRONTEND_URL: ${FRONTEND_URL}
+      OAUTHLIB_INSECURE_TRANSPORT: 1 # dev only — allows HTTP redirect
     volumes:
       - ./server:/app
       - server-cache:/app/.cache

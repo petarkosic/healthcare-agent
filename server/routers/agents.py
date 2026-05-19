@@ -1,6 +1,5 @@
 import json
 import logging
-from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from dotenv import load_dotenv
 
@@ -16,6 +15,7 @@ from models.agents import AIOverviewResponse, OverviewPromptResponse, OverviewRe
 from utils.cache import cache, hash_key
 from services.agent_service import agent_service
 from services.patient_service import visit_repository
+from services.google_calendar_service import create_event as create_calendar_event_for_doctor
 
 load_dotenv()
 
@@ -45,33 +45,6 @@ def schedule_visit_db(
     # In a full implementation, we would update the visit duration after creation
     # or modify the repository to accept this parameter
     return str(visit_id) if visit_id else None
-
-
-@observe(as_type="span")
-def create_calendar_event(
-    summary: str, start_time: str, end_time: str, description: str = None
-):
-    service = authenticate_google_calendar()
-
-    event = {
-        "summary": summary,
-        "description": description or "",
-        "start": {"dateTime": start_time, "timeZone": "GMT+01:00"},
-        "end": {"dateTime": end_time, "timeZone": "GMT+01:00"},
-    }
-
-    try:
-        created_event = (
-            service.events().insert(calendarId="primary", body=event).execute()
-        )
-
-        return {
-            "htmlLink": created_event.get("htmlLink"),
-            "eventId": created_event.get("id"),
-        }
-
-    except Exception as e:
-        return {"error": str(e)}
 
 
 tools = [
@@ -145,40 +118,6 @@ tools = [
         },
     },
 ]
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
-
-BASE_DIR = Path(__file__).resolve().parent
-CREDENTIALS_PATH = BASE_DIR / "credentials.json"
-TOKEN_PATH = BASE_DIR / "token.json"
-
-def authenticate_google_calendar():
-    creds = None
-
-    if TOKEN_PATH.exists():
-        with open(TOKEN_PATH, "rb") as token:
-            creds = Credentials.from_authorized_user_info(
-                info=json.load(token), scopes=SCOPES
-            )
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                str(CREDENTIALS_PATH), SCOPES
-            )
-            creds = flow.run_local_server(port=0)
-
-        with open(TOKEN_PATH, "wb") as token:
-            token.write(creds.to_json())
-
-    return build("calendar", "v3", credentials=creds)
 
 postgres_query = """
 WITH 
@@ -378,7 +317,7 @@ async def get_overview(patient_serial: str, doctor: dict = Depends(get_current_d
     prompt = build_prompt(patient_data, docs)
 
     response = openai_client.chat.completions.create(
-        model="gemini-2.5-flash",
+        model="gemini-3.1-flash-lite",
         messages=[
             {
                 "role": "system",
@@ -472,7 +411,7 @@ async def get_recommendations(request: OverviewRequest, doctor: dict = Depends(g
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-flash-lite",
             messages=[
                 {
                     "role": "system",
@@ -547,7 +486,7 @@ async def get_medications(request: OverviewRequest, doctor: dict = Depends(get_c
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-flash-lite",
             messages=[
                 {
                     "role": "system",
@@ -590,7 +529,7 @@ async def schedule_visit(follow_up: FollowUpRequest, doctor: dict = Depends(get_
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-flash-lite",
             messages=[
                 {
                     "role": "system",
@@ -622,11 +561,12 @@ async def schedule_visit(follow_up: FollowUpRequest, doctor: dict = Depends(get_
                     results.append({"tool": "schedule_visit_db", "result": result})
 
                 elif function_name == "create_calendar_event":
-                    result = create_calendar_event(
+                    result = create_calendar_event_for_doctor(
+                        doctor_serial=doctor["serial"],
                         summary=arguments.get("summary"),
                         start_time=arguments.get("start_time"),
                         end_time=arguments.get("end_time"),
-                        description=arguments.get("description"),
+                        description=arguments.get("description") or "",
                     )
                     results.append({"tool": "create_calendar_event", "result": result})
 

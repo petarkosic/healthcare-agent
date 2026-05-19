@@ -124,7 +124,11 @@ export const AuthModal = () => {
 
 			const data = await res.json();
 			if (!res.ok) {
-				setError(data.detail ?? 'Sign in failed');
+				if (res.status === 429) {
+					setError('Too many attempts. Please wait a minute before trying again.');
+				} else {
+					setError(data.detail ?? 'Sign in failed');
+				}
 				return;
 			}
 

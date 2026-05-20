@@ -199,7 +199,10 @@ class SetVisit(BaseModel):
     patient_serial_number: str
     doctor_serial_number: str
     visit_type: Literal['checkup', 'followup', 'emergency', 'specialist', 'vaccination', 'routine', 'urgent_care', 'surgical', 'telehealth']
-    location: Literal['Clinic', 'Hospital', 'Telehealth', 'Home Visit', 'Urgent Care']
+    location: Optional[Literal['Clinic', 'Hospital', 'Telehealth', 'Home Visit', 'Urgent Care']] = 'Clinic'
+    visit_date: Optional[str] = None
+    status: Optional[Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']] = 'in-progress'
+    chief_complaint: Optional[str] = ""
 
 class UpdateVisit(BaseModel):
     chief_complaint: str

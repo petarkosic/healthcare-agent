@@ -58,7 +58,9 @@ class PatientService:
             doctor_serial_number=visit_data.doctor_serial_number,
             visit_type=visit_data.visit_type,
             location=visit_data.location,
-            chief_complaint=""  # Will be updated separately if needed
+            visit_date=visit_data.visit_date,
+            status=visit_data.status,
+            chief_complaint=visit_data.chief_complaint,
         )
         
         if visit_id:

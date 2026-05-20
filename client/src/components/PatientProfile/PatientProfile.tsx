@@ -134,7 +134,7 @@ function PatientProfile() {
 
 					<Diagnoses data={data} setError={setError} refetch={fetchPatient} />
 
-					<Visits data={data} />
+					<Visits data={data} refetch={fetchPatient} />
 				</div>
 			</div>
 

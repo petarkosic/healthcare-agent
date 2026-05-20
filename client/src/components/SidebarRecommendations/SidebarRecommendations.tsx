@@ -9,6 +9,7 @@ import { formatDateTimeLocal } from '../../utils/utils';
 import { useLocation } from 'react-router';
 import { API_BASE } from '../../lib/api';
 import { useAuth } from '../../context/Auth/AuthProvider';
+import { useGoogleCalendar } from '../../context/GoogleCalendar/GoogleCalendarProvider';
 
 type SidebarRecommendationsProps = {
 	data: ResponseData | null;
@@ -34,6 +35,7 @@ export const SidebarRecommendations = ({
 	const location = useLocation();
 	const patient_id = location.pathname.split('/')[2];
 	const { doctorSerialNumber } = useAuth();
+	const { ensureConnected } = useGoogleCalendar();
 
 	if (!data || !isRecommendationsResponse(data)) return null;
 
@@ -67,46 +69,7 @@ export const SidebarRecommendations = ({
 		setIsLoading(true);
 
 		try {
-			const statusRes = await fetch(`${API_BASE}/api/auth/google/status`, {
-				credentials: 'include',
-			});
-			const { connected } = await statusRes.json();
-
-			if (!connected) {
-				const authRes = await fetch(`${API_BASE}/api/auth/google/authorize`, {
-					credentials: 'include',
-				});
-				const { auth_url } = await authRes.json();
-
-				await new Promise<void>((resolve, reject) => {
-					const popup = window.open(
-						auth_url,
-						'google_oauth',
-						'width=500,height=600',
-					);
-
-					const handler = (e: MessageEvent) => {
-						if (e.data === 'google_connected') {
-							window.removeEventListener('message', handler);
-							popup?.close();
-
-							resolve();
-						} else if (e.data === 'google_auth_failed') {
-							window.removeEventListener('message', handler);
-							popup?.close();
-
-							reject(new Error('Google authorization failed or was denied'));
-						}
-					};
-
-					window.addEventListener('message', handler);
-
-					setTimeout(() => {
-						window.removeEventListener('message', handler);
-						reject(new Error('OAuth timeout'));
-					}, 300000);
-				});
-			}
+			await ensureConnected();
 
 			const startDate = new Date(selectedDate);
 			const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);

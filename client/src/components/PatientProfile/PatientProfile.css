@@ -130,7 +130,7 @@
 }
 
 .status-abnormal,
-.status-inprogress {
+.status-in-progress {
 	background: var(--warning-bg);
 	color: var(--warning-text);
 }

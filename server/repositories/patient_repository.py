@@ -116,7 +116,8 @@ class PatientRepository(BaseRepository[PatientBase]):
             JOIN visits v ON p.patient_serial_number = v.patient_serial_number
             LEFT JOIN medications m ON p.patient_serial_number = m.patient_serial_number AND m.status = 'active'
             WHERE v.doctor_serial_number = %s
-            GROUP BY p.patient_serial_number, p.first_name, p.last_name, p.date_of_birth, p.gender
+            GROUP BY p.patient_serial_number, p.first_name, p.last_name, p.date_of_birth, p.gender, p.created_at
+            ORDER BY p.created_at DESC
             LIMIT %s OFFSET %s
             """,
             (doctor_serial_number, limit, offset),

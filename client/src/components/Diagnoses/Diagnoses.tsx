@@ -101,24 +101,28 @@ export const Diagnoses = ({ data, setError, refetch }: DiagnosesProps) => {
 						</span>
 					)}
 				</div>
-				<ul className='diagnoses-list'>
-					{data.diagnoses.map((diag: Diagnosis) => (
-						<li key={diag.diagnosis_id}>
-							<div className='diag-header'>
-								<strong>{diag.diagnosis_name}</strong>{' '}
-								<span className='tag diag-code'>
-									{diag.diagnosis_code || 'N/A'}
-								</span>
-							</div>
-							<div className='diag-meta'>
-								<span className={`status-badge status-${diag.status}`}>
-									{diag.status}
-								</span>
-								<span>{formatDateOnly(diag.diagnosed_date)}</span>
-							</div>
-						</li>
-					))}
-				</ul>
+				{data.diagnoses.length > 0 ? (
+					<ul className='diagnoses-list'>
+						{data.diagnoses.map((diag: Diagnosis) => (
+							<li key={diag.diagnosis_id}>
+								<div className='diag-header'>
+									<strong>{diag.diagnosis_name}</strong>{' '}
+									<span className='tag diag-code'>
+										{diag.diagnosis_code || 'N/A'}
+									</span>
+								</div>
+								<div className='diag-meta'>
+									<span className={`status-badge status-${diag.status}`}>
+										{diag.status}
+									</span>
+									<span>{formatDateOnly(diag.diagnosed_date)}</span>
+								</div>
+							</li>
+						))}
+					</ul>
+				) : (
+					<p className='empty-text'>No diagnoses recorded.</p>
+				)}
 			</div>
 
 			{isModalOpen && (

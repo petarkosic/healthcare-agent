@@ -201,25 +201,29 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 					)}
 				</div>
 				<div className='meds-list'>
-					{data.medications
-						.filter((m) => m.status === 'active')
-						.map((med) => (
-							<div
-								key={med.medication_id}
-								className='med-item med-item-clickable'
-								onClick={() => openEditModal(med)}
-							>
-								<div className='med-main'>
-									<strong>{med.medication_name}</strong>{' '}
-									{med.generic_name && (
-										<span className='generic'>({med.generic_name})</span>
-									)}
+					{data.medications.filter((m) => m.status === 'active').length > 0 ? (
+						data.medications
+							.filter((m) => m.status === 'active')
+							.map((med) => (
+								<div
+									key={med.medication_id}
+									className='med-item med-item-clickable'
+									onClick={() => openEditModal(med)}
+								>
+									<div className='med-main'>
+										<strong>{med.medication_name}</strong>{' '}
+										{med.generic_name && (
+											<span className='generic'>({med.generic_name})</span>
+										)}
+									</div>
+									<div className='med-dosage'>
+										{med.dosage} • {med.frequency}
+									</div>
 								</div>
-								<div className='med-dosage'>
-									{med.dosage} • {med.frequency}
-								</div>
-							</div>
-						))}
+							))
+					) : (
+						<p className='empty-text'>No active medications.</p>
+					)}
 				</div>
 			</div>
 

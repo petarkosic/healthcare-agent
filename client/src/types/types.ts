@@ -32,7 +32,7 @@ interface PatientBase {
 }
 
 export interface Visit {
-	chief_complaint: string;
+	chief_complaint: string | null;
 	created_at: string;
 	doctor_first_name: string;
 	doctor_last_name: string;

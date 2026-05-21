@@ -52,7 +52,7 @@ export const AddPatient = () => {
 			.filter(Boolean);
 
 		try {
-			const response = await fetch(`${API_BASE}/api/patients/`, {
+			const response = await fetch(`${API_BASE}/api/patients`, {
 				method: 'POST',
 				credentials: 'include',
 				headers: {
@@ -82,7 +82,7 @@ export const AddPatient = () => {
 
 			const data = await response.json();
 
-			startSession('checkup', 'Clinic', data.visit_id);
+			startSession('checkup', 'Clinic', data.visit_id, String(data.patient_serial_number));
 			navigate(`/patients/${data.patient_serial_number}`);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to add patient');

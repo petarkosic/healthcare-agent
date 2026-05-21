@@ -102,30 +102,34 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 						</span>
 					)}
 				</div>
-				<table className='mini-table'>
-					<thead>
-						<tr>
-							<th>Test</th>
-							<th>Result</th>
-							<th>Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						{data?.lab_results?.slice(0, 4).map((lab) => (
-							<tr key={lab.lab_id}>
-								<td>{lab.test_name}</td>
-								<td>
-									{lab.result_value} {lab.unit}
-								</td>
-								<td>
-									<span className={`status-badge status-${lab.result_status}`}>
-										{lab.result_status}
-									</span>
-								</td>
+				{data?.lab_results?.length > 0 ? (
+					<table className='mini-table'>
+						<thead>
+							<tr>
+								<th>Test</th>
+								<th>Result</th>
+								<th>Status</th>
 							</tr>
-						))}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{data.lab_results.slice(0, 4).map((lab) => (
+								<tr key={lab.lab_id}>
+									<td>{lab.test_name}</td>
+									<td>
+										{lab.result_value} {lab.unit}
+									</td>
+									<td>
+										<span className={`status-badge status-${lab.result_status}`}>
+											{lab.result_status}
+										</span>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				) : (
+					<p className='empty-text'>No lab results recorded.</p>
+				)}
 			</div>
 
 			{isModalOpen && (

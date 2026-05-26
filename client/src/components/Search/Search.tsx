@@ -1,22 +1,43 @@
-import { useState, useEffect, useRef } from 'react';
+import {
+	useState,
+	useEffect,
+	useRef,
+	forwardRef,
+	useImperativeHandle,
+} from 'react';
 import { useNavigate } from 'react-router';
-import { useAuth } from '../../context/Auth/AuthProvider';
 import { useDebounce } from '../../hooks/useDebounce';
 import { getInitials } from '../../utils/utils';
 import { API_BASE } from '../../lib/api';
 import type { TPatients } from '../../types/types';
 import './Search.css';
 
-export const Search = () => {
+export interface SearchHandle {
+	focus(): void;
+}
+
+export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 	const [query, setQuery] = useState('');
 	const [result, setResult] = useState<TPatients | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [notFound, setNotFound] = useState(false);
 
 	const debouncedQuery = useDebounce(query.trim(), 600);
-	const { doctorSerialNumber } = useAuth();
 	const navigate = useNavigate();
 	const abortRef = useRef<AbortController | null>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useImperativeHandle(ref, () => ({
+		focus: () => inputRef.current?.focus(),
+	}));
+
+	useEffect(() => {
+		const handler = () => inputRef.current?.focus();
+
+		document.addEventListener('mediflow:focus-search', handler);
+
+		return () => document.removeEventListener('mediflow:focus-search', handler);
+	}, []);
 
 	useEffect(() => {
 		if (!debouncedQuery) {
@@ -43,7 +64,7 @@ export const Search = () => {
 					signal: controller.signal,
 				});
 
-				if (!res.ok) throw new Error(`${res.status}`);
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
 				const data: TPatients[] = await res.json();
 
@@ -64,7 +85,9 @@ export const Search = () => {
 		};
 
 		search();
-	}, [debouncedQuery, doctorSerialNumber]);
+
+		return () => controller.abort();
+	}, [debouncedQuery]);
 
 	return (
 		<div className='search-container'>
@@ -77,6 +100,7 @@ export const Search = () => {
 					/>
 				</svg>
 				<input
+					ref={inputRef}
 					type='text'
 					className='search-input'
 					placeholder='Search by patient serial number...'
@@ -131,4 +155,6 @@ export const Search = () => {
 			)}
 		</div>
 	);
-};
+});
+
+Search.displayName = 'Search';

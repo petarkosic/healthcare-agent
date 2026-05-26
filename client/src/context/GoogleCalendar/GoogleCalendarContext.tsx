@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useState, useEffect, type ReactNode } from 'react';
 import { API_BASE } from '../../lib/api';
 import { GoogleCalendarContext } from './GoogleCalendarProvider';
 
@@ -8,6 +8,15 @@ export const GoogleCalendarProvider = ({
 	children: ReactNode;
 }) => {
 	const [connected, setConnected] = useState(false);
+
+	useEffect(() => {
+		fetch(`${API_BASE}/api/auth/google/status`, { credentials: 'include' })
+			.then((r) => r.json())
+			.then(({ connected: isConnected }) => {
+				if (isConnected) setConnected(true);
+			})
+			.catch(() => {});
+	}, []);
 
 	const ensureConnected = useCallback(async () => {
 		const statusRes = await fetch(`${API_BASE}/api/auth/google/status`, {

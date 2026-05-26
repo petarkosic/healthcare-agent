@@ -71,9 +71,11 @@ export const Patients = () => {
 		return (
 			<div className='patients-empty'>
 				<p className='patients-empty-msg'>No patients assigned yet.</p>
-				<Link to='/patients/new' className='btn-add-patient'>
-					Add New Patient
-				</Link>
+				{!session && (
+					<Link to='/patients/new' className='btn-add-patient'>
+						Add New Patient
+					</Link>
+				)}
 			</div>
 		);
 	}
@@ -82,9 +84,11 @@ export const Patients = () => {
 		<div className='patients-page'>
 			<div className='patients-header'>
 				<h2 className='patients-title'>My Patients</h2>
-				<Link to='/patients/new' className='btn-add-patient'>
-					Add New Patient
-				</Link>
+				{!session && (
+					<Link to='/patients/new' className='btn-add-patient'>
+						Add New Patient
+					</Link>
+				)}
 			</div>
 
 			<Search />

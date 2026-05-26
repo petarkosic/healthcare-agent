@@ -106,6 +106,80 @@ body {
 	color: var(--text-main);
 }
 
+.doctor-menu-wrapper {
+	position: relative;
+}
+
+.doctor-menu-trigger {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	background: none;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	padding: 0.25rem 0.5rem;
+	border-radius: var(--radius-sm, 6px);
+	transition: background 0.2s ease;
+}
+
+.doctor-menu-trigger:focus {
+	outline: none;
+}
+
+.doctor-menu-trigger:focus-visible {
+	outline: 2px solid var(--primary, #0284c7);
+	outline-offset: 2px;
+}
+
+.doctor-menu-trigger:hover {
+	background: var(--primary-light, #e0f2fe);
+}
+
+.doctor-dropdown {
+	position: absolute;
+	top: calc(100% + 8px);
+	right: 0;
+	background: white;
+	border: 1px solid var(--border, #e2e8f0);
+	border-radius: var(--radius-md, 8px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+	min-width: 160px;
+	z-index: 200;
+	overflow: hidden;
+}
+
+.doctor-dropdown-item {
+	display: block;
+	width: 100%;
+	text-align: left;
+	padding: 0.65rem 1rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--text-main, #0f172a);
+	background: none;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
+}
+
+.doctor-dropdown-item:focus {
+	outline: none;
+}
+
+.doctor-dropdown-item:focus-visible {
+	outline: 2px solid var(--primary, #0284c7);
+	outline-offset: -2px;
+}
+
+.doctor-dropdown-item:hover {
+	background: var(--bg-body, #f8fafc);
+	color: var(--primary, #0284c7);
+}
+
 .lp-btn-outline {
 	background: transparent;
 	border: 1px solid var(--border);

@@ -3,7 +3,7 @@ import type { ClinicalNote, PatientFullResponse } from '../../types/types';
 import { formatDate } from '../../utils/utils';
 import { useParams } from 'react-router';
 import './Notes.css';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/Auth/AuthProvider';
 
@@ -37,14 +37,10 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/notes`,
 				{
 					method: 'POST',
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-					},
 					body: JSON.stringify({
 						visit_id: session?.visitId,
 						note_type: newNoteType,

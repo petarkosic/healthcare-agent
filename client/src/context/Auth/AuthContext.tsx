@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AuthContext } from './AuthProvider';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [doctorSerialNumber, setDoctorSerialNumber] = useState<string | null>(
@@ -29,10 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	}, []);
 
 	const logout = useCallback(async () => {
-		await fetch(`${API_BASE}/api/auth/logout`, {
-			method: 'POST',
-			credentials: 'include',
-		});
+		await apiFetch(`${API_BASE}/api/auth/logout`, { method: 'POST' });
 		setDoctorSerialNumber(null);
 		setDoctorName(null);
 	}, []);

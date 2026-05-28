@@ -4,7 +4,7 @@ import './Sidebar.css';
 import type { Overview, ResponseData } from '../../types/types';
 import { SidebarRecommendations } from '../SidebarRecommendations/SidebarRecommendations';
 import { SidebarMedications } from '../SidebarMedications/SidebarMedications';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 
 type SidebarProps = {
 	isAiSidebarOpen: boolean;
@@ -30,9 +30,8 @@ export const Sidebar = ({
 	const getAiOverview = async () => {
 		setIsOverviewLoading(true);
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/agents/overview/${patient_serial}`,
-				{ credentials: 'include' },
 			);
 
 			if (!response.ok) {
@@ -74,12 +73,8 @@ export const Sidebar = ({
 		setIsActionLoading(true);
 
 		try {
-			const response = await fetch(`${API_BASE}/api/agents/${action}`, {
+			const response = await apiFetch(`${API_BASE}/api/agents/${action}`, {
 				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
 				body: JSON.stringify({
 					overview: overview?.ai_overview.overview,
 				}),

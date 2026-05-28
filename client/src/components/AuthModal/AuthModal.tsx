@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/Auth/AuthProvider';
 import './AuthModal.css';
 
@@ -76,10 +76,8 @@ export const AuthModal = () => {
 
 		setLoading(true);
 		try {
-			const res = await fetch(`${API_BASE}/api/auth/signup`, {
+			const res = await apiFetch(`${API_BASE}/api/auth/signup`, {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					first_name: firstName,
 					last_name: lastName,
@@ -112,10 +110,8 @@ export const AuthModal = () => {
 		setLoading(true);
 
 		try {
-			const res = await fetch(`${API_BASE}/api/auth/login`, {
+			const res = await apiFetch(`${API_BASE}/api/auth/login`, {
 				method: 'POST',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					serial_number: serialNumber,
 					password: loginPassword,

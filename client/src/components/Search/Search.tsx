@@ -8,7 +8,7 @@ import {
 import { useNavigate } from 'react-router';
 import { useDebounce } from '../../hooks/useDebounce';
 import { getInitials } from '../../utils/utils';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import type { TPatients } from '../../types/types';
 import './Search.css';
 
@@ -59,10 +59,7 @@ export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 			try {
 				const url = `${API_BASE}/api/patients/search?patient_serial_number=${encodeURIComponent(debouncedQuery)}`;
 
-				const res = await fetch(url, {
-					credentials: 'include',
-					signal: controller.signal,
-				});
+				const res = await apiFetch(url, { signal: controller.signal });
 
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 

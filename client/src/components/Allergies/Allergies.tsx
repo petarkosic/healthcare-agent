@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router';
 import type { PatientFullResponse } from '../../types/types';
 import { useSession } from '../../context/SessionContext';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import './Allergies.css';
 import { useAuth } from '../../context/Auth/AuthProvider';
 
@@ -54,12 +54,10 @@ export const Allergies = ({ data, setError, refetch }: AllergiesProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/allergies`,
 				{
 					method: 'PUT',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ allergies: draft }),
 				},
 			);

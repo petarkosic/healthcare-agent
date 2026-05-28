@@ -7,7 +7,7 @@ import type {
 import './SidebarRecommendations.css';
 import { formatDateTimeLocal } from '../../utils/utils';
 import { useLocation } from 'react-router';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/Auth/AuthProvider';
 import { useGoogleCalendar } from '../../context/GoogleCalendar/GoogleCalendarProvider';
 
@@ -74,10 +74,8 @@ export const SidebarRecommendations = ({
 			const startDate = new Date(selectedDate);
 			const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
 
-			const response = await fetch(`${API_BASE}/api/agents/schedule-followup`, {
+			const response = await apiFetch(`${API_BASE}/api/agents/schedule-followup`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				credentials: 'include',
 				body: JSON.stringify({
 					patient_serial_number: patient_id,
 					doctor_serial_number: doctorSerialNumber,

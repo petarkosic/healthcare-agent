@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, type ReactNode } from 'react';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { GoogleCalendarContext } from './GoogleCalendarProvider';
 
 export const GoogleCalendarProvider = ({
@@ -10,7 +10,7 @@ export const GoogleCalendarProvider = ({
 	const [connected, setConnected] = useState(false);
 
 	useEffect(() => {
-		fetch(`${API_BASE}/api/auth/google/status`, { credentials: 'include' })
+		apiFetch(`${API_BASE}/api/auth/google/status`)
 			.then((r) => r.json())
 			.then(({ connected: isConnected }) => {
 				if (isConnected) setConnected(true);
@@ -19,9 +19,7 @@ export const GoogleCalendarProvider = ({
 	}, []);
 
 	const ensureConnected = useCallback(async () => {
-		const statusRes = await fetch(`${API_BASE}/api/auth/google/status`, {
-			credentials: 'include',
-		});
+		const statusRes = await apiFetch(`${API_BASE}/api/auth/google/status`);
 		const { connected: isConnected } = await statusRes.json();
 
 		if (isConnected) {
@@ -29,9 +27,7 @@ export const GoogleCalendarProvider = ({
 			return;
 		}
 
-		const authRes = await fetch(`${API_BASE}/api/auth/google/authorize`, {
-			credentials: 'include',
-		});
+		const authRes = await apiFetch(`${API_BASE}/api/auth/google/authorize`);
 		const { auth_url } = await authRes.json();
 
 		await new Promise<void>((resolve, reject) => {

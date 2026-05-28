@@ -1,3 +1,4 @@
+import hmac
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -46,7 +47,7 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token"],
 )
 
 
@@ -63,8 +64,26 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
         return response
 
+_CSRF_METHODS = {"POST", "PUT", "DELETE", "PATCH"}
+
+class CSRFMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.method in _CSRF_METHODS and request.cookies.get("ha_token"):
+            header_token = request.headers.get("x-csrf-token")
+            cookie_token = request.cookies.get("csrf_token")
+
+            if (
+                not header_token
+                or not cookie_token
+                or not hmac.compare_digest(header_token, cookie_token)
+            ):
+                return JSONResponse(status_code=403, content={"detail": "CSRF token invalid"})
+                
+        return await call_next(request)
+
 
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(CSRFMiddleware)
 app.add_middleware(AuditLoggingMiddleware)
 
 

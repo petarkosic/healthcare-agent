@@ -11,7 +11,7 @@ import { Labs } from '../Labs/Labs';
 import { Diagnoses } from '../Diagnoses/Diagnoses';
 import { Visits } from '../Visits/Visits';
 import { Sidebar } from '../Sidebar/Sidebar';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { useSession } from '../../context/SessionContext';
 
 function PatientProfile() {
@@ -33,12 +33,9 @@ function PatientProfile() {
 
 	const fetchPatient = async (signal?: AbortSignal) => {
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}`,
-				{
-					credentials: 'include',
-					signal,
-				},
+				signal ? { signal } : {},
 			);
 
 			if (!response.ok) {

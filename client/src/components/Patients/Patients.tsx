@@ -6,7 +6,7 @@ import { Search } from '../Search/Search';
 import './Patients.css';
 import { useAuth } from '../../context/Auth/AuthProvider';
 import { useSession } from '../../context/SessionContext';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 
 export const Patients = () => {
 	const [patients, setPatients] = useState<TPatients[]>([]);
@@ -30,10 +30,7 @@ export const Patients = () => {
 			try {
 				const url = `${API_BASE}/api/patients`;
 
-				const response = await fetch(url, {
-					credentials: 'include',
-					signal: controller.signal,
-				});
+				const response = await apiFetch(url, { signal: controller.signal });
 
 				if (!response.ok) {
 					throw new Error(`Failed to fetch: ${response.status}`);

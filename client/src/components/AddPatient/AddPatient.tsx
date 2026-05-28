@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../context/Auth/AuthProvider';
 import { useSession } from '../../context/SessionContext';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import './AddPatient.css';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -52,12 +52,8 @@ export const AddPatient = () => {
 			.filter(Boolean);
 
 		try {
-			const response = await fetch(`${API_BASE}/api/patients`, {
+			const response = await apiFetch(`${API_BASE}/api/patients`, {
 				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
 				body: JSON.stringify({
 					doctor_serial_number: doctorSerialNumber,
 					first_name: form.first_name,

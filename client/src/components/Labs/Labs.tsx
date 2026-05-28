@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import type { PatientFullResponse } from '../../types/types';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/Auth/AuthProvider';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import './Labs.css';
 
 type LabsProps = {
@@ -53,12 +53,10 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/labs`,
 				{
 					method: 'POST',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						...form,
 						visit_id: session!.visitId,

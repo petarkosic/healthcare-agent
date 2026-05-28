@@ -4,7 +4,7 @@ import type { Diagnosis, PatientFullResponse } from '../../types/types';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/Auth/AuthProvider';
 import { formatDateOnly } from '../../utils/utils';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import './Diagnoses.css';
 
 type DiagnosesProps = {
@@ -52,12 +52,10 @@ export const Diagnoses = ({ data, setError, refetch }: DiagnosesProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/diagnoses`,
 				{
 					method: 'POST',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						...form,
 						visit_id: session!.visitId,

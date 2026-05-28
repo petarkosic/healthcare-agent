@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import type { PatientFullResponse } from '../../types/types';
 import { useSession } from '../../context/SessionContext';
 import { useAuth } from '../../context/Auth/AuthProvider';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import './Medications.css';
 
 type MedicationsProps = {
@@ -97,12 +97,10 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/medications/${selectedMed.medication_id}`,
 				{
 					method: 'PUT',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						...editForm,
 						end_date: editForm.end_date || null,
@@ -127,12 +125,9 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/medications/${selectedMed.medication_id}`,
-				{
-					method: 'DELETE',
-					credentials: 'include',
-				},
+				{ method: 'DELETE' },
 			);
 
 			if (!response.ok) throw new Error('Failed to delete medication');
@@ -152,12 +147,10 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/medications`,
 				{
 					method: 'POST',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						...addForm,
 						doctor_serial_number: doctorSerialNumber,

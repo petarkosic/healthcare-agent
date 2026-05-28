@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router';
 import type { VitalSigns } from '../../types/types';
 import { useSession } from '../../context/SessionContext';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import './Vitals.css';
 import { useAuth } from '../../context/Auth/AuthProvider';
 
@@ -61,12 +61,10 @@ export const Vitals = ({ latestVitals, setError, refetch }: VitalsProps) => {
 		const toNumber = (v: string) => (v !== '' ? Number(v) : undefined);
 
 		try {
-			const response = await fetch(
+			const response = await apiFetch(
 				`${API_BASE}/api/patients/${patient_serial}/vitals`,
 				{
 					method: 'POST',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						visit_id: session!.visitId,
 						blood_pressure_systolic: toNumber(form.blood_pressure_systolic),

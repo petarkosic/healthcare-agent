@@ -4,7 +4,7 @@ import { useSession } from '../../context/SessionContext';
 import './Navbar.css';
 import { getInitials, secondsToRoundedMinutes } from '../../utils/utils';
 import { useAuth } from '../../context/Auth/AuthProvider';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { SettingsModal } from '../SettingsModal/SettingsModal';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
@@ -108,12 +108,8 @@ export const Navbar = () => {
 
 	const handleStartSession = async () => {
 		try {
-			const response = await fetch(`${API_BASE}/api/patients/visits`, {
+			const response = await apiFetch(`${API_BASE}/api/patients/visits`, {
 				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-				},
 				body: JSON.stringify({
 					patient_serial_number: location.pathname.split('/')[2],
 					doctor_serial_number: doctorSerialNumber,
@@ -165,12 +161,8 @@ export const Navbar = () => {
 
 		try {
 			if (session?.visitId) {
-				const response = await fetch(`${API_BASE}/api/patients/visits`, {
+				const response = await apiFetch(`${API_BASE}/api/patients/visits`, {
 					method: 'PUT',
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-					},
 					body: JSON.stringify({
 						visit_id: session.visitId,
 						...sessionData,

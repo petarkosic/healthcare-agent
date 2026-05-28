@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from db.database import db_manager
 from models.auth import AuthResponse, LoginRequest, MeResponse, SignUpRequest
 from utils.auth import create_token, get_current_doctor, hash_password, verify_password
+from utils.csrf import generate_csrf_token
 from utils.limiter import limiter
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,15 @@ def _set_auth_cookie(response: JSONResponse, token: str) -> None:
         key="ha_token",
         value=token,
         httponly=True,
+        secure=SECURE_COOKIES,
+        samesite="lax",
+        max_age=_COOKIE_MAX_AGE,
+        path="/",
+    )
+    response.set_cookie(
+        key="csrf_token",
+        value=generate_csrf_token(),
+        httponly=False,
         secure=SECURE_COOKIES,
         samesite="lax",
         max_age=_COOKIE_MAX_AGE,
@@ -120,5 +130,6 @@ async def me(doctor: dict = Depends(get_current_doctor)):
 async def logout():
     response = JSONResponse(content={"message": "Logged out"})
     response.delete_cookie(key="ha_token", path="/")
+    response.delete_cookie(key="csrf_token", path="/")
 
     return response

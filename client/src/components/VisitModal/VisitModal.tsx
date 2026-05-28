@@ -4,7 +4,7 @@ import {
 	formatDateTimeLocal,
 	secondsToRoundedMinutes,
 } from '../../utils/utils';
-import { API_BASE } from '../../lib/api';
+import { API_BASE, apiFetch } from '../../lib/api';
 import { useSession } from '../../context/SessionContext';
 import { useGoogleCalendar } from '../../context/GoogleCalendar/GoogleCalendarProvider';
 import './VisitModal.css';
@@ -53,10 +53,8 @@ export const VisitModal = ({
 		setApiError(null);
 		setIsSubmitting(true);
 		try {
-			const res = await fetch(`${API_BASE}/api/patients/visits`, {
+			const res = await apiFetch(`${API_BASE}/api/patients/visits`, {
 				method: 'PUT',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					visit_id: visit.visit_id,
 					status: newStatus,
@@ -83,10 +81,8 @@ export const VisitModal = ({
 		setApiError(null);
 		setIsSubmitting(true);
 		try {
-			const res = await fetch(`${API_BASE}/api/patients/visits`, {
+			const res = await apiFetch(`${API_BASE}/api/patients/visits`, {
 				method: 'PUT',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					visit_id: visit.visit_id,
 					status: 'in-progress',
@@ -134,10 +130,8 @@ export const VisitModal = ({
 		setApiError(null);
 		setIsSubmitting(true);
 		try {
-			const res = await fetch(`${API_BASE}/api/patients/visits`, {
+			const res = await apiFetch(`${API_BASE}/api/patients/visits`, {
 				method: 'PUT',
-				credentials: 'include',
-				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					visit_id: visit.visit_id,
 					status: 'completed',
@@ -169,12 +163,10 @@ export const VisitModal = ({
 			endDate.setMinutes(endDate.getMinutes() + (visit.duration_minutes || 30));
 			const endTime = formatDateTimeLocal(endDate) + ':00';
 
-			const scheduleRes = await fetch(
+			const scheduleRes = await apiFetch(
 				`${API_BASE}/api/agents/schedule-followup`,
 				{
 					method: 'POST',
-					credentials: 'include',
-					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
 						patient_serial_number: visit.patient_serial_number,
 						doctor_serial_number: doctorSerialNumber,

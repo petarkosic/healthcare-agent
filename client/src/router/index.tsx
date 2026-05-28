@@ -1,11 +1,29 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet } from 'react-router';
 import App from '../App';
-import PatientProfile from '../components/PatientProfile/PatientProfile';
 import { Navbar } from '../components/Navbar/Navbar';
 import './layout.css';
 import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
-import { Patients } from '../components/Patients/Patients';
-import { AddPatient } from '../components/AddPatient/AddPatient';
+
+const Patients = lazy(() =>
+	import('../components/Patients/Patients').then((m) => ({
+		default: m.Patients,
+	})),
+);
+const AddPatient = lazy(() =>
+	import('../components/AddPatient/AddPatient').then((m) => ({
+		default: m.AddPatient,
+	})),
+);
+const PatientProfile = lazy(
+	() => import('../components/PatientProfile/PatientProfile'),
+);
+
+const RouteLoader = (
+	<div className='route-loader'>
+		<div className='route-loader-spinner' />
+	</div>
+);
 
 const router = createBrowserRouter([
 	{
@@ -30,7 +48,9 @@ const router = createBrowserRouter([
 				path: '/patients',
 				element: (
 					<ProtectedRoute>
-						<Patients />
+						<Suspense fallback={RouteLoader}>
+							<Patients />
+						</Suspense>
 					</ProtectedRoute>
 				),
 			},
@@ -38,7 +58,9 @@ const router = createBrowserRouter([
 				path: '/patients/new',
 				element: (
 					<ProtectedRoute>
-						<AddPatient />
+						<Suspense fallback={RouteLoader}>
+							<AddPatient />
+						</Suspense>
 					</ProtectedRoute>
 				),
 			},
@@ -46,7 +68,9 @@ const router = createBrowserRouter([
 				path: '/patients/:id',
 				element: (
 					<ProtectedRoute>
-						<PatientProfile />
+						<Suspense fallback={RouteLoader}>
+							<PatientProfile />
+						</Suspense>
 					</ProtectedRoute>
 				),
 			},

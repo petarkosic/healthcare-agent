@@ -19,7 +19,7 @@
 	position: relative;
 }
 
-.modal-close {
+.modal-card .modal-close {
 	position: absolute;
 	top: 1rem;
 	right: 1rem;
@@ -32,7 +32,7 @@
 	font-size: 1.25rem;
 }
 
-.modal-close:hover {
+.modal-card .modal-close:hover {
 	color: var(--text-main);
 }
 

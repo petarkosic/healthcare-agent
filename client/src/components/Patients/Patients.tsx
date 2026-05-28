@@ -17,6 +17,11 @@ export const Patients = () => {
 
 	const navigate = useNavigate();
 
+	// Prefetch PatientProfile so it's ready when the user clicks on a patient
+	useEffect(() => {
+		import('../PatientProfile/PatientProfile');
+	}, []);
+
 	useEffect(() => {
 		if (!doctorSerialNumber) {
 			setError('Authentication required');

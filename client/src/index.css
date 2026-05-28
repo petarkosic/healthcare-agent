@@ -61,6 +61,28 @@ button:disabled {
 	pointer-events: none;
 }
 
+.route-loader {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: calc(100vh - 64px);
+}
+
+.route-loader-spinner {
+	width: 32px;
+	height: 32px;
+	border: 3px solid #e2e8f0;
+	border-top-color: var(--primary, #0284c7);
+	border-radius: 50%;
+	animation: route-spin 0.7s linear infinite;
+}
+
+@keyframes route-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .btn-tooltip-wrap {
 	position: relative;
 	display: inline-block;

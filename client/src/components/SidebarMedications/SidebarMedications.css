@@ -5,58 +5,48 @@
 .current-medications {
 	margin-bottom: 2rem;
 	background: #ffffff;
-	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.medication-item {
+.medications-container .med-grid {
 	display: grid;
 	grid-template-columns: 1fr auto auto;
-	gap: 1rem;
 	align-items: center;
-	padding: 0.75rem 1rem;
-	border-bottom: 1px solid #f0f0f0;
-	transition: background-color 0.2s ease;
+	column-gap: 0.75rem;
 }
 
-.medication-item:last-child {
-	border-bottom: none;
-}
-
-.medication-item:hover {
-	background-color: #f9f9ff;
-}
-
-.medication-item .name {
+.medications-container .med-name {
 	font-weight: 600;
 	color: #2d3748;
-	font-size: 0.95rem;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
+	font-size: 0.9rem;
+	border-bottom: 1px solid #f0f0f0;
+	word-break: break-word;
 }
 
-.medication-item .dosage {
-	background: #edf2f7;
-	padding: 0.25rem 0.5rem;
-	border-radius: 4px;
+.medications-container .med-dosage {
 	font-size: 0.85rem;
 	color: #4a5568;
 	font-weight: 500;
-	min-width: 80px;
-	text-align: center;
+	border-bottom: 1px solid #f0f0f0;
+	white-space: nowrap;
 }
 
-.medication-item .frequency {
+.medications-container .med-frequency {
+	border-bottom: 1px solid #f0f0f0;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.medications-container .med-frequency-badge {
+	width: 100%;
 	background: #e6fffa;
 	color: #285e61;
-	padding: 0.25rem 0.75rem;
-	border-radius: 20px;
-	font-size: 0.8rem;
+	padding: 0.2rem 0.6rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	letter-spacing: 0.4px;
 	white-space: nowrap;
 }
 

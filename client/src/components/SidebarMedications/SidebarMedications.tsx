@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type {
 	MedicationChange,
 	MedicationsResponse,
@@ -25,18 +26,22 @@ export const SidebarMedications = ({ data }: SidebarMedicationsProps) => {
 			{current_medications?.length > 0 && (
 				<div className='current-medications'>
 					<h4>Current Medications</h4>
-					{current_medications?.map(
-						(
-							med: MedicationsResponse['medications']['current_medications'][number],
-							index: number,
-						) => (
-							<div className='medication-item' key={index}>
-								<span className='name'>{med.name}</span>
-								<span className='dosage'>{med.dosage}</span>
-								<span className='frequency'>{med.frequency}</span>
-							</div>
-						),
-					)}
+					<div className='med-grid'>
+						{current_medications.map(
+							(
+								med: MedicationsResponse['medications']['current_medications'][number],
+								index: number,
+							) => (
+								<Fragment key={index}>
+									<span className='med-name'>{med.name}</span>
+									<span className='med-dosage'>{med.dosage}</span>
+									<span className='med-frequency'>
+										<span className='med-frequency-badge'>{med.frequency}</span>
+									</span>
+								</Fragment>
+							),
+						)}
+					</div>
 				</div>
 			)}
 

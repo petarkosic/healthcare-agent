@@ -53,6 +53,10 @@ class AIOverviewResponse(BaseModel):
 class OverviewRequest(BaseModel):
     overview: str
 
+class MedicationsRequest(BaseModel):
+    overview: str
+    current_medications: list[ActiveMedications] = []
+
 class OverviewPromptResponse(BaseModel):
     overview: str
     critical_alerts: list[str]

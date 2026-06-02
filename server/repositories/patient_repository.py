@@ -30,14 +30,14 @@ class PatientRepository(BaseRepository[PatientBase]):
                         FROM medications m
                         LEFT JOIN doctors d ON m.doctor_serial_number = d.doctor_serial_number
                         WHERE m.patient_serial_number = %s
-                        ORDER BY m.start_date DESC, m.status
+                        ORDER BY m.created_at DESC, m.status
                       ),
                       lab_results_cte AS (
                         SELECT l.*, d.first_name AS ordering_doctor_first_name, d.last_name AS ordering_doctor_last_name
                         FROM lab_results l
                         LEFT JOIN doctors d ON l.ordering_doctors_serial_number = d.doctor_serial_number
                         WHERE l.patient_serial_number = %s
-                        ORDER BY l.tested_date DESC
+                        ORDER BY l.created_at DESC
                       ),
                       clinical_notes_cte AS (
                         SELECT cn.*, d.first_name AS doctor_first_name, d.last_name AS doctor_last_name, v.visit_date
@@ -52,7 +52,7 @@ class PatientRepository(BaseRepository[PatientBase]):
                         FROM diagnoses diag
                         LEFT JOIN doctors d ON diag.diagnosing_doctors_serial_number = d.doctor_serial_number
                         WHERE diag.patient_serial_number = %s
-                        ORDER BY diag.diagnosed_date DESC, diag.status
+                        ORDER BY diag.created_at DESC, diag.status
                       )
                     SELECT
                       row_to_json(p.*) AS patient,

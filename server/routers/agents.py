@@ -11,7 +11,7 @@ from models.agents import FollowUpRequest
 from utils.auth import get_current_doctor
 from utils.openai_client import openai_client
 from rag.rag_service import RAGService
-from models.agents import AIOverviewResponse, OverviewPromptResponse, OverviewRequest
+from models.agents import AIOverviewResponse, MedicationsRequest, OverviewPromptResponse, OverviewRequest
 from utils.cache import cache, hash_key
 from services.agent_service import agent_service
 from services.patient_service import visit_repository
@@ -118,176 +118,6 @@ tools = [
         },
     },
 ]
-
-postgres_query = """
-WITH 
-latest_visit AS (
-    -- Most recent visit (1 row)
-    SELECT 
-        v.visit_id,
-        v.visit_date,
-        v.visit_type,
-        v.chief_complaint,
-        v.status,
-        d.first_name || ' ' || d.last_name as doctor_name,
-        d.specialty
-    FROM visits v
-    JOIN doctors d ON v.doctor_serial_number = d.doctor_serial_number
-    WHERE v.patient_serial_number = %(pid)s
-    ORDER BY v.visit_date DESC
-    LIMIT 1
-),
-
-latest_vitals AS (
-    -- Most recent vital signs measurement (1 row)
-    SELECT 
-        vs.blood_pressure_systolic,
-        vs.blood_pressure_diastolic,
-        vs.heart_rate,
-        vs.temperature,
-        vs.oxygen_saturation,
-        vs.bmi,
-        vs.pain_level,
-        vs.measurement_time
-    FROM vital_signs vs
-    JOIN visits v ON vs.visit_id = v.visit_id
-    WHERE v.patient_serial_number = %(pid)s
-    ORDER BY vs.measurement_time DESC
-    LIMIT 1
-),
-
-latest_lab AS (
-    -- Most recent lab result (1 row)
-    SELECT 
-        test_name,
-        result_value,
-        unit,
-        reference_range,
-        result_status,
-        tested_date
-    FROM lab_results
-    WHERE patient_serial_number = %(pid)s
-    ORDER BY tested_date DESC
-    LIMIT 1
-),
-
-latest_note AS (
-    -- Most recent clinical note (1 row)
-    SELECT 
-        cn.note_type,
-        cn.note_text,
-        cn.created_at,
-        d.first_name || ' ' || d.last_name as doctor_name
-    FROM clinical_notes cn
-    JOIN visits v ON cn.visit_id = v.visit_id
-    JOIN doctors d ON cn.doctor_serial_number = d.doctor_serial_number
-    WHERE v.patient_serial_number = %(pid)s
-    ORDER BY cn.created_at DESC
-    LIMIT 1
-),
-
-active_meds AS (
-    -- All current medications (not just latest 1, since patients usually have multiple)
-    SELECT 
-        medication_name,
-        dosage,
-        frequency,
-        prescribed_for,
-        status
-    FROM medications
-    WHERE patient_serial_number = %(pid)s 
-    AND status = 'active'
-    AND (end_date IS NULL OR end_date >= CURRENT_DATE)
-    ORDER BY start_date DESC
-),
-
-active_diagnoses AS (
-    -- All active diagnoses (not just latest 1)
-    SELECT 
-        diagnosis_name,
-        diagnosis_code,
-        diagnosis_type,
-        status
-    FROM diagnoses
-    WHERE patient_serial_number = %(pid)s
-    AND status IN ('active', 'chronic')
-    ORDER BY diagnosed_date DESC
-)
-
-SELECT 
-    p.patient_serial_number,
-    p.first_name || ' ' || p.last_name as full_name,
-    EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth))::int as age,
-    p.gender,
-    p.blood_type,
-    p.allergies,
-    p.chronic_conditions,
-    
-    -- Latest visit as JSON object (single row)
-    json_build_object(
-        'visit_id', lv.visit_id,
-        'date', lv.visit_date,
-        'type', lv.visit_type,
-        'chief_complaint', lv.chief_complaint,
-        'doctor', lv.doctor_name,
-        'specialty', lv.specialty,
-        'status', lv.status
-    ) as latest_visit,
-    
-    -- Latest vitals as JSON object (single row)
-    json_build_object(
-        'measured_at', lvs.measurement_time,
-        'blood_pressure', lvs.blood_pressure_systolic || '/' || lvs.blood_pressure_diastolic,
-        'heart_rate', lvs.heart_rate,
-        'temperature', lvs.temperature,
-        'oxygen_saturation', lvs.oxygen_saturation,
-        'bmi', lvs.bmi,
-        'pain_level', lvs.pain_level
-    ) as latest_vitals,
-    
-    -- Latest lab as JSON object (single row)
-    json_build_object(
-        'test_name', ll.test_name,
-        'result', ll.result_value,
-        'unit', ll.unit,
-        'status', ll.result_status,
-        'reference_range', ll.reference_range,
-        'date', ll.tested_date
-    ) as latest_lab,
-    
-    -- Active medications as JSON array
-    COALESCE(
-        (SELECT json_agg(
-            json_build_object(
-                'name', medication_name,
-                'dosage', dosage,
-                'frequency', frequency,
-                'reason', prescribed_for
-            ) ORDER BY medication_name
-        ) FROM active_meds),
-        '[]'::json
-    ) as active_medications,
-    
-    -- Active diagnoses as JSON array
-    COALESCE(
-        (SELECT json_agg(
-            json_build_object(
-                'name', diagnosis_name,
-                'code', diagnosis_code,
-                'type', diagnosis_type,
-                'status', status
-            ) ORDER BY diagnosis_name
-        ) FROM active_diagnoses),
-        '[]'::json
-    ) as active_diagnoses
-
-FROM patients p
-LEFT JOIN latest_visit lv ON true
-LEFT JOIN latest_vitals lvs ON true
-LEFT JOIN latest_lab ll ON true
-WHERE p.patient_serial_number = %(pid)s;
-"""
-
 
 router = APIRouter(
     prefix="/agents",
@@ -434,18 +264,26 @@ async def get_recommendations(request: OverviewRequest, doctor: dict = Depends(g
 
 @router.post("/medications")
 @observe()
-async def get_medications(request: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
+async def get_medications(request: MedicationsRequest, doctor: dict = Depends(get_current_doctor)):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
-    cache_key = f"medications:{hash_key(request.overview)}"
+    meds_key = ":".join(f"{m.name}:{m.dosage}:{m.frequency}" for m in request.current_medications)
+    cache_key = f"medications:{hash_key(request.overview + meds_key)}"
     cached = cache.get(cache_key)
 
     if cached:
         return cached
 
+    meds_list = "\n".join(
+        f"- {m.name}: {m.dosage}, {m.frequency}" for m in request.current_medications
+    ) or "None provided"
+
     prompt = f"""
         Based on this overview, provide patient medications alternatives: {request.overview}.
+
+        Current medications (accurate, from patient record):
+        {meds_list}
 
         Return only valid JSON with the following format:
         {{
@@ -453,7 +291,6 @@ async def get_medications(request: OverviewRequest, doctor: dict = Depends(get_c
                 "current_medications": [
                     {{
                         "name": "string",
-                        "generic_name": "string",
                         "dosage": "string",
                         "frequency": "string"
                     }}
@@ -462,7 +299,6 @@ async def get_medications(request: OverviewRequest, doctor: dict = Depends(get_c
                     {{
                         "action": "string",
                         "name": "string",
-                        "generic_name": "string",
                         "dosage": "string",
                         "frequency": "string",
                         "reason": "string"

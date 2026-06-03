@@ -1,21 +1,17 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { Diagnosis, PatientFullResponse } from '../../types/types';
-import { useSession } from '../../context/SessionContext';
-import { useAuth } from '../../context/Auth/AuthProvider';
+import type { Diagnosis } from '../../types/types';
+import { useAppSelector } from '../../store/hooks';
 import { formatDateOnly } from '../../utils/utils';
-import { API_BASE, apiFetch } from '../../lib/api';
+import {
+	useGetPatientQuery,
+	useAddDiagnosisMutation,
+} from '../../store/api/patientsApi';
 import './Diagnoses.css';
 
-type DiagnosesProps = {
-	data: PatientFullResponse;
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	refetch: () => Promise<void>;
-};
-
-export const Diagnoses = ({ data, setError, refetch }: DiagnosesProps) => {
+export const Diagnoses = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [localError, setLocalError] = useState<string | null>(null);
 	const [form, setForm] = useState({
 		diagnosis_code: '',
 		diagnosis_name: '',
@@ -26,8 +22,13 @@ export const Diagnoses = ({ data, setError, refetch }: DiagnosesProps) => {
 	});
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
-	const { doctorSerialNumber } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+
+	const { data } = useGetPatientQuery(patient_serial!);
+	const [addDiagnosis, { isLoading: isSubmitting }] = useAddDiagnosisMutation();
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -48,46 +49,40 @@ export const Diagnoses = ({ data, setError, refetch }: DiagnosesProps) => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/diagnoses`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						...form,
-						visit_id: session!.visitId,
-						diagnosing_doctors_serial_number: doctorSerialNumber,
-						resolved_date: form.resolved_date || null,
-					}),
+			await addDiagnosis({
+				patientId: patient_serial!,
+				body: {
+					...form,
+					visit_id: session!.visitId,
+					diagnosing_doctors_serial_number: doctorSerialNumber,
+					resolved_date: form.resolved_date || null,
 				},
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to add diagnosis');
-			}
-
-			await refetch();
+			}).unwrap();
 			resetForm();
 			setIsModalOpen(false);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to add diagnosis');
 		}
 	};
 
+	if (!data) return null;
+
 	return (
 		<>
+			{localError && <div className='error'>{localError}</div>}
 			<div className='card card-diagnoses'>
 				<div className='card-header-row'>
 					<h3>Diagnoses History</h3>
 					{doctorSerialNumber && (
 						<span
 							className={!session ? 'btn-tooltip-wrap' : undefined}
-							data-tooltip={!session ? 'Start a session to add diagnoses' : undefined}
+							data-tooltip={
+								!session ? 'Start a session to add diagnoses' : undefined
+							}
 						>
 							<button
 								className='btn-primary'

@@ -1,15 +1,14 @@
 import {
 	useState,
-	useEffect,
 	useRef,
 	forwardRef,
 	useImperativeHandle,
+	useEffect,
 } from 'react';
 import { useNavigate } from 'react-router';
 import { useDebounce } from '../../hooks/useDebounce';
 import { getInitials } from '../../utils/utils';
-import { API_BASE, apiFetch } from '../../lib/api';
-import type { TPatients } from '../../types/types';
+import { useSearchPatientsQuery } from '../../store/api/patientsApi';
 import './Search.css';
 
 export interface SearchHandle {
@@ -18,14 +17,10 @@ export interface SearchHandle {
 
 export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 	const [query, setQuery] = useState('');
-	const [result, setResult] = useState<TPatients | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [notFound, setNotFound] = useState(false);
-
-	const debouncedQuery = useDebounce(query.trim(), 600);
 	const navigate = useNavigate();
-	const abortRef = useRef<AbortController | null>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	const debouncedQuery = useDebounce(query.trim(), 1000);
 
 	useImperativeHandle(ref, () => ({
 		focus: () => inputRef.current?.focus(),
@@ -39,52 +34,13 @@ export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 		return () => document.removeEventListener('mediflow:focus-search', handler);
 	}, []);
 
-	useEffect(() => {
-		if (!debouncedQuery) {
-			setResult(null);
-			setNotFound(false);
-			setLoading(false);
-			return;
-		}
+	const { data, isFetching, isError } = useSearchPatientsQuery(debouncedQuery, {
+		skip: !debouncedQuery,
+	});
 
-		abortRef.current?.abort();
-		const controller = new AbortController();
-		abortRef.current = controller;
-
-		const search = async () => {
-			setLoading(true);
-			setResult(null);
-			setNotFound(false);
-
-			try {
-				const url = `${API_BASE}/api/patients/search?patient_serial_number=${encodeURIComponent(debouncedQuery)}`;
-
-				const res = await apiFetch(url, { signal: controller.signal });
-
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-				const data: TPatients[] = await res.json();
-
-				if (data.length > 0) {
-					setResult(data[0]);
-				} else {
-					setNotFound(true);
-				}
-			} catch (err) {
-				if (err instanceof Error && err.name !== 'AbortError') {
-					setNotFound(true);
-				}
-			} finally {
-				if (!controller.signal.aborted) {
-					setLoading(false);
-				}
-			}
-		};
-
-		search();
-
-		return () => controller.abort();
-	}, [debouncedQuery]);
+	const result = data?.[0] ?? null;
+	const notFound =
+		!isFetching && !!debouncedQuery && (isError || (data && data.length === 0));
 
 	return (
 		<div className='search-container'>
@@ -104,16 +60,18 @@ export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 				/>
-				{loading && <span className='search-spinner' aria-label='Searching' />}
+				{isFetching && (
+					<span className='search-spinner' aria-label='Searching' />
+				)}
 			</div>
 
-			{notFound && !loading && (
+			{notFound && (
 				<div className='search-not-found'>
 					No patient found with serial number "{debouncedQuery}"
 				</div>
 			)}
 
-			{result && !loading && (
+			{result && !isFetching && (
 				<article
 					className='patient-card search-result-card'
 					onClick={() => navigate(`/patients/${result.patient_serial_number}`)}

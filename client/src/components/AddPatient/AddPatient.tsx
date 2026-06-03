@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { useSession } from '../../context/SessionContext';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { startSession } from '../../store/sessionSlice';
+import { useCreatePatientMutation } from '../../store/api/patientsApi';
 import './AddPatient.css';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -24,12 +24,14 @@ export const AddPatient = () => {
 		emergency_contact_name: '',
 		emergency_contact_phone: '',
 	});
-	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const { doctorSerialNumber } = useAuth();
-	const { startSession } = useSession();
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
+	const [createPatient, { isLoading: submitting }] = useCreatePatientMutation();
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -43,7 +45,6 @@ export const AddPatient = () => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setSubmitting(true);
 		setError(null);
 
 		const allergies = form.known_allergies
@@ -52,38 +53,33 @@ export const AddPatient = () => {
 			.filter(Boolean);
 
 		try {
-			const response = await apiFetch(`${API_BASE}/api/patients`, {
-				method: 'POST',
-				body: JSON.stringify({
-					doctor_serial_number: doctorSerialNumber,
-					first_name: form.first_name,
-					last_name: form.last_name,
-					date_of_birth: form.date_of_birth,
-					gender: form.gender,
-					blood_type: form.blood_type,
-					email: form.email,
-					phone: form.phone,
-					address: `${form.street_number} ${form.street}, ${form.city}, ${form.country}`,
-					emergency_contact_name: form.emergency_contact_name,
-					emergency_contact_phone: form.emergency_contact_phone,
-					allergies,
-					chronic_conditions: [],
+			const data = await createPatient({
+				doctor_serial_number: doctorSerialNumber,
+				first_name: form.first_name,
+				last_name: form.last_name,
+				date_of_birth: form.date_of_birth,
+				gender: form.gender,
+				blood_type: form.blood_type,
+				email: form.email,
+				phone: form.phone,
+				address: `${form.street_number} ${form.street}, ${form.city}, ${form.country}`,
+				emergency_contact_name: form.emergency_contact_name,
+				emergency_contact_phone: form.emergency_contact_phone,
+				allergies,
+				chronic_conditions: [],
+			}).unwrap();
+
+			dispatch(
+				startSession({
+					type: 'checkup',
+					location: 'Clinic',
+					visitId: data.visit_id,
+					patientSerialNumber: String(data.patient_serial_number),
 				}),
-			});
-
-			if (!response.ok) {
-				const data = await response.json().catch(() => null);
-				throw new Error(data?.detail ?? `Request failed: ${response.status}`);
-			}
-
-			const data = await response.json();
-
-			startSession('checkup', 'Clinic', data.visit_id, String(data.patient_serial_number));
+			);
 			navigate(`/patients/${data.patient_serial_number}`);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to add patient');
-		} finally {
-			setSubmitting(false);
 		}
 	};
 

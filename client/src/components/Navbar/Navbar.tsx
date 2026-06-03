@@ -1,10 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { useSession } from '../../context/SessionContext';
+import { startSession, endSession } from '../../store/sessionSlice';
 import './Navbar.css';
-import { getInitials, secondsToRoundedMinutes } from '../../utils/utils';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { API_BASE, apiFetch } from '../../lib/api';
+import {
+	formatTime,
+	getInitials,
+	secondsToRoundedMinutes,
+} from '../../utils/utils';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { openModal, logoutUser } from '../../store/authSlice';
+import {
+	useCreateVisitMutation,
+	useUpdateVisitMutation,
+} from '../../store/api/patientsApi';
 import { SettingsModal } from '../SettingsModal/SettingsModal';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
@@ -48,12 +56,26 @@ export const Navbar = () => {
 	const isPatientProfile = /^\/patients\/(?!new$)[^/]+$/.test(
 		location.pathname,
 	);
-	const { session, formatTime, endSession, startSession, elapsedTime } =
-		useSession();
-	const { doctorSerialNumber, doctorName, openModal, logout } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const [elapsedTime, setElapsedTime] = useState(0);
+
+	useEffect(() => {
+		if (!session) return;
+		const id = window.setInterval(() => {
+			setElapsedTime(Math.floor((Date.now() - session.startTime) / 1000));
+		}, 1000);
+		return () => clearInterval(id);
+	}, [session]);
+	const dispatch = useAppDispatch();
+	const { doctorSerialNumber, doctorName } = useAppSelector(
+		(state) => state.auth,
+	);
+	const [createVisit] = useCreateVisitMutation();
+	const [updateVisit] = useUpdateVisitMutation();
 
 	useEffect(() => {
 		if (!dropdownOpen) return;
+
 		const handler = (e: MouseEvent) => {
 			if (
 				dropdownRef.current &&
@@ -62,6 +84,7 @@ export const Navbar = () => {
 				setDropdownOpen(false);
 			}
 		};
+
 		document.addEventListener('mousedown', handler);
 
 		return () => document.removeEventListener('mousedown', handler);
@@ -107,32 +130,30 @@ export const Navbar = () => {
 	};
 
 	const handleStartSession = async () => {
+		const patientId = location.pathname.split('/')[2];
+
 		try {
-			const response = await apiFetch(`${API_BASE}/api/patients/visits`, {
-				method: 'POST',
-				body: JSON.stringify({
-					patient_serial_number: location.pathname.split('/')[2],
+			const data = await createVisit({
+				patientId,
+				body: {
+					patient_serial_number: patientId,
 					doctor_serial_number: doctorSerialNumber,
 					visit_type: selectedType,
 					location: selectedLocation,
+				},
+			}).unwrap();
+
+			dispatch(
+				startSession({
+					type: selectedType,
+					location: selectedLocation,
+					visitId: data.visit_id,
+					patientSerialNumber: patientId,
 				}),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to start session');
-			}
-
-			const data = await response.json();
-
-			startSession(
-				selectedType,
-				selectedLocation,
-				data.visit_id,
-				location.pathname.split('/')[2],
 			);
+
 			setShowTypeSelect(false);
-		} catch (error) {
-			console.error(error);
+		} catch {
 			alert('Failed to start session');
 		}
 	};
@@ -161,25 +182,17 @@ export const Navbar = () => {
 
 		try {
 			if (session?.visitId) {
-				const response = await apiFetch(`${API_BASE}/api/patients/visits`, {
-					method: 'PUT',
-					body: JSON.stringify({
-						visit_id: session.visitId,
-						...sessionData,
-					}),
-				});
-
-				if (!response.ok) {
-					throw new Error('Failed to update visit');
-				}
+				await updateVisit({
+					patientId: session.patientSerialNumber!,
+					body: { visit_id: session.visitId, ...sessionData },
+				}).unwrap();
 			}
 
 			setChiefComplaint('');
 			setShowEndForm(false);
 			setError('');
-			endSession();
-		} catch (err) {
-			console.error(err);
+			dispatch(endSession());
+		} catch {
 			alert('Failed to end session');
 		}
 	};
@@ -190,7 +203,7 @@ export const Navbar = () => {
 	};
 
 	const doctorLogout = async () => {
-		await logout();
+		await dispatch(logoutUser());
 		navigate('/');
 	};
 
@@ -351,7 +364,10 @@ export const Navbar = () => {
 							)}
 						</div>
 					) : (
-						<button className='lp-btn lp-btn-primary' onClick={openModal}>
+						<button
+							className='lp-btn lp-btn-primary'
+							onClick={() => dispatch(openModal())}
+						>
 							Sign In
 						</button>
 					)}

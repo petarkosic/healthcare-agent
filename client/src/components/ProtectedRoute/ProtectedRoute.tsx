@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router';
-import { useAuth } from '../../context/Auth/AuthProvider';
+import { useAppSelector } from '../../store/hooks';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-	const { doctorSerialNumber, isLoading } = useAuth();
+	const { doctorSerialNumber, isLoading } = useAppSelector((state) => state.auth);
 
 	if (isLoading) return null;
 

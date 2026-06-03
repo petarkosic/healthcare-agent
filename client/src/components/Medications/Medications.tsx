@@ -1,24 +1,22 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import type { PatientFullResponse } from '../../types/types';
-import { useSession } from '../../context/SessionContext';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppSelector } from '../../store/hooks';
+import {
+	useGetPatientQuery,
+	useAddMedicationMutation,
+	useUpdateMedicationMutation,
+	useDeleteMedicationMutation,
+} from '../../store/api/patientsApi';
 import './Medications.css';
-
-type MedicationsProps = {
-	data: PatientFullResponse;
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	refetch: () => Promise<void>;
-};
 
 type MedicationRow = PatientFullResponse['medications'][number];
 
-export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
+export const Medications = () => {
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [selectedMed, setSelectedMed] = useState<MedicationRow | null>(null);
 	const [confirmingDelete, setConfirmingDelete] = useState(false);
+	const [localError, setLocalError] = useState<string | null>(null);
 	const [editForm, setEditForm] = useState({
 		dosage: '',
 		frequency: '',
@@ -40,12 +38,24 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 	});
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
-	const { doctorSerialNumber } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+
+	const { data } = useGetPatientQuery(patient_serial!);
+	const [addMedication, { isLoading: isAdding }] = useAddMedicationMutation();
+	const [updateMedication, { isLoading: isUpdating }] =
+		useUpdateMedicationMutation();
+	const [deleteMedication, { isLoading: isDeleting }] =
+		useDeleteMedicationMutation();
+
+	const isSubmitting = isAdding || isUpdating || isDeleting;
 
 	const closeEditModal = () => {
 		setSelectedMed(null);
 		setConfirmingDelete(false);
+		setLocalError(null);
 	};
 
 	const openEditModal = (med: MedicationRow) => {
@@ -92,87 +102,68 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 
 	const handleEditSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
 		if (!selectedMed) return;
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/medications/${selectedMed.medication_id}`,
-				{
-					method: 'PUT',
-					body: JSON.stringify({
-						...editForm,
-						end_date: editForm.end_date || null,
-					}),
-				},
-			);
+			await updateMedication({
+				patientId: patient_serial!,
+				medicationId: selectedMed.medication_id,
+				body: { ...editForm, end_date: editForm.end_date || null },
+			}).unwrap();
 
-			if (!response.ok) throw new Error('Failed to update medication');
-
-			await refetch();
 			setSelectedMed(null);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to update medication');
 		}
 	};
 
 	const handleDelete = async () => {
 		if (!selectedMed) return;
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/medications/${selectedMed.medication_id}`,
-				{ method: 'DELETE' },
-			);
+			await deleteMedication({
+				patientId: patient_serial!,
+				medicationId: selectedMed.medication_id,
+			}).unwrap();
 
-			if (!response.ok) throw new Error('Failed to delete medication');
-
-			await refetch();
 			closeEditModal();
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to delete medication');
 		}
 	};
 
 	const handleAddSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/medications`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						...addForm,
-						doctor_serial_number: doctorSerialNumber,
-						end_date: addForm.end_date || null,
-					}),
+			await addMedication({
+				patientId: patient_serial!,
+				body: {
+					...addForm,
+					doctor_serial_number: doctorSerialNumber,
+					end_date: addForm.end_date || null,
 				},
-			);
+			}).unwrap();
 
-			if (!response.ok) throw new Error('Failed to add medication');
-
-			await refetch();
 			resetAddForm();
 			setIsAddModalOpen(false);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to add medication');
 		}
 	};
 
+	if (!data) return null;
+
 	return (
 		<>
+			{localError && <div className='error'>{localError}</div>}
 			<div className='card card-meds'>
 				<div className='card-header-row'>
 					<h3>Active Medications</h3>
@@ -396,14 +387,6 @@ export const Medications = ({ data, setError, refetch }: MedicationsProps) => {
 								<div className='med-readonly-row'>
 									<span className='med-readonly-label'>Instructions</span>
 									<span>{selectedMed.instructions}</span>
-								</div>
-								<div className='modal-actions'>
-									<button
-										className='btn-primary'
-										onClick={() => setSelectedMed(null)}
-									>
-										Close
-									</button>
 								</div>
 							</div>
 						)}

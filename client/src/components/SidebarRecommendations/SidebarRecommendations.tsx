@@ -7,9 +7,9 @@ import type {
 import './SidebarRecommendations.css';
 import { formatDateTimeLocal } from '../../utils/utils';
 import { useLocation } from 'react-router';
-import { API_BASE, apiFetch } from '../../lib/api';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { useGoogleCalendar } from '../../context/GoogleCalendar/GoogleCalendarProvider';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
+import { useScheduleFollowupMutation } from '../../store/api/agentsApi';
 
 type SidebarRecommendationsProps = {
 	data: ResponseData | null;
@@ -34,8 +34,11 @@ export const SidebarRecommendations = ({
 
 	const location = useLocation();
 	const patient_id = location.pathname.split('/')[2];
-	const { doctorSerialNumber } = useAuth();
-	const { ensureConnected } = useGoogleCalendar();
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+	const dispatch = useAppDispatch();
+	const [scheduleFollowup] = useScheduleFollowupMutation();
 
 	if (!data || !isRecommendationsResponse(data)) return null;
 
@@ -69,29 +72,21 @@ export const SidebarRecommendations = ({
 		setIsLoading(true);
 
 		try {
-			await ensureConnected();
+			await dispatch(ensureGoogleConnected()).unwrap();
 
 			const startDate = new Date(selectedDate);
 			const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
 
-			const response = await apiFetch(`${API_BASE}/api/agents/schedule-followup`, {
-				method: 'POST',
-				body: JSON.stringify({
-					patient_serial_number: patient_id,
-					doctor_serial_number: doctorSerialNumber,
-					visit_date: selectedDate,
-					visit_type: 'followup',
-					summary: selectedRecommendation?.follow_up?.reason,
-					start_time: startDate.toISOString(),
-					end_time: endDate.toISOString(),
-					description:
-						selectedRecommendation?.reason || 'Follow-up appointment',
-				}),
-			});
-
-			if (!response.ok) throw new Error('Failed to schedule visit');
-
-			const res = await response.json();
+			const res = await scheduleFollowup({
+				patient_serial_number: patient_id,
+				doctor_serial_number: doctorSerialNumber,
+				visit_date: selectedDate,
+				visit_type: 'followup',
+				summary: selectedRecommendation?.follow_up?.reason ?? '',
+				start_time: startDate.toISOString(),
+				end_time: endDate.toISOString(),
+				description: selectedRecommendation?.reason || 'Follow-up appointment',
+			}).unwrap();
 
 			if (res.success) {
 				setViewMode('success');

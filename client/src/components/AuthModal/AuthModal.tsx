@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { API_BASE, apiFetch } from '../../lib/api';
-import { useAuth } from '../../context/Auth/AuthProvider';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { login, closeModal } from '../../store/authSlice';
+import {
+	useSignupMutation,
+	useLoginDoctorMutation,
+} from '../../store/api/authApi';
 import './AuthModal.css';
 
 type View = 'signin' | 'signup';
@@ -11,14 +15,17 @@ interface SignUpSuccess {
 }
 
 export const AuthModal = () => {
-	const { isModalOpen, closeModal, login } = useAuth();
+	const dispatch = useAppDispatch();
+	const isModalOpen = useAppSelector((state) => state.auth.isModalOpen);
 	const navigate = useNavigate();
 	const [view, setView] = useState<View>('signin');
 	const [signUpSuccess, setSignUpSuccess] = useState<SignUpSuccess | null>(
 		null,
 	);
-	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	const [signup, { isLoading: signingUp }] = useSignupMutation();
+	const [loginDoctor, { isLoading: signingIn }] = useLoginDoctorMutation();
+	const loading = signingUp || signingIn;
 	const overlayRef = useRef<HTMLDivElement>(null);
 
 	// Sign up fields
@@ -34,12 +41,11 @@ export const AuthModal = () => {
 	const [serialNumber, setSerialNumber] = useState('');
 	const [loginPassword, setLoginPassword] = useState('');
 
-	useEffect(() => {
-		if (!isModalOpen) {
-			setError('');
-			setSignUpSuccess(null);
-		}
-	}, [isModalOpen]);
+	const handleClose = () => {
+		setError('');
+		setSignUpSuccess(null);
+		dispatch(closeModal());
+	};
 
 	const resetSignUpFields = () => {
 		setFirstName('');
@@ -52,7 +58,7 @@ export const AuthModal = () => {
 	};
 
 	const handleOverlayClick = (e: React.MouseEvent) => {
-		if (e.target === overlayRef.current) closeModal();
+		if (e.target === overlayRef.current) handleClose();
 	};
 
 	const switchView = (next: View) => {
@@ -74,67 +80,52 @@ export const AuthModal = () => {
 			return;
 		}
 
-		setLoading(true);
 		try {
-			const res = await apiFetch(`${API_BASE}/api/auth/signup`, {
-				method: 'POST',
-				body: JSON.stringify({
-					first_name: firstName,
-					last_name: lastName,
-					email,
-					specialty,
-					license_number: licenseNumber,
-					password,
-				}),
-			});
-
-			const data = await res.json();
-			if (!res.ok) {
-				setError(data.detail ?? 'Sign up failed');
-				return;
-			}
+			const data = await signup({
+				first_name: firstName,
+				last_name: lastName,
+				email,
+				specialty,
+				license_number: licenseNumber,
+				password,
+			}).unwrap();
 
 			await navigator.clipboard.writeText(data.doctor_serial_number);
 			setSignUpSuccess({ serialNumber: data.doctor_serial_number });
 			resetSignUpFields();
-		} catch {
-			setError('Network error. Please try again.');
-		} finally {
-			setLoading(false);
+		} catch (err: unknown) {
+			setError(
+				(err as { data?: { detail?: string } })?.data?.detail ??
+					'Sign up failed',
+			);
 		}
 	};
 
 	const handleSignIn = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
-		setLoading(true);
 
 		try {
-			const res = await apiFetch(`${API_BASE}/api/auth/login`, {
-				method: 'POST',
-				body: JSON.stringify({
-					serial_number: serialNumber,
-					password: loginPassword,
-				}),
-			});
+			const data = await loginDoctor({
+				serial_number: serialNumber,
+				password: loginPassword,
+			}).unwrap();
 
-			const data = await res.json();
-			if (!res.ok) {
-				if (res.status === 429) {
-					setError('Too many attempts. Please wait a minute before trying again.');
-				} else {
-					setError(data.detail ?? 'Sign in failed');
-				}
-				return;
-			}
-
-			login(data.doctor_serial_number, data.doctor_name);
-			closeModal();
+			dispatch(
+				login({ serial: data.doctor_serial_number, name: data.doctor_name }),
+			);
+			handleClose();
 			navigate('/patients');
-		} catch {
-			setError('Network error. Please try again.');
-		} finally {
-			setLoading(false);
+		} catch (err: unknown) {
+			const status = (err as { status?: number })?.status;
+			const detail = (err as { data?: { detail?: string } })?.data?.detail;
+			if (status === 429) {
+				setError(
+					'Too many attempts. Please wait a minute before trying again.',
+				);
+			} else {
+				setError(detail ?? 'Sign in failed');
+			}
 		}
 	};
 
@@ -147,7 +138,11 @@ export const AuthModal = () => {
 			onClick={handleOverlayClick}
 		>
 			<div className='modal-card'>
-				<button className='modal-close' onClick={closeModal} aria-label='Close'>
+				<button
+					className='modal-close'
+					onClick={handleClose}
+					aria-label='Close'
+				>
 					✕
 				</button>
 

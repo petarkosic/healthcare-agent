@@ -1,36 +1,36 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { PatientFullResponse } from '../../types/types';
-import { useSession } from '../../context/SessionContext';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppSelector } from '../../store/hooks';
+import {
+	useGetPatientQuery,
+	useUpdateAllergiesMutation,
+} from '../../store/api/patientsApi';
 import './Allergies.css';
-import { useAuth } from '../../context/Auth/AuthProvider';
 
-type AllergiesProps = {
-	data: PatientFullResponse;
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	refetch: () => Promise<void>;
-};
-
-export const Allergies = ({ data, setError, refetch }: AllergiesProps) => {
+export const Allergies = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [draft, setDraft] = useState<string[]>([]);
 	const [newEntry, setNewEntry] = useState('');
+	const [localError, setLocalError] = useState<string | null>(null);
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
-	const { doctorSerialNumber } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+
+	const { data } = useGetPatientQuery(patient_serial!);
+	const [updateAllergies, { isLoading: isSubmitting }] =
+		useUpdateAllergiesMutation();
 
 	const openModal = () => {
-		setDraft([...(data.patient.allergies ?? [])]);
+		setDraft([...(data?.patient.allergies ?? [])]);
 		setNewEntry('');
 		setIsModalOpen(true);
 	};
 
 	const addEntry = () => {
 		const trimmed = newEntry.trim();
-
 		if (!trimmed || draft.includes(trimmed)) return;
 
 		setDraft((prev) => [...prev, trimmed]);
@@ -50,31 +50,26 @@ export const Allergies = ({ data, setError, refetch }: AllergiesProps) => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/allergies`,
-				{
-					method: 'PUT',
-					body: JSON.stringify({ allergies: draft }),
-				},
-			);
+			await updateAllergies({
+				patientId: patient_serial!,
+				allergies: draft,
+			}).unwrap();
 
-			if (!response.ok) throw new Error('Failed to update allergies');
-
-			await refetch();
 			setIsModalOpen(false);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to update allergies');
 		}
 	};
 
+	if (!data) return null;
+
 	return (
 		<>
+			{localError && <div className='error'>{localError}</div>}
 			<div className='allergy-banner'>
 				<span className='icon-alert'>⚠️</span>
 				<div className='allergy-banner-content'>
@@ -86,7 +81,9 @@ export const Allergies = ({ data, setError, refetch }: AllergiesProps) => {
 				{doctorSerialNumber && (
 					<span
 						className={!session ? 'btn-tooltip-wrap' : undefined}
-						data-tooltip={!session ? 'Start a session to update allergies' : undefined}
+						data-tooltip={
+							!session ? 'Start a session to update allergies' : undefined
+						}
 					>
 						<button
 							className='allergy-edit-btn'

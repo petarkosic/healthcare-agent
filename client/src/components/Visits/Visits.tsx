@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import type { PatientFullResponse, Visit } from '../../types/types';
+import type { Visit } from '../../types/types';
 import { formatDateOnly } from '../../utils/utils';
-import { useAuth } from '../../context/Auth/AuthProvider';
+import { useParams } from 'react-router';
+import { useAppSelector } from '../../store/hooks';
+import { useGetPatientQuery } from '../../store/api/patientsApi';
 import { VisitModal } from '../VisitModal/VisitModal';
 import './Visits.css';
 
-type VisitsProps = {
-	data: PatientFullResponse;
-	refetch: () => void;
-};
-
-export const Visits = ({ data, refetch }: VisitsProps) => {
+export const Visits = () => {
 	const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
-	const { doctorSerialNumber } = useAuth();
+
+	const { id: patient_serial } = useParams();
+	const doctorSerialNumber = useAppSelector((state) => state.auth.doctorSerialNumber);
+	const { data } = useGetPatientQuery(patient_serial!);
+
+	if (!data) return null;
 
 	return (
 		<>
@@ -40,9 +42,7 @@ export const Visits = ({ data, refetch }: VisitsProps) => {
 									<td style={{ textTransform: 'capitalize' }}>
 										{visit?.visit_type?.replace(/_/g, ' ')}
 									</td>
-									<td>
-										{visit.doctor_first_name} {visit.doctor_last_name}
-									</td>
+									<td>{visit.doctor_first_name} {visit.doctor_last_name}</td>
 									<td
 										data-tooltip={visit.chief_complaint || undefined}
 										className='chief-complaint-tooltip'
@@ -69,7 +69,6 @@ export const Visits = ({ data, refetch }: VisitsProps) => {
 				<VisitModal
 					visit={selectedVisit}
 					onClose={() => setSelectedVisit(null)}
-					onRefetch={refetch}
 					doctorSerialNumber={doctorSerialNumber}
 				/>
 			)}

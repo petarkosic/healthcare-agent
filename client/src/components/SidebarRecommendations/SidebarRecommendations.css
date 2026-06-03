@@ -2,6 +2,10 @@
 	padding: 1rem 0;
 }
 
+.recommendations-container h4 {
+	padding: 0 0.75rem;
+}
+
 .recommendations-title {
 	font-size: 1rem;
 	font-weight: 600;

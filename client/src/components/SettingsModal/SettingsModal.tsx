@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { useGoogleCalendar } from '../../context/GoogleCalendar/GoogleCalendarProvider';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
 import './SettingsModal.css';
 
 type Section = 'keyboard' | 'connections' | 'account';
@@ -30,8 +30,11 @@ export const SettingsModal = ({
 	defaultSection = 'keyboard',
 }: SettingsModalProps) => {
 	const [activeSection, setActiveSection] = useState<Section>(defaultSection);
-	const { doctorName, doctorSerialNumber } = useAuth();
-	const { connected, ensureConnected } = useGoogleCalendar();
+	const dispatch = useAppDispatch();
+	const { doctorName, doctorSerialNumber } = useAppSelector(
+		(state) => state.auth,
+	);
+	const connected = useAppSelector((state) => state.googleCalendar.connected);
 	const [copied, setCopied] = useState(false);
 	const [connecting, setConnecting] = useState(false);
 
@@ -63,7 +66,7 @@ export const SettingsModal = ({
 		setConnecting(true);
 
 		try {
-			await ensureConnected();
+			await dispatch(ensureGoogleConnected()).unwrap();
 		} finally {
 			setConnecting(false);
 		}

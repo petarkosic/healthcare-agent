@@ -1,20 +1,15 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { VitalSigns } from '../../types/types';
-import { useSession } from '../../context/SessionContext';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppSelector } from '../../store/hooks';
+import {
+	useGetPatientQuery,
+	useAddVitalMutation,
+} from '../../store/api/patientsApi';
 import './Vitals.css';
-import { useAuth } from '../../context/Auth/AuthProvider';
 
-type VitalsProps = {
-	latestVitals: VitalSigns | null;
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	refetch: () => Promise<void>;
-};
-
-export const Vitals = ({ latestVitals, setError, refetch }: VitalsProps) => {
+export const Vitals = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [localError, setLocalError] = useState<string | null>(null);
 	const [form, setForm] = useState({
 		blood_pressure_systolic: '',
 		blood_pressure_diastolic: '',
@@ -29,8 +24,15 @@ export const Vitals = ({ latestVitals, setError, refetch }: VitalsProps) => {
 	});
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
-	const { doctorSerialNumber } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+
+	const { data } = useGetPatientQuery(patient_serial!);
+	const [addVital, { isLoading: isSubmitting }] = useAddVitalMutation();
+
+	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -55,55 +57,51 @@ export const Vitals = ({ latestVitals, setError, refetch }: VitalsProps) => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		const toNumber = (v: string) => (v !== '' ? Number(v) : undefined);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/vitals`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						visit_id: session!.visitId,
-						blood_pressure_systolic: toNumber(form.blood_pressure_systolic),
-						blood_pressure_diastolic: toNumber(form.blood_pressure_diastolic),
-						heart_rate: toNumber(form.heart_rate),
-						temperature: toNumber(form.temperature),
-						respiratory_rate: toNumber(form.respiratory_rate),
-						oxygen_saturation: toNumber(form.oxygen_saturation),
-						weight_kg: toNumber(form.weight_kg),
-						height_cm: toNumber(form.height_cm),
-						pain_level: toNumber(form.pain_level),
-						notes: form.notes,
-					}),
+			await addVital({
+				patientId: patient_serial!,
+				body: {
+					visit_id: session!.visitId,
+					blood_pressure_systolic: toNumber(form.blood_pressure_systolic),
+					blood_pressure_diastolic: toNumber(form.blood_pressure_diastolic),
+					heart_rate: toNumber(form.heart_rate),
+					temperature: toNumber(form.temperature),
+					respiratory_rate: toNumber(form.respiratory_rate),
+					oxygen_saturation: toNumber(form.oxygen_saturation),
+					weight_kg: toNumber(form.weight_kg),
+					height_cm: toNumber(form.height_cm),
+					pain_level: toNumber(form.pain_level),
+					notes: form.notes,
 				},
-			);
+			}).unwrap();
 
-			if (!response.ok) {
-				throw new Error('Failed to add vitals');
-			}
-
-			await refetch();
 			resetForm();
+
 			setIsModalOpen(false);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to add vitals');
 		}
 	};
 
+	if (!data) return null;
+
 	return (
 		<>
+			{localError && <div className='error'>{localError}</div>}
 			<div className='card card-vitals'>
 				<div className='card-header-row'>
 					<h3>Latest Vitals</h3>
 					{doctorSerialNumber && (
 						<span
 							className={!session ? 'btn-tooltip-wrap' : undefined}
-							data-tooltip={!session ? 'Start a session to add vitals' : undefined}
+							data-tooltip={
+								!session ? 'Start a session to add vitals' : undefined
+							}
 						>
 							<button
 								className='btn-primary'

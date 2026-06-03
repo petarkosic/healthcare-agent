@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './PatientProfile.css';
 import { useParams } from 'react-router';
-import type { PatientFullResponse } from '../../types/types';
 import { ProfileHeader } from '../ProfileHeader/ProfileHeader';
 import { Allergies } from '../Allergies/Allergies';
 import { Vitals } from '../Vitals/Vitals';
@@ -11,83 +10,58 @@ import { Labs } from '../Labs/Labs';
 import { Diagnoses } from '../Diagnoses/Diagnoses';
 import { Visits } from '../Visits/Visits';
 import { Sidebar } from '../Sidebar/Sidebar';
-import { API_BASE, apiFetch } from '../../lib/api';
-import { useSession } from '../../context/SessionContext';
+import { useAppSelector } from '../../store/hooks';
+import { useGetPatientQuery } from '../../store/api/patientsApi';
 
 function PatientProfile() {
-	const [data, setData] = useState<PatientFullResponse | null>(null);
-	const [loading, setLoading] = useState(true);
 	const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
-
-	const [error, setError] = useState<string | null>('');
+	const [sidebarError, setSidebarError] = useState<string | null>(null);
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
+	const session = useAppSelector((state) => state.session.session);
 
-	// sentinel '__init__' on first run → records current visitId, skips fetch.
-	// On subsequent runs, only fetches when visitId actually changed.
-	// Survives StrictMode's double-invoke because the ref value persists across cleanup — second run sees same visitId, no change, no fetch.
+	const { data, isLoading, error, refetch } = useGetPatientQuery(
+		patient_serial!,
+	);
+
 	const prevVisitId = useRef<string | null | undefined>('__init__');
-
-	const latestVitals = data?.vital_signs.length ? data.vital_signs[0] : null;
-
-	const fetchPatient = async (signal?: AbortSignal) => {
-		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}`,
-				signal ? { signal } : {},
-			);
-
-			if (!response.ok) {
-				const errorData = await response.json();
-
-				throw new Error(
-					errorData.detail || `HTTP error! status: ${response.status}`,
-				);
-			}
-
-			const result = await response.json();
-
-			setData(result);
-		} catch (error) {
-			if (error instanceof Error && error.name === 'AbortError') return;
-			const err = error as Error;
-			setError(err.message);
-		}
-	};
-
-	useEffect(() => {
-		const controller = new AbortController();
-		setLoading(true);
-		fetchPatient(controller.signal).finally(() => {
-			if (!controller.signal.aborted) setLoading(false);
-		});
-		return () => controller.abort();
-	}, [patient_serial]);
 
 	useEffect(() => {
 		const current = session?.visitId ?? null;
+
 		if (prevVisitId.current === '__init__') {
 			prevVisitId.current = current;
+
 			return;
 		}
 		if (current !== prevVisitId.current) {
 			prevVisitId.current = current;
-			fetchPatient();
-		}
-	}, [session?.visitId]);
 
-	if (loading)
+			refetch();
+		}
+	}, [session?.visitId, refetch]);
+
+	if (isLoading)
 		return <div className='loading-state'>Loading Patient Profile...</div>;
 
-	if (error) return <div className='error-state'>{error}</div>;
+	if (error)
+		return (
+			<div className='error-state'>
+				{'data' in error
+					? ((error.data as { detail?: string })?.detail ??
+						'Failed to load patient')
+					: 'Failed to load patient'}
+			</div>
+		);
 
 	if (!data) return <div className='error-state'>Patient not found.</div>;
 
+	const sidebarOpen = !!session && isAiSidebarOpen;
+
 	return (
-		<div className={`app-wrapper ${isAiSidebarOpen ? 'sidebar-open' : ''}`}>
+		<div className={`app-wrapper ${sidebarOpen ? 'sidebar-open' : ''}`}>
 			<div className='profile-container'>
-				{!isAiSidebarOpen && (
+				{!sidebarOpen && (
 					<button
 						className='ai-toggle-btn'
 						onClick={() => setIsAiSidebarOpen(!isAiSidebarOpen)}
@@ -114,32 +88,36 @@ function PatientProfile() {
 
 				<ProfileHeader data={data} />
 
-				<Allergies data={data} setError={setError} refetch={fetchPatient} />
+				<Allergies />
 
 				<div className='profile-grid'>
-					<Vitals
-						latestVitals={latestVitals}
-						setError={setError}
-						refetch={fetchPatient}
-					/>
+					<Vitals />
 
-					<Medications data={data} setError={setError} refetch={fetchPatient} />
+					<Medications />
 
-					<Notes data={data} setError={setError} refetch={fetchPatient} />
+					<Notes />
 
-					<Labs data={data} setError={setError} refetch={fetchPatient} />
+					<Labs />
 
-					<Diagnoses data={data} setError={setError} refetch={fetchPatient} />
+					<Diagnoses />
 
-					<Visits data={data} refetch={fetchPatient} />
+					<Visits />
 				</div>
 			</div>
 
 			<Sidebar
-				isAiSidebarOpen={isAiSidebarOpen}
+				isAiSidebarOpen={sidebarOpen}
 				setIsAiSidebarOpen={setIsAiSidebarOpen}
-				setError={setError}
+				setError={setSidebarError}
 			/>
+			{sidebarError && (
+				<div
+					className='error-state'
+					style={{ position: 'fixed', bottom: '1rem', right: '1rem' }}
+				>
+					{sidebarError}
+				</div>
+			)}
 		</div>
 	);
 }

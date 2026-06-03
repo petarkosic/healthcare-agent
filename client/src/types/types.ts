@@ -149,67 +149,9 @@ interface AIOverview {
 	suggested_questions: string[];
 }
 
-interface ActiveDiagnoses {
-	code: string;
-	name: string;
-	type: string;
-	status: string;
-}
-
-interface ActiveMedications {
-	name: string;
-	dosage: string;
-	frequency: string;
-	reason: string;
-}
-
-interface LatestLab {
-	date: string;
-	reference_range: string;
-	result: string;
-	status: string;
-	test_name: string;
-	unit: string;
-}
-
-interface LatestVisit {
-	chief_complaint: string;
-	date: string;
-	doctor: string;
-	specialty: string;
-	status: string;
-	type: string;
-	visit_id: string;
-}
-
-interface LatestVitals {
-	blood_pressure: string;
-	bmi: number;
-	heart_rate: number;
-	measured_at: string;
-	oxygen_saturation: number;
-	pain_level: number;
-	temperature: number;
-}
-
-interface RawData {
-	active_diagnoses: ActiveDiagnoses[];
-	active_medications: ActiveMedications[];
-	alergies: string[];
-	blood_type: string;
-	chronic_conditions: string[];
-	full_name: string;
-	gender: string;
-	latest_lab: LatestLab;
-	latest_visit: LatestVisit;
-	latest_vitals: LatestVitals;
-	patient_serial_number: string;
-}
-
 export interface Overview {
 	patient_serial: number;
 	ai_overview: AIOverview;
-	raw_data: RawData;
 	chroma_sources: number;
 }
 

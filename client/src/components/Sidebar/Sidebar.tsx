@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import './Sidebar.css';
-import type { Overview, ResponseData } from '../../types/types';
 import { SidebarRecommendations } from '../SidebarRecommendations/SidebarRecommendations';
 import { SidebarMedications } from '../SidebarMedications/SidebarMedications';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useGetPatientQuery } from '../../store/api/patientsApi';
+import {
+	fetchAiOverview,
+	fetchAiRecommendations,
+	fetchAiMedications,
+} from '../../store/aiSlice';
 
 type SidebarProps = {
 	isAiSidebarOpen: boolean;
@@ -17,83 +22,95 @@ export const Sidebar = ({
 	setIsAiSidebarOpen,
 	setError,
 }: SidebarProps) => {
-	const [overview, setOverview] = useState<Overview>();
-	const [data, setData] = useState<ResponseData | null>(null);
 	const [activeView, setActiveView] = useState<
 		'recommendations' | 'medications' | null
 	>(null);
-	const [isActionLoading, setIsActionLoading] = useState(false);
-	const [isOverviewLoading, setIsOverviewLoading] = useState(false);
 
 	const { id: patient_serial } = useParams();
+	const dispatch = useAppDispatch();
+	const { data: patientData } = useGetPatientQuery(patient_serial!);
 
-	const getAiOverview = async () => {
-		setIsOverviewLoading(true);
-		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/agents/overview/${patient_serial}`,
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to get AI overview');
-			}
-
-			const result = await response.json();
-
-			setOverview(result);
-		} catch (error) {
-			setError(error as string);
-		} finally {
-			setIsOverviewLoading(false);
-		}
-	};
+	const aiCache = useAppSelector(
+		(state) => state.ai.byPatient[patient_serial!],
+	);
+	const overview = aiCache?.overview ?? null;
+	const overviewLoading = aiCache?.overviewStatus === 'loading';
+	const recommendations = aiCache?.recommendations ?? null;
+	const medications = aiCache?.medications ?? null;
+	const actionLoading =
+		aiCache?.recommendationsStatus === 'loading' ||
+		aiCache?.medicationsStatus === 'loading';
 
 	useEffect(() => {
-		if (isAiSidebarOpen) {
-			getAiOverview();
+		if (!isAiSidebarOpen) return;
 
-			setActiveView(null);
-			setData(null);
-		}
-	}, [isAiSidebarOpen]);
+		dispatch(fetchAiOverview(patient_serial!)).then((result) => {
+			if (fetchAiOverview.rejected.match(result) && !result.meta.condition) {
+				setError(result.error.message ?? 'Failed to get AI overview');
+			}
+		});
+	}, [isAiSidebarOpen, patient_serial]);
 
 	const handleBack = () => {
 		setActiveView(null);
-		setData(null);
 	};
 
 	const handleQuickAction = async (
 		action: 'recommendations' | 'medications',
 	) => {
-		if (isActionLoading) return;
+		if (actionLoading || !overview) return;
 
-		setError(null);
 		setActiveView(action);
-		setData(null);
-		setIsActionLoading(true);
+		setError(null);
 
-		try {
-			const response = await apiFetch(`${API_BASE}/api/agents/${action}`, {
-				method: 'POST',
-				body: JSON.stringify({
-					overview: overview?.ai_overview.overview,
+		const overviewText = overview.ai_overview.overview;
+
+		if (action === 'recommendations') {
+			const result = await dispatch(
+				fetchAiRecommendations({
+					patientSerial: patient_serial!,
+					overviewText,
 				}),
-			});
+			);
 
-			if (!response.ok) {
-				throw new Error('Failed to add note');
+			if (
+				fetchAiRecommendations.rejected.match(result) &&
+				!result.meta.condition
+			) {
+				setError(result.error.message ?? 'Failed to get recommendations');
+				setActiveView(null);
 			}
+		} else {
+			const currentMedications = (patientData?.medications ?? [])
+				.filter((m) => m.status === 'active')
+				.map((m) => ({
+					name: m.medication_name,
+					dosage: m.dosage,
+					frequency: m.frequency,
+					reason: m.prescribed_for,
+				}));
 
-			const newData = await response.json();
+			const result = await dispatch(
+				fetchAiMedications({
+					patientSerial: patient_serial!,
+					overviewText,
+					currentMedications,
+				}),
+			);
 
-			setData(newData);
-		} catch (error) {
-			setError(error as string);
-			setActiveView(null);
-		} finally {
-			setIsActionLoading(false);
+			if (fetchAiMedications.rejected.match(result) && !result.meta.condition) {
+				setError(result.error.message ?? 'Failed to get medications');
+				setActiveView(null);
+			}
 		}
 	};
+
+	const activeData =
+		activeView === 'recommendations'
+			? recommendations
+			: activeView === 'medications'
+				? medications
+				: null;
 
 	return (
 		<div className={`ai-sidebar ${isAiSidebarOpen ? 'open' : ''}`}>
@@ -102,7 +119,7 @@ export const Sidebar = ({
 					<button
 						className='ai-back-btn'
 						onClick={handleBack}
-						disabled={isActionLoading}
+						disabled={actionLoading}
 					>
 						&#8592; Overview
 					</button>
@@ -110,33 +127,33 @@ export const Sidebar = ({
 				<button
 					className='ai-close-btn'
 					onClick={() => setIsAiSidebarOpen(false)}
-					disabled={isActionLoading}
+					disabled={actionLoading}
 				>
 					&times;
 				</button>
 			</div>
 			<div className='ai-body'>
-				{isOverviewLoading && (
+				{overviewLoading && (
 					<div className='ai-loading'>
 						<span className='ai-spinner' />
 						<p>Analyzing patient data...</p>
 					</div>
 				)}
 
-				{activeView && !data && !isOverviewLoading && (
+				{activeView && !activeData && !overviewLoading && (
 					<div className='ai-loading'>
 						<span className='ai-spinner' />
 						<p>Getting {activeView}...</p>
 					</div>
 				)}
 
-				{!activeView && !isOverviewLoading && overview?.ai_overview && (
+				{!activeView && !overviewLoading && overview?.ai_overview && (
 					<div className='ai-placeholder-content'>
 						<div className='ai-message ai-ai'>
-							<p>{overview?.ai_overview?.overview}</p>
+							<p>{overview.ai_overview.overview}</p>
 						</div>
 						<div>
-							{overview?.ai_overview?.suggested_questions?.map(
+							{overview.ai_overview.suggested_questions?.map(
 								(question: string, index: number) => (
 									<p className='ai-message' key={index}>
 										{question}
@@ -147,40 +164,42 @@ export const Sidebar = ({
 					</div>
 				)}
 
-				{!activeView && !isOverviewLoading && !overview?.ai_overview && (
+				{!activeView && !overviewLoading && !overview?.ai_overview && (
 					<div className='ai-message'>
 						<p>No overview available.</p>
 					</div>
 				)}
 
 				{activeView === 'recommendations' && (
-					<SidebarRecommendations data={data} />
+					<SidebarRecommendations data={recommendations} />
 				)}
 
-				{activeView === 'medications' && <SidebarMedications data={data} />}
+				{activeView === 'medications' && (
+					<SidebarMedications data={medications} />
+				)}
 			</div>
 			{overview && (
 				<div className='ai-quick-action'>
 					<span
-						className={`ai-quick-action-button ${activeView === 'recommendations' ? 'active' : ''} ${isActionLoading ? 'disabled' : ''}`}
+						className={`ai-quick-action-button ${activeView === 'recommendations' ? 'active' : ''} ${actionLoading ? 'disabled' : ''}`}
 						title='recommendations'
 						onClick={() =>
-							!isActionLoading && handleQuickAction('recommendations')
+							!actionLoading && handleQuickAction('recommendations')
 						}
 						style={{
-							cursor: isActionLoading ? 'not-allowed' : 'pointer',
-							opacity: isActionLoading ? 0.6 : 1,
+							cursor: actionLoading ? 'not-allowed' : 'pointer',
+							opacity: actionLoading ? 0.6 : 1,
 						}}
 					>
 						Recommendations
 					</span>
 					<span
-						className={`ai-quick-action-button ${activeView === 'medications' ? 'active' : ''} ${isActionLoading ? 'disabled' : ''}`}
+						className={`ai-quick-action-button ${activeView === 'medications' ? 'active' : ''} ${actionLoading ? 'disabled' : ''}`}
 						title='medications'
-						onClick={() => !isActionLoading && handleQuickAction('medications')}
+						onClick={() => !actionLoading && handleQuickAction('medications')}
 						style={{
-							cursor: isActionLoading ? 'not-allowed' : 'pointer',
-							opacity: isActionLoading ? 0.6 : 1,
+							cursor: actionLoading ? 'not-allowed' : 'pointer',
+							opacity: actionLoading ? 0.6 : 1,
 						}}
 					>
 						Medications

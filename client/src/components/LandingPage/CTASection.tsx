@@ -1,15 +1,19 @@
 import { useNavigate } from 'react-router';
-import { useAuth } from '../../context/Auth/AuthProvider';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { openModal } from '../../store/authSlice';
 
 const CTASection: React.FC = () => {
-	const { doctorSerialNumber, openModal } = useAuth();
+	const dispatch = useAppDispatch();
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
 	const navigate = useNavigate();
 
 	const handleDashboard = () => {
 		if (doctorSerialNumber) {
 			navigate('/patients');
 		} else {
-			openModal();
+			dispatch(openModal());
 		}
 	};
 

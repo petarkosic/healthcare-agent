@@ -1,20 +1,15 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { PatientFullResponse } from '../../types/types';
-import { useSession } from '../../context/SessionContext';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppSelector } from '../../store/hooks';
+import {
+	useGetPatientQuery,
+	useAddLabMutation,
+} from '../../store/api/patientsApi';
 import './Labs.css';
 
-type LabsProps = {
-	data: PatientFullResponse;
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	refetch: () => Promise<void>;
-};
-
-export const Labs = ({ data, setError, refetch }: LabsProps) => {
+export const Labs = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [localError, setLocalError] = useState<string | null>(null);
 	const [form, setForm] = useState({
 		test_name: '',
 		result_value: '',
@@ -26,8 +21,13 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 	});
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
-	const { doctorSerialNumber } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+
+	const { data } = useGetPatientQuery(patient_serial!);
+	const [addLab, { isLoading: isSubmitting }] = useAddLabMutation();
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -49,46 +49,41 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
-		setIsSubmitting(true);
+
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/labs`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						...form,
-						visit_id: session!.visitId,
-						ordering_doctors_serial_number: doctorSerialNumber,
-						unit: form.unit || null,
-					}),
+			await addLab({
+				patientId: patient_serial!,
+				body: {
+					...form,
+					visit_id: session!.visitId,
+					ordering_doctors_serial_number: doctorSerialNumber,
+					unit: form.unit || null,
 				},
-			);
+			}).unwrap();
 
-			if (!response.ok) {
-				throw new Error('Failed to add lab result');
-			}
-
-			await refetch();
 			resetForm();
 			setIsModalOpen(false);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Unknown error');
-		} finally {
-			setIsSubmitting(false);
+		} catch {
+			setLocalError('Failed to add lab result');
 		}
 	};
 
+	if (!data) return null;
+
 	return (
 		<>
+			{localError && <div className='error'>{localError}</div>}
 			<div className='card card-labs'>
 				<div className='card-header-row'>
 					<h3>Lab Results</h3>
 					{doctorSerialNumber && (
 						<span
 							className={!session ? 'btn-tooltip-wrap' : undefined}
-							data-tooltip={!session ? 'Start a session to add lab results' : undefined}
+							data-tooltip={
+								!session ? 'Start a session to add lab results' : undefined
+							}
 						>
 							<button
 								className='btn-primary'
@@ -100,7 +95,7 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 						</span>
 					)}
 				</div>
-				{data?.lab_results?.length > 0 ? (
+				{data.lab_results?.length > 0 ? (
 					<table className='mini-table'>
 						<thead>
 							<tr>
@@ -117,7 +112,9 @@ export const Labs = ({ data, setError, refetch }: LabsProps) => {
 										{lab.result_value} {lab.unit}
 									</td>
 									<td>
-										<span className={`status-badge status-${lab.result_status}`}>
+										<span
+											className={`status-badge status-${lab.result_status}`}
+										>
 											{lab.result_status}
 										</span>
 									</td>

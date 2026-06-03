@@ -4,15 +4,16 @@ import {
 	formatDateTimeLocal,
 	secondsToRoundedMinutes,
 } from '../../utils/utils';
-import { API_BASE, apiFetch } from '../../lib/api';
-import { useSession } from '../../context/SessionContext';
-import { useGoogleCalendar } from '../../context/GoogleCalendar/GoogleCalendarProvider';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { startSession, endSession } from '../../store/sessionSlice';
+import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
+import { useUpdateVisitMutation } from '../../store/api/patientsApi';
+import { useScheduleFollowupMutation } from '../../store/api/agentsApi';
 import './VisitModal.css';
 
 type VisitModalProps = {
 	visit: Visit;
 	onClose: () => void;
-	onRefetch: () => void;
 	doctorSerialNumber: string | null;
 };
 
@@ -21,12 +22,13 @@ type View = 'details' | 'reschedule';
 export const VisitModal = ({
 	visit,
 	onClose,
-	onRefetch,
 	doctorSerialNumber,
 }: VisitModalProps) => {
 	const minDate = (() => {
 		const d = new Date();
+
 		d.setDate(d.getDate() + 1);
+
 		return formatDateTimeLocal(d);
 	})();
 
@@ -44,34 +46,38 @@ export const VisitModal = ({
 	const [complaintInput, setComplaintInput] = useState('');
 	const [complaintError, setComplaintError] = useState('');
 
-	const { session, elapsedTime, endSession, startSession } = useSession();
-	const { ensureConnected } = useGoogleCalendar();
+	const session = useAppSelector((state) => state.session.session);
+	const elapsedTime = session
+		? Math.floor((Date.now() - session.startTime) / 1000)
+		: 0;
+	const dispatch = useAppDispatch();
+
+	const [updateVisit] = useUpdateVisitMutation();
+	const [scheduleFollowup] = useScheduleFollowupMutation();
 
 	const isActiveVisit = session?.visitId === visit.visit_id;
 
 	const changeStatus = async (newStatus: string) => {
 		setApiError(null);
+
 		setIsSubmitting(true);
+
 		try {
-			const res = await apiFetch(`${API_BASE}/api/patients/visits`, {
-				method: 'PUT',
-				body: JSON.stringify({
+			await updateVisit({
+				patientId: visit.patient_serial_number,
+				body: {
 					visit_id: visit.visit_id,
 					status: newStatus,
 					chief_complaint: visit.chief_complaint,
 					duration_minutes: visit.duration_minutes || 30,
-				}),
-			});
-			if (!res.ok) throw new Error('Failed to update visit');
-			if (newStatus === 'cancelled' && isActiveVisit) {
-				endSession();
-			}
-			onRefetch();
+				},
+			}).unwrap();
+
+			if (newStatus === 'cancelled' && isActiveVisit) dispatch(endSession());
+
 			onClose();
-		} catch (err) {
-			setApiError(
-				err instanceof Error ? err.message : 'Failed to update visit',
-			);
+		} catch {
+			setApiError('Failed to update visit');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -79,47 +85,43 @@ export const VisitModal = ({
 
 	const handleStartVisit = async () => {
 		setApiError(null);
+
 		setIsSubmitting(true);
+
 		try {
-			const res = await apiFetch(`${API_BASE}/api/patients/visits`, {
-				method: 'PUT',
-				body: JSON.stringify({
+			await updateVisit({
+				patientId: visit.patient_serial_number,
+				body: {
 					visit_id: visit.visit_id,
 					status: 'in-progress',
 					chief_complaint: visit.chief_complaint,
 					duration_minutes: visit.duration_minutes || 30,
+				},
+			}).unwrap();
+
+			dispatch(
+				startSession({
+					type: startType,
+					location: startLocation,
+					visitId: visit.visit_id,
+					patientSerialNumber: visit.patient_serial_number,
 				}),
-			});
-			if (!res.ok) throw new Error('Failed to start visit');
-			startSession(
-				startType,
-				startLocation,
-				visit.visit_id,
-				visit.patient_serial_number,
 			);
+
 			setShowStartForm(false);
-			onRefetch();
+
 			onClose();
-		} catch (err) {
-			setApiError(err instanceof Error ? err.message : 'Failed to start visit');
+		} catch {
+			setApiError('Failed to start visit');
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
-	const handleCompleteClick = () => {
-		setShowCompleteForm(true);
-	};
-
-	const handleCancelComplete = () => {
-		setShowCompleteForm(false);
-		setComplaintInput('');
-		setComplaintError('');
-	};
-
 	const handleConfirmComplete = async () => {
 		if (complaintInput.trim() === '') {
 			setComplaintError('Main complaint cannot be empty');
+
 			return;
 		}
 
@@ -128,25 +130,25 @@ export const VisitModal = ({
 			: visit.duration_minutes || 30;
 
 		setApiError(null);
+
 		setIsSubmitting(true);
+
 		try {
-			const res = await apiFetch(`${API_BASE}/api/patients/visits`, {
-				method: 'PUT',
-				body: JSON.stringify({
+			await updateVisit({
+				patientId: visit.patient_serial_number,
+				body: {
 					visit_id: visit.visit_id,
 					status: 'completed',
 					chief_complaint: complaintInput,
 					duration_minutes: duration,
-				}),
-			});
-			if (!res.ok) throw new Error('Failed to complete visit');
-			if (isActiveVisit) endSession();
-			onRefetch();
+				},
+			}).unwrap();
+
+			if (isActiveVisit) dispatch(endSession());
+
 			onClose();
-		} catch (err) {
-			setApiError(
-				err instanceof Error ? err.message : 'Failed to complete visit',
-			);
+		} catch {
+			setApiError('Failed to complete visit');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -154,34 +156,28 @@ export const VisitModal = ({
 
 	const handleReschedule = async () => {
 		setApiError(null);
+
 		setIsSubmitting(true);
+
 		try {
-			await ensureConnected();
+			await dispatch(ensureGoogleConnected()).unwrap();
 
 			const startTime = rescheduleDate + ':00';
 			const endDate = new Date(rescheduleDate);
 			endDate.setMinutes(endDate.getMinutes() + (visit.duration_minutes || 30));
 			const endTime = formatDateTimeLocal(endDate) + ':00';
 
-			const scheduleRes = await apiFetch(
-				`${API_BASE}/api/agents/schedule-followup`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						patient_serial_number: visit.patient_serial_number,
-						doctor_serial_number: doctorSerialNumber,
-						visit_date: startTime,
-						visit_type: visit.visit_type,
-						summary: `${visit.visit_type} visit`,
-						start_time: startTime,
-						end_time: endTime,
-						description: rescheduleReason || visit.chief_complaint || '',
-					}),
-				},
-			);
-			if (!scheduleRes.ok) throw new Error('Failed to create new visit');
+			await scheduleFollowup({
+				patient_serial_number: visit.patient_serial_number,
+				doctor_serial_number: doctorSerialNumber,
+				visit_date: startTime,
+				visit_type: visit.visit_type,
+				summary: `${visit.visit_type} visit`,
+				start_time: startTime,
+				end_time: endTime,
+				description: rescheduleReason || visit.chief_complaint || '',
+			}).unwrap();
 
-			onRefetch();
 			onClose();
 		} catch (err) {
 			setApiError(
@@ -190,18 +186,6 @@ export const VisitModal = ({
 		} finally {
 			setIsSubmitting(false);
 		}
-	};
-
-	const goToReschedule = () => {
-		setView('reschedule');
-		setApiError(null);
-		setComplaintInput('');
-		setComplaintError('');
-	};
-
-	const goToDetails = () => {
-		setView('details');
-		setApiError(null);
 	};
 
 	return (
@@ -292,7 +276,7 @@ export const VisitModal = ({
 									</div>
 									<button
 										className='btn-secondary'
-										onClick={handleCancelComplete}
+										onClick={() => setShowCompleteForm(false)}
 										disabled={isSubmitting}
 									>
 										Cancel
@@ -397,7 +381,7 @@ export const VisitModal = ({
 										<>
 											<button
 												className='btn-success'
-												onClick={handleCompleteClick}
+												onClick={() => setShowCompleteForm(true)}
 												disabled={isSubmitting}
 											>
 												Complete
@@ -415,7 +399,10 @@ export const VisitModal = ({
 										visit.status === 'no-show') && (
 										<button
 											className='btn-primary'
-											onClick={goToReschedule}
+											onClick={() => {
+												setView('reschedule');
+												setApiError(null);
+											}}
 											disabled={isSubmitting}
 										>
 											Reschedule
@@ -436,7 +423,9 @@ export const VisitModal = ({
 					<>
 						<div className='reschedule-view'>
 							<div>
-								<label htmlFor='reschedule-date'>New visit date & time</label>
+								<label htmlFor='reschedule-date'>
+									New visit date &amp; time
+								</label>
 								<input
 									id='reschedule-date'
 									type='datetime-local'
@@ -463,7 +452,10 @@ export const VisitModal = ({
 						<div className='modal-actions'>
 							<button
 								className='btn-secondary'
-								onClick={goToDetails}
+								onClick={() => {
+									setView('details');
+									setApiError(null);
+								}}
 								disabled={isSubmitting}
 							>
 								Back

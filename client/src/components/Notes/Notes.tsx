@@ -1,78 +1,67 @@
 import { useState } from 'react';
-import type { ClinicalNote, PatientFullResponse } from '../../types/types';
+import type { ClinicalNote } from '../../types/types';
 import { formatDate } from '../../utils/utils';
 import { useParams } from 'react-router';
 import './Notes.css';
-import { API_BASE, apiFetch } from '../../lib/api';
-import { useSession } from '../../context/SessionContext';
-import { useAuth } from '../../context/Auth/AuthProvider';
+import { useAppSelector } from '../../store/hooks';
+import {
+	useGetPatientQuery,
+	useAddNoteMutation,
+} from '../../store/api/patientsApi';
 
-type NotesProps = {
-	data: PatientFullResponse;
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
-	refetch: () => Promise<void>;
-};
-
-export const Notes = ({ data, setError, refetch }: NotesProps) => {
+export const Notes = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
-
 	const [newNoteType, setNewNoteType] = useState('progress_note');
 	const [newNoteText, setNewNoteText] = useState('');
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [localError, setLocalError] = useState<string | null>(null);
 
 	const { id: patient_serial } = useParams();
-	const { session } = useSession();
-	const { doctorSerialNumber } = useAuth();
+	const session = useAppSelector((state) => state.session.session);
+	const doctorSerialNumber = useAppSelector(
+		(state) => state.auth.doctorSerialNumber,
+	);
+
+	const { data } = useGetPatientQuery(patient_serial!);
+	const [addNote, { isLoading: isSubmitting }] = useAddNoteMutation();
 
 	const handleAddNote = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError(null);
 
-		if (!data) {
-			setError('Patient not found');
-			return;
-		}
-
-		setIsSubmitting(true);
+		setLocalError(null);
 
 		try {
-			const response = await apiFetch(
-				`${API_BASE}/api/patients/${patient_serial}/notes`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						visit_id: session?.visitId,
-						note_type: newNoteType,
-						note_text: newNoteText,
-						doctor_serial_number: doctorSerialNumber,
-					}),
+			await addNote({
+				patientId: patient_serial!,
+				body: {
+					visit_id: session?.visitId,
+					note_type: newNoteType,
+					note_text: newNoteText,
+					doctor_serial_number: doctorSerialNumber,
 				},
-			);
+			}).unwrap();
 
-			if (!response.ok) {
-				throw new Error('Failed to add note');
-			}
-
-			await refetch();
-		} catch (error) {
-			setError(error as string);
-		} finally {
-			setIsSubmitting(false);
 			setNewNoteText('');
 			setIsModalOpen(false);
+		} catch {
+			setLocalError('Failed to add note');
 		}
 	};
 
+	if (!data) return null;
+
 	return (
 		<>
+			{localError && <div className='error'>{localError}</div>}
 			<div className='card card-notes'>
 				<div className='card-header-row'>
 					<h3>Clinical Notes</h3>
 					{doctorSerialNumber && (
 						<span
 							className={!session ? 'btn-tooltip-wrap' : undefined}
-							data-tooltip={!session ? 'Start a session to add notes' : undefined}
+							data-tooltip={
+								!session ? 'Start a session to add notes' : undefined
+							}
 						>
 							<button
 								className='btn-primary'
@@ -85,8 +74,8 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 					)}
 				</div>
 				<div className='notes-timeline'>
-					{data?.clinical_notes?.length > 0 ? (
-						data?.clinical_notes?.map((note) => (
+					{data.clinical_notes?.length > 0 ? (
+						data.clinical_notes.map((note) => (
 							<div
 								key={note.note_id}
 								className='note-entry'
@@ -95,9 +84,7 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 							>
 								<div className='note-header'>
 									<span
-										className={`note-type-badge type-${
-											note?.note_type?.split('_')[1] || 'generic'
-										}`}
+										className={`note-type-badge type-${note?.note_type?.split('_')[1] || 'generic'}`}
 									>
 										{note?.note_type?.replace(/_/g, ' ').toUpperCase()}
 									</span>
@@ -163,7 +150,7 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 									placeholder='Enter clinical observations...'
 									required
 									disabled={isSubmitting}
-								></textarea>
+								/>
 							</div>
 							<div className='modal-actions'>
 								<button
@@ -206,9 +193,7 @@ export const Notes = ({ data, setError, refetch }: NotesProps) => {
 						<div className='modal-body'>
 							<div className='note-header'>
 								<span
-									className={`note-type-badge type-${
-										selectedNote?.note_type?.split('_')[1] || 'generic'
-									}`}
+									className={`note-type-badge type-${selectedNote?.note_type?.split('_')[1] || 'generic'}`}
 								>
 									{selectedNote?.note_type?.replace(/_/g, ' ').toUpperCase()}
 								</span>

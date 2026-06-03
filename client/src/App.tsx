@@ -1,9 +1,9 @@
 import { AuthModal } from './components/AuthModal/AuthModal';
 import LandingPage from './components/LandingPage/LandingPage';
-import { useAuth } from './context/Auth/AuthProvider';
+import { useAppSelector } from './store/hooks';
 
 function App() {
-	const { isModalOpen } = useAuth();
+	const isModalOpen = useAppSelector((state) => state.auth.isModalOpen);
 
 	return (
 		<>

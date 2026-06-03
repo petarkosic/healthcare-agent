@@ -1,75 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import type { TPatients } from '../../types/types';
 import { getInitials } from '../../utils/utils';
 import { Search } from '../Search/Search';
 import './Patients.css';
-import { useAuth } from '../../context/Auth/AuthProvider';
-import { useSession } from '../../context/SessionContext';
-import { API_BASE, apiFetch } from '../../lib/api';
+import { useAppSelector } from '../../store/hooks';
+import { useGetPatientsQuery } from '../../store/api/patientsApi';
 
 export const Patients = () => {
-	const [patients, setPatients] = useState<TPatients[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const { doctorSerialNumber } = useAuth();
-	const { session } = useSession();
-
+	const session = useAppSelector((state) => state.session.session);
 	const navigate = useNavigate();
 
-	// Prefetch PatientProfile so it's ready when the user clicks on a patient
+	const { data: patients, isLoading, error } = useGetPatientsQuery();
+
 	useEffect(() => {
 		import('../PatientProfile/PatientProfile');
 	}, []);
-
-	useEffect(() => {
-		if (!doctorSerialNumber) {
-			setError('Authentication required');
-			setLoading(false);
-			return;
-		}
-
-		const controller = new AbortController();
-
-		const fetchPatients = async () => {
-			try {
-				const url = `${API_BASE}/api/patients`;
-
-				const response = await apiFetch(url, { signal: controller.signal });
-
-				if (!response.ok) {
-					throw new Error(`Failed to fetch: ${response.status}`);
-				}
-
-				const data: TPatients[] = await response.json();
-
-				setPatients(data);
-				setError(null);
-			} catch (err) {
-				if (err instanceof Error && err.name !== 'AbortError') {
-					console.error('Error fetching patients:', err);
-					setError('Failed to load patients. Please try again.');
-				}
-			} finally {
-				if (!controller.signal.aborted) {
-					setLoading(false);
-				}
-			}
-		};
-
-		fetchPatients();
-
-		return () => controller.abort();
-	}, [doctorSerialNumber]);
 
 	const handlePatientClick = (patientId: number) => {
 		navigate(`/patients/${patientId}`);
 	};
 
-	if (loading) return <div className='loading'>Loading patients...</div>;
-	if (error) return <div className='error'>{error}</div>;
+	if (isLoading) return <div className='loading'>Loading patients...</div>;
+	if (error)
+		return (
+			<div className='error'>Failed to load patients. Please try again.</div>
+		);
 
-	if (patients.length === 0) {
+	if (!patients?.length) {
 		return (
 			<div className='patients-empty'>
 				<p className='patients-empty-msg'>No patients assigned yet.</p>
@@ -100,9 +57,7 @@ export const Patients = () => {
 					<article
 						key={patient.patient_serial_number}
 						className={`patient-card${session?.patientSerialNumber === String(patient.patient_serial_number) ? ' patient-card--active' : ''}`}
-						onClick={() => {
-							handlePatientClick(patient.patient_serial_number);
-						}}
+						onClick={() => handlePatientClick(patient.patient_serial_number)}
 					>
 						<div className='identity'>
 							<div className='avatar'>{getInitials(patient.full_name)}</div>
@@ -119,13 +74,11 @@ export const Patients = () => {
 								)}
 							</div>
 						</div>
-
 						<div className='vitals'>
 							<div>
 								{patient.age}y • {patient.gender}
 							</div>
 						</div>
-
 						<div className='stats'>
 							<div className='stat-item'>
 								<span className='stat-val'>{patient.total_visits}</span>

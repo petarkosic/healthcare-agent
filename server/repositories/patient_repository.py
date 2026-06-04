@@ -110,7 +110,7 @@ class PatientRepository(BaseRepository[PatientBase]):
                 EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth)) AS age,
                 p.gender,
                 COUNT(DISTINCT v.visit_id) AS total_visits,
-                MAX(v.visit_date) AS last_visit_date,
+                MAX(CASE WHEN v.status = 'completed' THEN v.visit_date END) AS last_visit_date,
                 COUNT(DISTINCT m.medication_id) AS active_medications_count
             FROM patients p
             JOIN visits v ON p.patient_serial_number = v.patient_serial_number
@@ -132,7 +132,7 @@ class PatientRepository(BaseRepository[PatientBase]):
                 EXTRACT(YEAR FROM AGE(CURRENT_DATE, p.date_of_birth)) AS age,
                 p.gender,
                 COUNT(DISTINCT v.visit_id) AS total_visits,
-                MAX(v.visit_date) AS last_visit_date,
+                MAX(CASE WHEN v.status = 'completed' THEN v.visit_date END) AS last_visit_date,
                 COUNT(DISTINCT m.medication_id) AS active_medications_count
             FROM patients p
             JOIN visits v ON p.patient_serial_number = v.patient_serial_number

@@ -217,15 +217,6 @@ export const Notes = () => {
 								{selectedNote?.note_text}
 							</div>
 						</div>
-						<div className='modal-actions'>
-							<button
-								type='button'
-								className='btn-primary'
-								onClick={() => setSelectedNote(null)}
-							>
-								Close
-							</button>
-						</div>
 					</div>
 				</div>
 			)}

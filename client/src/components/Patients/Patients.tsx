@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { getInitials } from '../../utils/utils';
+import { formatDateOnly, getInitials } from '../../utils/utils';
 import { Search } from '../Search/Search';
 import './Patients.css';
 import { useAppSelector } from '../../store/hooks';
@@ -91,8 +91,7 @@ export const Patients = () => {
 								<span className='stat-lbl'>Active Meds</span>
 							</div>
 							<div className='last-visit'>
-								Last Visit:{' '}
-								{new Date(patient.last_visit_date).toLocaleDateString()}
+								Last Visit: {formatDateOnly(patient.last_visit_date)}
 							</div>
 						</div>
 					</article>

@@ -94,3 +94,17 @@
 	font-weight: 400;
 	color: var(--text-muted);
 }
+
+@media (max-width: 768px) {
+	.meds-list {
+		max-height: 400px;
+	}
+
+	.med-readonly-row {
+		flex-wrap: wrap;
+	}
+
+	.med-readonly-label {
+		white-space: normal;
+	}
+}

@@ -108,3 +108,13 @@ button:disabled {
 	white-space: nowrap;
 	z-index: 100;
 }
+
+@media (max-width: 640px) {
+	.btn-tooltip-wrap[data-tooltip]:hover::after {
+		white-space: normal;
+		max-width: min(240px, 70vw);
+		left: auto;
+		right: 0;
+		transform: none;
+	}
+}

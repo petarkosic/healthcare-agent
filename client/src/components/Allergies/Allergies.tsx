@@ -71,7 +71,6 @@ export const Allergies = () => {
 		<>
 			{localError && <div className='error'>{localError}</div>}
 			<div className='allergy-banner'>
-				<span className='icon-alert'>⚠️</span>
 				<div className='allergy-banner-content'>
 					<strong>Known Allergies:</strong>{' '}
 					{data.patient.allergies?.length

@@ -3,12 +3,12 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
 import './SettingsModal.css';
 
-type Section = 'keyboard' | 'connections' | 'account';
+type Section = 'account' | 'connections' | 'keyboard';
 
 const SECTIONS: { id: Section; label: string }[] = [
-	{ id: 'keyboard', label: 'Keyboard Shortcuts' },
-	{ id: 'connections', label: 'Connections' },
 	{ id: 'account', label: 'Account' },
+	{ id: 'connections', label: 'Connections' },
+	{ id: 'keyboard', label: 'Keyboard Shortcuts' },
 ];
 
 const SHORTCUTS = [
@@ -27,7 +27,7 @@ interface SettingsModalProps {
 export const SettingsModal = ({
 	isOpen,
 	onClose,
-	defaultSection = 'keyboard',
+	defaultSection = 'account',
 }: SettingsModalProps) => {
 	const [activeSection, setActiveSection] = useState<Section>(defaultSection);
 	const dispatch = useAppDispatch();
@@ -108,34 +108,33 @@ export const SettingsModal = ({
 					</nav>
 
 					<div className='settings-content'>
-						{activeSection === 'keyboard' && (
+						{activeSection === 'account' && (
 							<div className='settings-section'>
-								<h2 className='settings-section-title'>Keyboard Shortcuts</h2>
+								<h2 className='settings-section-title'>Account</h2>
 								<p className='settings-section-sub'>
-									Shortcuts are disabled when focus is inside an input field.
+									Your doctor profile information.
 								</p>
-								<table className='shortcuts-table'>
-									<thead>
-										<tr>
-											<th>Key</th>
-											<th>Action</th>
-										</tr>
-									</thead>
-									<tbody>
-										{SHORTCUTS.map((s) => (
-											<tr key={s.description}>
-												<td>
-													{s.keys.map((k) => (
-														<kbd key={k} className='kbd'>
-															{k}
-														</kbd>
-													))}
-												</td>
-												<td className='shortcut-desc'>{s.description}</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
+
+								<div className='account-field'>
+									<span className='account-label'>Name</span>
+									<span className='account-value'>{doctorName ?? '—'}</span>
+								</div>
+
+								<div className='account-field'>
+									<span className='account-label'>Serial Number</span>
+									<div className='account-serial-row'>
+										<span className='account-serial'>
+											{doctorSerialNumber ?? '—'}
+										</span>
+										<button
+											className='btn-copy'
+											onClick={copySerial}
+											disabled={!doctorSerialNumber}
+										>
+											{copied ? 'Copied!' : 'Copy'}
+										</button>
+									</div>
+								</div>
 							</div>
 						)}
 
@@ -143,7 +142,7 @@ export const SettingsModal = ({
 							<div className='settings-section'>
 								<h2 className='settings-section-title'>Connections</h2>
 								<p className='settings-section-sub'>
-									Connect external services to extend HealthAgent.
+									Connect external services to extend MediFlow.
 								</p>
 
 								<div className='connection-item'>
@@ -173,33 +172,34 @@ export const SettingsModal = ({
 							</div>
 						)}
 
-						{activeSection === 'account' && (
+						{activeSection === 'keyboard' && (
 							<div className='settings-section'>
-								<h2 className='settings-section-title'>Account</h2>
+								<h2 className='settings-section-title'>Keyboard Shortcuts</h2>
 								<p className='settings-section-sub'>
-									Your doctor profile information.
+									Shortcuts are disabled when focus is inside an input field.
 								</p>
-
-								<div className='account-field'>
-									<span className='account-label'>Name</span>
-									<span className='account-value'>{doctorName ?? '—'}</span>
-								</div>
-
-								<div className='account-field'>
-									<span className='account-label'>Serial Number</span>
-									<div className='account-serial-row'>
-										<span className='account-serial'>
-											{doctorSerialNumber ?? '—'}
-										</span>
-										<button
-											className='btn-copy'
-											onClick={copySerial}
-											disabled={!doctorSerialNumber}
-										>
-											{copied ? 'Copied!' : 'Copy'}
-										</button>
-									</div>
-								</div>
+								<table className='shortcuts-table'>
+									<thead>
+										<tr>
+											<th>Key</th>
+											<th>Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										{SHORTCUTS.map((s) => (
+											<tr key={s.description}>
+												<td>
+													{s.keys.map((k) => (
+														<kbd key={k} className='kbd'>
+															{k}
+														</kbd>
+													))}
+												</td>
+												<td className='shortcut-desc'>{s.description}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
 							</div>
 						)}
 					</div>

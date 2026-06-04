@@ -357,14 +357,14 @@ export const VisitModal = ({
 														onClick={() => setShowStartForm(true)}
 														disabled={isSubmitting}
 													>
-														Start Visit
+														Start visit
 													</button>
 													<button
 														className='btn-danger'
 														onClick={() => changeStatus('cancelled')}
 														disabled={isSubmitting}
 													>
-														Cancel
+														Cancel visit
 													</button>
 													<button
 														className='btn-secondary'

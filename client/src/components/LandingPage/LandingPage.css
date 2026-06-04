@@ -31,28 +31,9 @@
 }
 
 .lp-inner {
-	max-width: 1200px;
+	max-width: 1440px;
 	margin: 0 auto;
 	padding: 0 2rem;
-}
-
-/* ===== NAV ===== */
-.lp-nav {
-	background: var(--bg-card);
-	border-bottom: 1px solid var(--border);
-	position: sticky;
-	top: 0;
-	z-index: 50;
-}
-
-.lp-nav-inner {
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 2rem;
-	height: 64px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
 }
 
 .lp-logo {
@@ -79,25 +60,6 @@
 .lp-logo-icon svg {
 	width: 18px;
 	height: 18px;
-}
-
-.lp-nav-links {
-	display: flex;
-	align-items: center;
-	gap: 1.75rem;
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.lp-nav-links a {
-	font-size: 0.9rem;
-	color: var(--secondary);
-	text-decoration: none;
-}
-
-.lp-nav-links a:hover {
-	color: var(--text-main);
 }
 
 .lp-nav-actions {
@@ -143,15 +105,6 @@
 .lp-btn-primary:hover {
 	background: var(--navbar-accent-blue-hover);
 	color: #fff;
-}
-
-.lp-btn-ghost {
-	background: transparent;
-	color: var(--secondary);
-}
-
-.lp-btn-ghost:hover {
-	color: var(--text-main);
 }
 
 .lp-btn-outline {
@@ -340,7 +293,7 @@
 }
 
 .lp-footer-inner {
-	max-width: 1200px;
+	max-width: 1440px;
 	margin: 0 auto;
 	padding: 0 2rem;
 	display: flex;
@@ -353,20 +306,72 @@
 	color: var(--text-muted);
 }
 
-.lp-footer-links {
-	display: flex;
-	gap: 1.25rem;
-	list-style: none;
-	margin: 0;
-	padding: 0;
+@media (max-width: 768px) {
+	.lp-hero {
+		padding: 3rem 1.5rem 2.5rem;
+	}
+
+	.lp-hero-h1 {
+		font-size: 2rem;
+	}
+
+	.lp-hero-sub {
+		font-size: 1rem;
+	}
+
+	.lp-features {
+		padding: 3rem 1.5rem;
+	}
+
+	.lp-features-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.lp-cta {
+		padding: 3rem 1.5rem;
+	}
+
+	.lp-footer-inner {
+		flex-direction: column;
+		gap: 0.5rem;
+		text-align: center;
+	}
 }
 
-.lp-footer-links a {
-	font-size: 0.8rem;
-	color: var(--text-muted);
-	text-decoration: none;
+@media (max-width: 480px) {
+	.lp-inner {
+		padding: 0 1rem;
+	}
+
+	.lp-hero {
+		padding: 2.5rem 1rem 2rem;
+	}
+
+	.lp-hero-h1 {
+		font-size: 1.75rem;
+	}
+
+	.lp-section-title,
+	.lp-cta-title {
+		font-size: 1.4rem;
+	}
+
+	.lp-features-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.lp-cta {
+		padding: 2.5rem 1rem;
+	}
 }
 
-.lp-footer-links a:hover {
-	color: var(--secondary);
+@media (max-width: 360px) {
+	.lp-hero-h1 {
+		font-size: 1.4rem;
+	}
+
+	.lp-section-title,
+	.lp-cta-title {
+		font-size: 1.4rem;
+	}
 }

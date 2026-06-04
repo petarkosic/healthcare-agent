@@ -47,7 +47,7 @@ export const Navbar = () => {
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [settingsSection, setSettingsSection] = useState<
 		'keyboard' | 'connections' | 'account'
-	>('keyboard');
+	>('account');
 
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -94,7 +94,7 @@ export const Navbar = () => {
 		'?': () => {
 			if (!doctorSerialNumber) return;
 
-			setSettingsSection('keyboard');
+			setSettingsSection('account');
 			setSettingsOpen(true);
 		},
 		n: () => {
@@ -223,7 +223,7 @@ export const Navbar = () => {
 								<path d='M22 12h-4l-3 9L9 3l-3 9H2' strokeLinejoin='round' />
 							</svg>
 						</span>
-						HealthAgent
+						<span className='navbar-brand-text'>MediFlow</span>
 					</Link>
 				</div>
 
@@ -340,14 +340,14 @@ export const Navbar = () => {
 								onClick={() => setDropdownOpen((o) => !o)}
 							>
 								<div className='doctor-avatar'>{getInitials(doctorName!)}</div>
-								<span className='doctor-nav-name'>{doctorName}</span>
+								<span className='doctor-nav-name'>Dr. {doctorName}</span>
 							</button>
 							{dropdownOpen && (
 								<div className='doctor-dropdown'>
 									<button
 										className='doctor-dropdown-item'
 										onClick={() => {
-											setSettingsSection('keyboard');
+											setSettingsSection('account');
 											setSettingsOpen(true);
 											setDropdownOpen(false);
 										}}

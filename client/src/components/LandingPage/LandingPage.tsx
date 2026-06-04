@@ -15,7 +15,7 @@ const LandingPage: React.FC = () => {
 			<footer className='lp-footer'>
 				<div className='lp-footer-inner'>
 					<span className='lp-footer-copy'>
-						© {new Date().getFullYear()} HealthAgent
+						© {new Date().getFullYear()} MediFlow
 					</span>
 				</div>
 			</footer>

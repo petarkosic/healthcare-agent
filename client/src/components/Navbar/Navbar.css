@@ -24,13 +24,13 @@ body {
 	position: sticky;
 	top: 0;
 	z-index: 50;
-	max-width: 1200px;
-	margin: 0 auto;
-	padding: 0 2rem;
+	width: 100%;
+	padding: 0 max(2rem, calc((100vw - 1440px) / 2 + 2rem));
 	height: 64px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	box-sizing: border-box;
 }
 
 .navbar-left {
@@ -73,7 +73,6 @@ body {
 	gap: 0.75rem;
 	min-width: 120px;
 	justify-content: flex-end;
-	/* padding: 0 1rem; */
 }
 
 .doctor-info {
@@ -87,12 +86,12 @@ body {
 }
 
 .doctor-avatar {
+	display: none;
 	width: 40px;
 	height: 40px;
 	border-radius: 50%;
 	background: #f1f5f9;
 	border: 1px solid var(--navbar-border-color);
-	display: flex;
 	align-items: center;
 	justify-content: center;
 	color: var(--navbar-text-muted);
@@ -361,7 +360,7 @@ body {
 	border: 1px solid #ccc;
 	border-radius: 6px;
 	font-size: 14px;
-	width: 200px;
+	width: clamp(80px, 20vw, 200px);
 	transition: border-color 0.2s;
 	background: white;
 }
@@ -395,4 +394,115 @@ body {
 
 .btn-confirm-end:hover {
 	background-color: var(--navbar-accent-blue-hover);
+}
+
+@media (max-width: 768px) {
+	.navbar {
+		padding: 0 1rem !important;
+	}
+
+	.navbar-left {
+		min-width: 0;
+	}
+
+	.navbar-right {
+		min-width: 0;
+	}
+
+	.navbar-brand-text {
+		display: none;
+	}
+
+	.btn-start-session {
+		padding: 0.35rem 0.75rem;
+		font-size: 0.8rem;
+	}
+
+	/* session-select overlays entire navbar */
+	.session-select {
+		position: absolute;
+		inset: 0;
+		z-index: 10;
+		border-radius: 0;
+		border: none;
+		border-bottom: 1px solid var(--navbar-border-color);
+		padding: 0 1rem;
+		box-shadow: none;
+		background: var(--navbar-primary-bg);
+		gap: 0.5rem;
+	}
+
+	.session-select-input {
+		flex: 1;
+		min-width: 0;
+		font-size: 0.8rem;
+	}
+
+	.session-select-actions {
+		flex-shrink: 0;
+		margin-left: 0;
+		gap: 0.375rem;
+	}
+
+	/* session-end-form overlays entire navbar */
+	.session-end-form {
+		position: absolute;
+		inset: 0;
+		z-index: 10;
+		background: var(--navbar-primary-bg);
+		border-bottom: 1px solid var(--navbar-border-color);
+		padding: 0 1rem;
+		gap: 0.5rem;
+	}
+
+	.session-end-form .input-wrapper {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.session-end-form .complaint-input {
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.session-end-form .btn-cancel,
+	.session-end-form .btn-confirm-end {
+		flex-shrink: 0;
+	}
+
+	.btn-cancel,
+	.btn-start-timer,
+	.btn-confirm-end {
+		padding: 0.35rem 0.6rem;
+		font-size: 0.8rem;
+		white-space: nowrap;
+	}
+
+	.doctor-avatar {
+		display: flex;
+	}
+
+	.doctor-nav-name {
+		display: none;
+	}
+
+	.session-timer {
+		font-size: 0.95rem;
+	}
+
+	.session-active {
+		gap: 0.5rem;
+		padding: 0.3rem 0.6rem;
+	}
+
+	.btn-end-session {
+		padding: 0.3rem 0.6rem;
+		font-size: 0.75rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.session-type {
+		display: none;
+	}
 }

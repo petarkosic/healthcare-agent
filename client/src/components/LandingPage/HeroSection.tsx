@@ -38,7 +38,7 @@ const HeroSection: React.FC = () => {
 				</h1>
 
 				<p className='lp-hero-sub'>
-					HealthAgent gives doctors a complete patient view — vitals, labs,
+					MediFlow gives doctors a complete patient view — vitals, labs,
 					medications, diagnoses — with an AI assistant that summarizes patient
 					status and surfaces treatment recommendations in seconds.
 				</p>

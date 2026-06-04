@@ -1,6 +1,6 @@
 .add-patient-page {
 	padding: 2rem;
-	max-width: 1200px;
+	max-width: 1440px;
 	margin: 0 auto;
 }
 
@@ -165,8 +165,18 @@ label:has(+ textarea[required])::after {
 	color: var(--text-main);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+	.add-patient-page {
+		padding: 1rem;
+	}
+
 	.form-row {
 		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 480px) {
+	.add-patient-header h2 {
+		font-size: 1.4rem;
 	}
 }

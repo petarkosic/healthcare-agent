@@ -136,3 +136,39 @@
 	font-size: 0.75rem;
 	color: #dc2626;
 }
+
+@media (max-width: 640px) {
+	.visit-details-grid {
+		grid-template-columns: 1fr;
+		gap: 0.5rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.visit-actions {
+		flex-direction: column;
+	}
+
+	.complete-form {
+		flex-direction: column;
+	}
+
+	.complete-form-input-wrapper {
+		order: 0;
+		width: 100%;
+	}
+
+	.complete-form-input {
+		width: 100%;
+	}
+
+	.complete-form .btn-success {
+		order: 1;
+		width: 100%;
+	}
+
+	.complete-form .btn-secondary {
+		order: 2;
+		width: 100%;
+	}
+}

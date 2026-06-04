@@ -212,3 +212,46 @@
 	font-weight: 500;
 	margin-top: 0.25rem;
 }
+
+@media (max-width: 640px) {
+	.modal-overlay {
+		inset: 0;
+		padding: 0;
+		align-items: flex-start;
+	}
+
+	.modal-card {
+		max-width: 100%;
+		width: 100%;
+		height: 100dvh;
+		max-height: 100dvh;
+		border-radius: 0;
+		box-shadow: none;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.modal-tabs {
+		padding: 1.25rem 1.25rem 0;
+		flex-shrink: 0;
+	}
+
+	.modal-form {
+		flex: 1;
+		overflow-y: auto;
+		padding: 0 1.25rem 2rem;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.signup-success {
+		flex: 1;
+		overflow-y: auto;
+		padding: 0 1.25rem 2rem;
+	}
+
+	.form-row {
+		grid-template-columns: 1fr;
+	}
+}

@@ -180,8 +180,12 @@ export const VisitModal = ({
 
 			onClose();
 		} catch (err) {
+			const status = (err as { status?: number })?.status;
+
 			setApiError(
-				err instanceof Error ? err.message : 'Failed to reschedule visit',
+				status === 429
+					? 'Rate limit reached. Please wait a minute.'
+					: 'Failed to reschedule visit',
 			);
 		} finally {
 			setIsSubmitting(false);

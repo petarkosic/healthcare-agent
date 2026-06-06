@@ -40,6 +40,9 @@ export const fetchAiOverview = createAsyncThunk(
 			`${API_BASE}/api/agents/overview/${patientSerial}`,
 		);
 
+		if (res.status === 429)
+			throw new Error('Rate limit reached. Please wait a minute.');
+
 		if (!res.ok) throw new Error('Failed to get AI overview');
 
 		return (await res.json()) as Overview;
@@ -61,6 +64,9 @@ export const fetchAiRecommendations = createAsyncThunk(
 			method: 'POST',
 			body: JSON.stringify({ overview: overviewText }),
 		});
+
+		if (res.status === 429)
+			throw new Error('Rate limit reached. Please wait a minute.');
 
 		if (!res.ok) throw new Error('Failed to get recommendations');
 
@@ -98,6 +104,9 @@ export const fetchAiMedications = createAsyncThunk(
 				current_medications: currentMedications,
 			}),
 		});
+
+		if (res.status === 429)
+			throw new Error('Rate limit reached. Please wait a minute.');
 
 		if (!res.ok) throw new Error('Failed to get medications');
 

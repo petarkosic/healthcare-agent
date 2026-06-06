@@ -29,6 +29,7 @@ export const SidebarRecommendations = ({
 	);
 	const [selectedDate, setSelectedDate] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const [scheduleError, setScheduleError] = useState<string | null>(null);
 	const [selectedRecommendation, setSelectedRecommendation] =
 		useState<Recommendation | null>(null);
 
@@ -66,6 +67,7 @@ export const SidebarRecommendations = ({
 		setViewMode('card');
 		setSelectedRecommendation(null);
 		setSelectedDate('');
+		setScheduleError(null);
 	};
 
 	const handleConfirm = async () => {
@@ -94,9 +96,13 @@ export const SidebarRecommendations = ({
 				throw new Error(res.error || 'Failed to schedule');
 			}
 		} catch (error) {
-			console.error('Scheduling failed:', error);
-			alert('Failed to schedule. Please try again.');
-			setViewMode('card');
+			const status = (error as { status?: number })?.status;
+
+			setScheduleError(
+				status === 429
+					? 'Rate limit reached. Please wait a minute.'
+					: 'Failed to schedule. Please try again.',
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -158,6 +164,8 @@ export const SidebarRecommendations = ({
 							<br />
 							<em>{selectedRecommendation?.follow_up?.reason}</em>
 						</p>
+
+						{scheduleError && <p className='schedule-error'>{scheduleError}</p>}
 
 						<div className='schedule-actions'>
 							<button

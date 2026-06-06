@@ -1,6 +1,6 @@
 import json
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
@@ -13,6 +13,7 @@ from utils.openai_client import openai_client
 from rag.rag_service import RAGService
 from models.agents import AIOverviewResponse, MedicationsRequest, OverviewPromptResponse, OverviewRequest
 from utils.cache import cache, hash_key
+from utils.limiter import limiter
 from services.agent_service import agent_service
 from services.patient_service import visit_repository
 from services.google_calendar_service import create_event as create_calendar_event_for_doctor
@@ -127,7 +128,8 @@ router = APIRouter(
 
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 @observe()
-async def get_overview(patient_serial: str, doctor: dict = Depends(get_current_doctor)):
+@limiter.limit("2/minute")
+async def get_overview(http_request: Request, patient_serial: str, doctor: dict = Depends(get_current_doctor)):
     cache_key = f"overview:{patient_serial}"
     cached = cache.get(cache_key)
 
@@ -174,7 +176,8 @@ async def get_overview(patient_serial: str, doctor: dict = Depends(get_current_d
 
 @router.post("/recommendations")
 @observe()
-async def get_recommendations(request: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
+@limiter.limit("2/minute")
+async def get_recommendations(http_request: Request, request: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -264,7 +267,8 @@ async def get_recommendations(request: OverviewRequest, doctor: dict = Depends(g
 
 @router.post("/medications")
 @observe()
-async def get_medications(request: MedicationsRequest, doctor: dict = Depends(get_current_doctor)):
+@limiter.limit("2/minute")
+async def get_medications(http_request: Request, request: MedicationsRequest, doctor: dict = Depends(get_current_doctor)):
     if not request.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -345,7 +349,8 @@ async def get_medications(request: MedicationsRequest, doctor: dict = Depends(ge
 
 @router.post("/schedule-followup")
 @observe(as_type="chain")
-async def schedule_visit(follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
+@limiter.limit("3/minute")
+async def schedule_visit(http_request: Request, follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
 
         Patient Serial: {follow_up.patient_serial_number}

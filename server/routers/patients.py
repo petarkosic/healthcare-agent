@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from dotenv import load_dotenv
 from langfuse import observe
 
-from db.database import db_manager
 from rag.rag_service import RAGService
 from models.notes import Note
 from models.patients import (
@@ -20,6 +19,7 @@ from models.patients import (
     UpdateAllergies,
 )
 from utils.auth import get_current_doctor
+from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
 
@@ -34,17 +34,6 @@ router = APIRouter(
     tags=["patients"],
 )
 
-
-def _verify_patient_access(patient_serial: str, doctor_serial: str) -> None:
-    with db_manager.get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT 1 FROM visits WHERE patient_serial_number = %s AND doctor_serial_number = %s LIMIT 1",
-                (patient_serial, doctor_serial),
-            )
-
-            if not cur.fetchone():
-                raise HTTPException(status_code=403, detail="Access denied")
 
 
 @router.get("")
@@ -89,13 +78,14 @@ async def search_patient(
         raise HTTPException(status_code=500, detail="Error searching for patient")
 
 
-@router.get("/{patient_serial_number}", response_model=PatientFullResponse)
+@router.get("/{patient_serial}", response_model=PatientFullResponse)
 async def get_patient(
-    patient_serial_number: str, doctor: dict = Depends(get_current_doctor)
+    patient_serial: str,
+    doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
-        _verify_patient_access(patient_serial_number, doctor["serial"])
-        patient_data = patient_service.get_patient_full(patient_serial_number)
+        patient_data = patient_service.get_patient_full(patient_serial)
 
         if not patient_data:
             raise HTTPException(status_code=404, detail="Patient not found")
@@ -104,7 +94,7 @@ async def get_patient(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Error fetching patient %s", patient_serial_number)
+        logger.exception("Error fetching patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error fetching patient data")
 
 
@@ -114,6 +104,7 @@ async def set_note(
     patient_serial: str,
     note: Note,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     if not note.visit_id or not note.note_type or not note.note_text:
         raise HTTPException(
@@ -169,6 +160,7 @@ async def add_medication(
     patient_serial: str,
     medication: AddMedication,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
         medication_data = medication.model_dump(exclude={"doctor_serial_number"})
@@ -190,10 +182,9 @@ async def update_medication(
     medication_id: str,
     payload: UpdateMedication,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
-        _verify_patient_access(patient_serial, doctor["serial"])
-
         fields = {k: v for k, v in payload.model_dump().items() if v is not None}
         result = patient_service.update_medication(medication_id, patient_serial, fields)
         
@@ -210,10 +201,9 @@ async def delete_medication(
     patient_serial: str,
     medication_id: str,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
-        _verify_patient_access(patient_serial, doctor["serial"])
-
         result = patient_service.delete_medication(medication_id, patient_serial)
         
         return result
@@ -229,6 +219,7 @@ async def add_vitals(
     patient_serial: str,
     vitals: AddVitalSigns,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
         vitals_data = vitals.model_dump(exclude={"visit_id"}, exclude_none=True)
@@ -248,6 +239,7 @@ async def add_lab(
     patient_serial: str,
     lab: AddLabResult,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
         lab_data = lab.model_dump(
@@ -273,6 +265,7 @@ async def add_diagnosis(
     patient_serial: str,
     diagnosis: AddDiagnosis,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
         diagnosis_data = diagnosis.model_dump(
@@ -298,9 +291,9 @@ async def update_allergies(
     patient_serial: str,
     body: UpdateAllergies,
     doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
 ):
     try:
-        _verify_patient_access(patient_serial, doctor["serial"])
         result = patient_service.update_allergies(
             patient_serial_number=patient_serial,
             allergies=body.allergies,

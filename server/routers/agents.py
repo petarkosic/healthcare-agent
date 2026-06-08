@@ -9,6 +9,7 @@ from langfuse import observe
 
 from models.agents import FollowUpRequest
 from utils.auth import get_current_doctor
+from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
 from rag.rag_service import RAGService
 from models.agents import AIOverviewResponse, MedicationsRequest, OverviewPromptResponse, OverviewRequest
@@ -129,7 +130,12 @@ router = APIRouter(
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 @observe()
 @limiter.limit("2/minute")
-async def get_overview(http_request: Request, patient_serial: str, doctor: dict = Depends(get_current_doctor)):
+async def get_overview(
+    http_request: Request,
+    patient_serial: str,
+    doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
+):
     cache_key = f"overview:{patient_serial}"
     cached = cache.get(cache_key)
 
@@ -261,8 +267,9 @@ async def get_recommendations(http_request: Request, request: OverviewRequest, d
         cache.set(cache_key, llm_output)
 
         return llm_output
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Error generating recommendations")
+        raise HTTPException(status_code=500, detail="Error generating recommendations")
 
 
 @router.post("/medications")
@@ -343,18 +350,21 @@ async def get_medications(http_request: Request, request: MedicationsRequest, do
         cache.set(cache_key, llm_output)
 
         return llm_output
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Error generating medications")
+        raise HTTPException(status_code=500, detail="Error generating medications")
 
 
 @router.post("/schedule-followup")
 @observe(as_type="chain")
 @limiter.limit("3/minute")
 async def schedule_visit(http_request: Request, follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
+    verify_patient_access(follow_up.patient_serial_number, doctor)
+
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
 
         Patient Serial: {follow_up.patient_serial_number}
-        Doctor Serial: {follow_up.doctor_serial_number}
+        Doctor Serial: {doctor['serial']}
         Visit Date: {follow_up.visit_date}
         Visit Type: {follow_up.visit_type}
         Summary: {follow_up.summary}
@@ -393,7 +403,7 @@ async def schedule_visit(http_request: Request, follow_up: FollowUpRequest, doct
                 if function_name == "schedule_visit_db":
                     result = schedule_visit_db(
                         patient_serial_number=arguments.get("patient_serial_number"),
-                        doctor_serial_number=arguments.get("doctor_serial_number"),
+                        doctor_serial_number=doctor['serial'],
                         visit_date=arguments.get("visit_date"),
                         visit_type=arguments.get("visit_type"),
                         chief_complaint=arguments.get("chief_complaint"),
@@ -417,8 +427,9 @@ async def schedule_visit(http_request: Request, follow_up: FollowUpRequest, doct
             "tools_executed": results,
         }
 
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+    except Exception:
+        logger.exception("Error scheduling follow-up visit")
+        raise HTTPException(status_code=500, detail="Error scheduling visit")
 
 
 @observe(as_type="span")

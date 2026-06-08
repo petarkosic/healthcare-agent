@@ -94,5 +94,6 @@ def create_event(
         return {"htmlLink": created.get("htmlLink"), "eventId": created.get("id")}
     except HTTPException:
         raise
-    except Exception as e:
-        return {"error": str(e)}
+    except Exception:
+        logger.exception("Error creating calendar event for doctor %s", doctor_serial)
+        raise HTTPException(status_code=500, detail="Error creating calendar event")

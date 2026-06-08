@@ -130,8 +130,8 @@ router = APIRouter(
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 @observe()
 @limiter.limit("2/minute")
-async def get_overview(
-    http_request: Request,
+def get_overview(
+    request: Request,
     patient_serial: str,
     doctor: dict = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
@@ -183,17 +183,17 @@ async def get_overview(
 @router.post("/recommendations")
 @observe()
 @limiter.limit("2/minute")
-async def get_recommendations(http_request: Request, request: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
-    if not request.overview:
+def get_recommendations(request: Request, payload: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
+    if not payload.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
-    cache_key = f"recommendations:{hash_key(request.overview)}"
+    cache_key = f"recommendations:{hash_key(payload.overview)}"
     cached = cache.get(cache_key)
     if cached:
         return cached
 
     prompt = f"""
-        Based on this overview, provide patient recommendations: {request.overview}.
+        Based on this overview, provide patient recommendations: {payload.overview}.
 
         Return only valid JSON with the following format:
         {{
@@ -275,23 +275,23 @@ async def get_recommendations(http_request: Request, request: OverviewRequest, d
 @router.post("/medications")
 @observe()
 @limiter.limit("2/minute")
-async def get_medications(http_request: Request, request: MedicationsRequest, doctor: dict = Depends(get_current_doctor)):
-    if not request.overview:
+def get_medications(request: Request, payload: MedicationsRequest, doctor: dict = Depends(get_current_doctor)):
+    if not payload.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
-    meds_key = ":".join(f"{m.name}:{m.dosage}:{m.frequency}" for m in request.current_medications)
-    cache_key = f"medications:{hash_key(request.overview + meds_key)}"
+    meds_key = ":".join(f"{m.name}:{m.dosage}:{m.frequency}" for m in payload.current_medications)
+    cache_key = f"medications:{hash_key(payload.overview + meds_key)}"
     cached = cache.get(cache_key)
 
     if cached:
         return cached
 
     meds_list = "\n".join(
-        f"- {m.name}: {m.dosage}, {m.frequency}" for m in request.current_medications
+        f"- {m.name}: {m.dosage}, {m.frequency}" for m in payload.current_medications
     ) or "None provided"
 
     prompt = f"""
-        Based on this overview, provide patient medications alternatives: {request.overview}.
+        Based on this overview, provide patient medications alternatives: {payload.overview}.
 
         Current medications (accurate, from patient record):
         {meds_list}
@@ -358,7 +358,7 @@ async def get_medications(http_request: Request, request: MedicationsRequest, do
 @router.post("/schedule-followup")
 @observe(as_type="chain")
 @limiter.limit("3/minute")
-async def schedule_visit(http_request: Request, follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
+def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
     verify_patient_access(follow_up.patient_serial_number, doctor)
 
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.

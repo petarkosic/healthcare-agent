@@ -37,7 +37,7 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_patients(doctor: dict = Depends(get_current_doctor)):
+def get_patients(doctor: dict = Depends(get_current_doctor)):
     try:
         patients = patient_service.get_patients(doctor_serial_number=doctor["serial"])
 
@@ -48,7 +48,7 @@ async def get_patients(doctor: dict = Depends(get_current_doctor)):
 
 
 @router.post("")
-async def create_patient(
+def create_patient(
     patient: CreatePatient, doctor: dict = Depends(get_current_doctor)
 ):
     try:
@@ -62,7 +62,7 @@ async def create_patient(
 
 
 @router.get("/search")
-async def search_patient(
+def search_patient(
     patient_serial_number: str = Query(...),
     doctor: dict = Depends(get_current_doctor),
 ):
@@ -79,7 +79,7 @@ async def search_patient(
 
 
 @router.get("/{patient_serial}", response_model=PatientFullResponse)
-async def get_patient(
+def get_patient(
     patient_serial: str,
     doctor: dict = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
@@ -100,7 +100,7 @@ async def get_patient(
 
 @router.post("/{patient_serial}/notes")
 @observe()
-async def set_note(
+def set_note(
     patient_serial: str,
     note: Note,
     doctor: dict = Depends(get_current_doctor),
@@ -156,7 +156,7 @@ async def set_note(
 
 
 @router.post("/{patient_serial}/medications")
-async def add_medication(
+def add_medication(
     patient_serial: str,
     medication: AddMedication,
     doctor: dict = Depends(get_current_doctor),
@@ -177,7 +177,7 @@ async def add_medication(
 
 
 @router.put("/{patient_serial}/medications/{medication_id}")
-async def update_medication(
+def update_medication(
     patient_serial: str,
     medication_id: str,
     payload: UpdateMedication,
@@ -197,7 +197,7 @@ async def update_medication(
 
 
 @router.delete("/{patient_serial}/medications/{medication_id}")
-async def delete_medication(
+def delete_medication(
     patient_serial: str,
     medication_id: str,
     doctor: dict = Depends(get_current_doctor),
@@ -215,7 +215,7 @@ async def delete_medication(
 
 
 @router.post("/{patient_serial}/vitals")
-async def add_vitals(
+def add_vitals(
     patient_serial: str,
     vitals: AddVitalSigns,
     doctor: dict = Depends(get_current_doctor),
@@ -235,7 +235,7 @@ async def add_vitals(
 
 
 @router.post("/{patient_serial}/labs")
-async def add_lab(
+def add_lab(
     patient_serial: str,
     lab: AddLabResult,
     doctor: dict = Depends(get_current_doctor),
@@ -261,7 +261,7 @@ async def add_lab(
 
 
 @router.post("/{patient_serial}/diagnoses")
-async def add_diagnosis(
+def add_diagnosis(
     patient_serial: str,
     diagnosis: AddDiagnosis,
     doctor: dict = Depends(get_current_doctor),
@@ -287,7 +287,7 @@ async def add_diagnosis(
 
 
 @router.put("/{patient_serial}/allergies")
-async def update_allergies(
+def update_allergies(
     patient_serial: str,
     body: UpdateAllergies,
     doctor: dict = Depends(get_current_doctor),
@@ -308,7 +308,7 @@ async def update_allergies(
 
 
 @router.post("/visits")
-async def set_visit(visit: SetVisit, doctor: dict = Depends(get_current_doctor)):
+def set_visit(visit: SetVisit, doctor: dict = Depends(get_current_doctor)):
     try:
         visit.doctor_serial_number = doctor["serial"]
         result = patient_service.create_visit(visit)
@@ -322,7 +322,7 @@ async def set_visit(visit: SetVisit, doctor: dict = Depends(get_current_doctor))
 
 
 @router.put("/visits")
-async def update_visit(visit: UpdateVisit, doctor: dict = Depends(get_current_doctor)):
+def update_visit(visit: UpdateVisit, doctor: dict = Depends(get_current_doctor)):
     try:
         result = patient_service.update_visit(visit)
         

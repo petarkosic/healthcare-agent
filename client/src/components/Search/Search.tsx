@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router';
 import { useDebounce } from '../../hooks/useDebounce';
 import { getInitials } from '../../utils/utils';
 import { useSearchPatientsQuery } from '../../store/api/patientsApi';
+import { useAppSelector } from '../../store/hooks';
 import './Search.css';
 
 export interface SearchHandle {
@@ -18,6 +19,7 @@ export interface SearchHandle {
 export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 	const [query, setQuery] = useState('');
 	const navigate = useNavigate();
+	const session = useAppSelector((state) => state.session.session);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const debouncedQuery = useDebounce(query.trim(), 1000);
@@ -38,9 +40,21 @@ export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 		skip: !debouncedQuery,
 	});
 
-	const result = data?.[0] ?? null;
+	const result = debouncedQuery ? (data?.[0] ?? null) : null;
 	const notFound =
 		!isFetching && !!debouncedQuery && (isError || (data && data.length === 0));
+
+	const handleResultClick = () => {
+		if (!result) return;
+
+		if (
+			session &&
+			session.patientSerialNumber !== String(result.patient_serial_number)
+		)
+			return;
+
+		navigate(`/patients/${result.patient_serial_number}`);
+	};
 
 	return (
 		<div className='search-container'>
@@ -73,8 +87,14 @@ export const Search = forwardRef<SearchHandle, object>((_props, ref) => {
 
 			{result && !isFetching && (
 				<article
-					className='patient-card search-result-card'
-					onClick={() => navigate(`/patients/${result.patient_serial_number}`)}
+					className={`patient-card search-result-card${session && session.patientSerialNumber !== String(result.patient_serial_number) ? ' patient-card--locked' : ''}`}
+					data-locked-tip={
+						session &&
+						session.patientSerialNumber !== String(result.patient_serial_number)
+							? 'Session in progress — end current session first'
+							: undefined
+					}
+					onClick={handleResultClick}
 				>
 					<div className='identity'>
 						<div className='avatar'>{getInitials(result.full_name)}</div>

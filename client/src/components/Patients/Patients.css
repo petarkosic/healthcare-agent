@@ -31,6 +31,45 @@
 	border-color: #16a34a;
 }
 
+.patient-card--locked {
+	cursor: not-allowed;
+	position: relative;
+}
+
+.patient-card--locked::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(255, 255, 255, 0.6);
+	border-radius: inherit;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.patient-card--locked:hover {
+	box-shadow: none;
+	border-color: var(--border);
+	cursor: not-allowed;
+}
+
+.patient-card--locked[data-locked-tip]:hover::after {
+	content: attr(data-locked-tip);
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--bg-card);
+	color: var(--text-main);
+	border: 1px solid var(--border);
+	font-size: 0.75rem;
+	font-weight: normal;
+	white-space: nowrap;
+	padding: 0.5rem 0.75rem;
+	border-radius: var(--radius-sm);
+	pointer-events: none;
+	z-index: 100;
+}
+
 .session-active-badge {
 	display: inline-flex;
 	align-items: center;

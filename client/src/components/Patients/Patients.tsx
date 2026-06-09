@@ -17,6 +17,8 @@ export const Patients = () => {
 	}, []);
 
 	const handlePatientClick = (patientId: number) => {
+		if (session && session.patientSerialNumber !== String(patientId)) return;
+
 		navigate(`/patients/${patientId}`);
 	};
 
@@ -56,7 +58,8 @@ export const Patients = () => {
 				{patients.map((patient) => (
 					<article
 						key={patient.patient_serial_number}
-						className={`patient-card${session?.patientSerialNumber === String(patient.patient_serial_number) ? ' patient-card--active' : ''}`}
+						className={`patient-card${session?.patientSerialNumber === String(patient.patient_serial_number) ? ' patient-card--active' : session ? ' patient-card--locked' : ''}`}
+					data-locked-tip={session && session.patientSerialNumber !== String(patient.patient_serial_number) ? 'Session in progress — end current session first' : undefined}
 						onClick={() => handlePatientClick(patient.patient_serial_number)}
 					>
 						<div className='identity'>

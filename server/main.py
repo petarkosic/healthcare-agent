@@ -10,7 +10,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from middleware.audit import AuditLoggingMiddleware
+from middleware.audit import AuditLoggingMiddleware, audit_lifespan
 from routers import agents, auth, patients, google_auth
 from utils.langfuse_client import langfuse
 from utils.limiter import limiter
@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield
+    async with audit_lifespan(app):
+        yield
     langfuse.flush()
 
 

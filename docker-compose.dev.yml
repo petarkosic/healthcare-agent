@@ -36,18 +36,6 @@ services:
         condition: service_started
     networks:
       - ha-network
-    command:
-      [
-        'uv',
-        'run',
-        'fastapi',
-        'dev',
-        '--host',
-        '0.0.0.0',
-        '--port',
-        '8000',
-        '--reload',
-      ]
 
   client:
     build:
@@ -63,7 +51,6 @@ services:
       - ha-network
     environment:
       - VITE_API_URL=http://localhost:8000
-    command: ['npm', 'run', 'dev', '--', '--host', '0.0.0.0']
 
 networks:
   ha-network:

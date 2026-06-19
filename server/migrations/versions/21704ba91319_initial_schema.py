@@ -114,7 +114,7 @@ def upgrade() -> None:
             heart_rate                INTEGER      CONSTRAINT vital_signs_heart_rate_check               CHECK (heart_rate               BETWEEN 30  AND 250),
             temperature               DECIMAL(4,2) CONSTRAINT vital_signs_temperature_check              CHECK (temperature              BETWEEN 34  AND 43),
             respiratory_rate          INTEGER      CONSTRAINT vital_signs_respiratory_rate_check         CHECK (respiratory_rate         BETWEEN 8   AND 60),
-            oxygen_saturation         DECIMAL(4,2) CONSTRAINT vital_signs_oxygen_saturation_check        CHECK (oxygen_saturation        BETWEEN 70  AND 100),
+            oxygen_saturation         DECIMAL(5,2) CONSTRAINT vital_signs_oxygen_saturation_check        CHECK (oxygen_saturation        BETWEEN 70  AND 100),
             weight_kg                 DECIMAL(5,2) CONSTRAINT vital_signs_weight_kg_check                CHECK (weight_kg > 0),
             height_cm                 DECIMAL(5,2) CONSTRAINT vital_signs_height_cm_check                CHECK (height_cm > 0),
             bmi                       DECIMAL(5,2),

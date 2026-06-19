@@ -20,12 +20,12 @@ services:
       retries: 5
 
   chroma:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:1.5.9
     container_name: ha-chroma
     ports:
       - '8001:8000'
     volumes:
-      - chroma-data:/chroma/chroma_db
+      - chroma-data:/data
     networks:
       - ha-network
     healthcheck:

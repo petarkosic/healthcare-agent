@@ -187,7 +187,7 @@ class VitalSign(Base):
     heart_rate = Column(Integer)
     temperature = Column(Numeric(4, 2))
     respiratory_rate = Column(Integer)
-    oxygen_saturation = Column(Numeric(4, 2))
+    oxygen_saturation = Column(Numeric(5, 2))
     weight_kg = Column(Numeric(5, 2))
     height_cm = Column(Numeric(5, 2))
     bmi = Column(Numeric(5, 2))

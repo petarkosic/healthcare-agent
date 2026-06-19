@@ -56,5 +56,20 @@ class VitalSignsRepository(BaseRepository[VitalSignsResponse]):
                 conn.commit()
 
                 return str(vital_id)
-            
+
+    def get_vitals_by_visit(self, visit_id: str):
+        """Get all vital signs recorded for a visit"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT *
+                    FROM vital_signs
+                    WHERE visit_id = %s
+                    ORDER BY measurement_time ASC
+                """, (visit_id,))
+
+                columns = [desc[0] for desc in cur.description]
+                
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
+
 vital_signs_repository = VitalSignsRepository()

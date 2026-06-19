@@ -70,4 +70,23 @@ class DiagnosisRepository(BaseRepository):
                 
                 return str(diagnosis_id)
 
+    def get_diagnoses_by_visit(self, visit_id: str):
+        """Get all diagnoses linked to a visit"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        diag.*,
+                        d.first_name AS diagnosing_doctor_first_name,
+                        d.last_name AS diagnosing_doctor_last_name
+                    FROM diagnoses diag
+                    LEFT JOIN doctors d ON diag.diagnosing_doctors_serial_number = d.doctor_serial_number
+                    WHERE diag.visit_id = %s
+                    ORDER BY diag.diagnosed_date DESC
+                """, (visit_id,))
+
+                columns = [desc[0] for desc in cur.description]
+                
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
+
 diagnosis_repository = DiagnosisRepository()

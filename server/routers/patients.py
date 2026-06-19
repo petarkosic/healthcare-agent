@@ -1,6 +1,8 @@
 import logging
+import io
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from langfuse import observe
 
@@ -22,6 +24,7 @@ from utils.auth import get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
+from services.report_service import report_service
 
 logger = logging.getLogger(__name__)
 
@@ -325,10 +328,43 @@ def set_visit(visit: SetVisit, doctor: dict = Depends(get_current_doctor)):
 def update_visit(visit: UpdateVisit, doctor: dict = Depends(get_current_doctor)):
     try:
         result = patient_service.update_visit(visit)
-        
+
         return result
     except HTTPException:
         raise
     except Exception:
         logger.exception("Error updating visit")
         raise HTTPException(status_code=500, detail="Error updating visit")
+
+
+@router.get("/{patient_serial}/visits/{visit_id}/report")
+def get_visit_report(
+    patient_serial: str,
+    visit_id: str,
+    doctor: dict = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
+):
+    try:
+        report_data = report_service.build_report_data(
+            patient_serial=patient_serial,
+            visit_id=visit_id,
+        )
+        pdf_bytes = report_service.render_pdf(report_data)
+
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": "inline; filename=visit-report.pdf",
+                "Content-Length": str(len(pdf_bytes)),
+            },
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        logger.exception(
+            "Error generating report for patient %s visit %s",
+            patient_serial,
+            visit_id,
+        )
+        raise HTTPException(status_code=500, detail="Error generating report")

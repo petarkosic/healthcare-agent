@@ -69,5 +69,24 @@ class ClinicalNoteRepository(BaseRepository):
                 conn.commit()
 
                 return affected_rows > 0
-            
+
+    def get_notes_by_visit(self, visit_id: str):
+        """Get all clinical notes for a visit"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        cn.*,
+                        d.first_name AS doctor_first_name,
+                        d.last_name AS doctor_last_name
+                    FROM clinical_notes cn
+                    LEFT JOIN doctors d ON cn.doctor_serial_number = d.doctor_serial_number
+                    WHERE cn.visit_id = %s
+                    ORDER BY cn.created_at ASC
+                """, (visit_id,))
+
+                columns = [desc[0] for desc in cur.description]
+                
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
+
 clinical_note_repository = ClinicalNoteRepository()

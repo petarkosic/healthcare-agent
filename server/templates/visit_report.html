@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>
+			{{ patient.first_name }} {{ patient.last_name }} — Visit Report
+		</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 10pt;
+				color: #1e293b;
+				background: #fff;
+				padding: 14mm 18mm;
+			}
+
+			/* ── Top accent ── */
+			.page-accent {
+				height: 4px;
+				background: #1e40af;
+				margin: -14mm -18mm 14px;
+			}
+
+			/* ── Header ── */
+			.report-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-end;
+				padding-bottom: 10px;
+				margin-bottom: 16px;
+				border-bottom: 1.5px solid #1e40af;
+			}
+			.patient-name {
+				font-size: 20pt;
+				font-weight: 700;
+				color: #0f172a;
+				letter-spacing: -0.02em;
+				line-height: 1;
+			}
+			.visit-datetime {
+				font-size: 10pt;
+				color: #475569;
+				margin-top: 4px;
+			}
+			.report-meta {
+				text-align: right;
+				font-size: 8.5pt;
+				color: #475569;
+				line-height: 1.6;
+			}
+			.meta-label {
+				font-size: 7pt;
+				text-transform: uppercase;
+				letter-spacing: 0.06em;
+				color: #94a3b8;
+				display: block;
+				line-height: 1.2;
+				margin-top: 3px;
+			}
+
+			/* ── Sections ── */
+			.section {
+				margin-bottom: 14px;
+				page-break-inside: avoid;
+			}
+			.section-title {
+				font-size: 7.5pt;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				color: #1e40af;
+				padding-left: 8px;
+				border-left: 3px solid #1e40af;
+				margin-bottom: 7px;
+				line-height: 1.4;
+			}
+
+			/* ── Unified table ── */
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 9pt;
+			}
+			thead tr {
+				background: #f1f5f9;
+				border-bottom: 1.5px solid #cbd5e1;
+			}
+			th {
+				text-align: left;
+				padding: 5px 10px;
+				font-size: 7.5pt;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				color: #64748b;
+			}
+			td {
+				padding: 5px 10px;
+				border-bottom: 1px solid #f1f5f9;
+				vertical-align: top;
+			}
+			tr:last-child td {
+				border-bottom: none;
+			}
+
+			/* Label column used in kv tables */
+			.td-label {
+				width: 130px;
+				font-size: 7.5pt;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+				color: #94a3b8;
+				white-space: nowrap;
+			}
+
+			/* ── Badges ── */
+			.badge {
+				display: inline-block;
+				padding: 1px 7px;
+				border-radius: 3px;
+				font-size: 8pt;
+				font-weight: 600;
+			}
+			.badge-normal {
+				background: #f0fdf4;
+				color: #15803d;
+			}
+			.badge-abnormal {
+				background: #fff7ed;
+				color: #c2410c;
+			}
+			.badge-critical {
+				background: #fef2f2;
+				color: #dc2626;
+			}
+			.badge-pending {
+				background: #f8fafc;
+				color: #64748b;
+			}
+			.badge-active {
+				background: #eff6ff;
+				color: #1d4ed8;
+			}
+			.badge-primary {
+				background: #fef3c7;
+				color: #92400e;
+			}
+			.badge-chronic {
+				background: #fdf4ff;
+				color: #7e22ce;
+			}
+			.badge-secondary {
+				background: #f8fafc;
+				color: #475569;
+			}
+			.badge-acute {
+				background: #fff1f2;
+				color: #be123c;
+			}
+
+			.empty {
+				color: #94a3b8;
+				font-style: italic;
+				font-size: 9pt;
+			}
+
+			/* ── Footer ── */
+			.report-footer {
+				margin-top: 18px;
+				padding-top: 7px;
+				border-top: 1px solid #e2e8f0;
+				display: flex;
+				justify-content: space-between;
+				font-size: 7.5pt;
+				color: #94a3b8;
+			}
+
+			@media print {
+				* {
+					-webkit-print-color-adjust: exact !important;
+					print-color-adjust: exact !important;
+				}
+				body {
+					padding: 0;
+				}
+				.page-accent {
+					margin: 0 0 14px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="page-accent"></div>
+
+		<!-- HEADER -->
+		<div class="report-header">
+			<div>
+				<div class="patient-name">
+					{{ patient.first_name }} {{ patient.last_name }}
+				</div>
+				<div class="visit-datetime">{{ visit.visit_date | fmt_datetime }}</div>
+			</div>
+			<div class="report-meta">
+				<span class="meta-label">Generated</span>
+				{{ generated_at }}
+				<span class="meta-label">Physician</span>
+				Dr. {{ visit.doctor_first_name }} {{ visit.doctor_last_name }}
+				<span class="meta-label">Specialty</span>
+				{{ visit.specialty }}
+			</div>
+		</div>
+
+		<!-- PATIENT INFORMATION -->
+		<div class="section">
+			<div class="section-title">Patient Information</div>
+			<table>
+				<tbody>
+					<tr>
+						<td class="td-label">Full Name</td>
+						<td>{{ patient.first_name }} {{ patient.last_name }}</td>
+						<td class="td-label">Date of Birth</td>
+						<td>{{ patient.date_of_birth | fmt_date }}</td>
+					</tr>
+					<tr>
+						<td class="td-label">Gender</td>
+						<td>{{ patient.gender or '—' }}</td>
+						<td class="td-label">Blood Type</td>
+						<td>{{ patient.blood_type or '—' }}</td>
+					</tr>
+					{% if patient.allergies %}
+					<tr>
+						<td class="td-label">Allergies</td>
+						<td colspan="3">{{ patient.allergies | join(', ') }}</td>
+					</tr>
+					{% endif %} {% if patient.chronic_conditions %}
+					<tr>
+						<td class="td-label">Conditions</td>
+						<td colspan="3">{{ patient.chronic_conditions | join(', ') }}</td>
+					</tr>
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- VISIT SUMMARY -->
+		<div class="section">
+			<div class="section-title">Visit Summary</div>
+			<table>
+				<tbody>
+					<tr>
+						<td class="td-label">Date &amp; Time</td>
+						<td>{{ visit.visit_date | fmt_datetime }}</td>
+						<td class="td-label">Visit Type</td>
+						<td style="text-transform: capitalize">
+							{{ visit.visit_type | replace('_', ' ') if visit.visit_type else
+							'—' }}
+						</td>
+					</tr>
+					<tr>
+						<td class="td-label">Location</td>
+						<td>{{ visit.location or '—' }}</td>
+						<td class="td-label">Duration</td>
+						<td>
+							{% if visit.duration_minutes %}{{ visit.duration_minutes }} min{%
+							else %}—{% endif %}
+						</td>
+					</tr>
+					{% if visit.chief_complaint %}
+					<tr>
+						<td class="td-label">Chief Complaint</td>
+						<td colspan="3">{{ visit.chief_complaint }}</td>
+					</tr>
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+
+		<!-- VITAL SIGNS -->
+		<div class="section">
+			<div class="section-title">Vital Signs</div>
+			{% if vitals %}
+			<table>
+				<thead>
+					<tr>
+						<th>Measurement Time</th>
+						<th>BP (mmHg)</th>
+						<th>HR (bpm)</th>
+						<th>Temp (°C)</th>
+						<th>O₂ Sat (%)</th>
+						<th>Weight (kg)</th>
+						<th>Pain</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for v in vitals %}
+					<tr>
+						<td>{{ v.measurement_time | fmt_datetime }}</td>
+						<td>
+							{% if v.blood_pressure_systolic and v.blood_pressure_diastolic %}
+							{{ v.blood_pressure_systolic }}/{{ v.blood_pressure_diastolic }}
+							{% else %}—{% endif %}
+						</td>
+						<td>{{ v.heart_rate or '—' }}</td>
+						<td>{{ v.temperature or '—' }}</td>
+						<td>{{ v.oxygen_saturation or '—' }}</td>
+						<td>{{ v.weight_kg or '—' }}</td>
+						<td>
+							{% if v.pain_level is not none %}{{ v.pain_level }}/10{% else
+							%}—{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<span class="empty">No vital signs recorded for this visit.</span>
+			{% endif %}
+		</div>
+
+		<!-- DIAGNOSES -->
+		<div class="section">
+			<div class="section-title">Diagnoses</div>
+			{% if diagnoses %}
+			<table>
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Diagnosis</th>
+						<th>Type</th>
+						<th>Status</th>
+						<th>Date</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for d in diagnoses %}
+					<tr>
+						<td>{{ d.diagnosis_code or '—' }}</td>
+						<td>{{ d.diagnosis_name }}</td>
+						<td>
+							<span class="badge badge-{{ d.diagnosis_type or 'pending' }}">
+								{{ (d.diagnosis_type or '—') | replace('_', ' ') | title }}
+							</span>
+						</td>
+						<td>{{ d.status | title }}</td>
+						<td>{{ d.diagnosed_date | fmt_date }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<span class="empty">No diagnoses recorded for this visit.</span>
+			{% endif %}
+		</div>
+
+		<!-- CLINICAL NOTES -->
+		<div class="section">
+			<div class="section-title">Clinical Notes</div>
+			{% if notes %}
+			<table>
+				<thead>
+					<tr>
+						<th style="width: 160px">Note Type</th>
+						<th>Summary</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for note in notes %}
+					<tr>
+						<td style="color: #64748b; font-size: 8.5pt">
+							{{ note.note_type | replace('_', ' ') | title }}
+						</td>
+						<td>{{ note.summary }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<span class="empty">No clinical notes recorded for this visit.</span>
+			{% endif %}
+		</div>
+
+		<!-- LAB RESULTS -->
+		<div class="section">
+			<div class="section-title">Lab Results</div>
+			{% if labs %}
+			<table>
+				<thead>
+					<tr>
+						<th>Test</th>
+						<th>Result</th>
+						<th>Unit</th>
+						<th>Reference</th>
+						<th>Status</th>
+						<th>Date</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for lab in labs %}
+					<tr>
+						<td>{{ lab.test_name }}</td>
+						<td>{{ lab.result_value or '—' }}</td>
+						<td>{{ lab.unit or '—' }}</td>
+						<td>{{ lab.reference_range or '—' }}</td>
+						<td>
+							<span class="badge badge-{{ lab.result_status or 'pending' }}">
+								{{ (lab.result_status or 'pending') | title }}
+							</span>
+						</td>
+						<td>{{ lab.tested_date | fmt_date }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<span class="empty">No lab results recorded for this visit.</span>
+			{% endif %}
+		</div>
+
+		<!-- ACTIVE MEDICATIONS -->
+		<div class="section">
+			<div class="section-title">Active Medications</div>
+			{% if medications %}
+			<table>
+				<thead>
+					<tr>
+						<th>Medication</th>
+						<th>Dosage</th>
+						<th>Frequency</th>
+						<th>Prescribed For</th>
+						<th>Start Date</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for med in medications %}
+					<tr>
+						<td>
+							{{ med.medication_name }} {% if med.generic_name and
+							med.generic_name != med.medication_name %}
+							<br /><span style="font-size: 8pt; color: #64748b"
+								>({{ med.generic_name }})</span
+							>
+							{% endif %}
+						</td>
+						<td>{{ med.dosage or '—' }}</td>
+						<td>{{ med.frequency or '—' }}</td>
+						<td>{{ med.prescribed_for or '—' }}</td>
+						<td>{{ med.start_date | fmt_date }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<span class="empty">No active medications on record.</span>
+			{% endif %}
+		</div>
+
+		<!-- NEXT APPOINTMENT -->
+		<div class="section">
+			<div class="section-title">Next Appointment</div>
+			{% if next_visit %}
+			<table>
+				<tbody>
+					<tr>
+						<td class="td-label">Date &amp; Time</td>
+						<td>{{ next_visit.visit_date | fmt_datetime }}</td>
+						<td class="td-label">Type</td>
+						<td style="text-transform: capitalize">
+							{{ next_visit.visit_type | replace('_', ' ') if
+							next_visit.visit_type else '—' }}
+						</td>
+					</tr>
+					<tr>
+						<td class="td-label">Location</td>
+						<td>{{ next_visit.location or '—' }}</td>
+						<td class="td-label">Doctor</td>
+						<td>
+							Dr. {{ next_visit.doctor_first_name }} {{
+							next_visit.doctor_last_name }}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			{% else %}
+			<span class="empty">No upcoming appointments scheduled.</span>
+			{% endif %}
+		</div>
+
+		<!-- FOOTER -->
+		<div class="report-footer">
+			<span>Generated {{ generated_at }}</span>
+			<span
+				>{{ patient.first_name }} {{ patient.last_name }} · {{
+				patient.patient_serial_number }}</span
+			>
+		</div>
+	</body>
+</html>

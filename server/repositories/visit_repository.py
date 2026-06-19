@@ -94,5 +94,55 @@ class VisitRepository(BaseRepository[VisitResponse]):
                 visit_columns = [desc[0] for desc in cur.description]
 
                 return [dict(zip(visit_columns, row)) for row in cur.fetchall()]
-            
+
+    def get_visit_by_id(self, visit_id: str):
+        """Get a single visit with doctor info by visit_id"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        v.*,
+                        d.first_name AS doctor_first_name,
+                        d.last_name AS doctor_last_name,
+                        d.specialty
+                    FROM visits v
+                    JOIN doctors d ON v.doctor_serial_number = d.doctor_serial_number
+                    WHERE v.visit_id = %s
+                """, (visit_id,))
+
+                row = cur.fetchone()
+                if not row:
+                    return None
+
+                columns = [desc[0] for desc in cur.description]
+
+                return dict(zip(columns, row))
+
+    def get_next_scheduled_visit(self, patient_serial_number: str):
+        """Get the earliest future scheduled visit for a patient"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        v.*,
+                        d.first_name AS doctor_first_name,
+                        d.last_name AS doctor_last_name,
+                        d.specialty
+                    FROM visits v
+                    JOIN doctors d ON v.doctor_serial_number = d.doctor_serial_number
+                    WHERE v.patient_serial_number = %s
+                      AND v.status = 'scheduled'
+                      AND v.visit_date > NOW()
+                    ORDER BY v.visit_date ASC
+                    LIMIT 1
+                """, (patient_serial_number,))
+
+                row = cur.fetchone()
+                if not row:
+                    return None
+
+                columns = [desc[0] for desc in cur.description]
+                
+                return dict(zip(columns, row))
+
 visit_repository = VisitRepository()

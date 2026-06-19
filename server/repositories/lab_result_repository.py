@@ -60,4 +60,23 @@ class LabResultRepository(BaseRepository):
 
                 return str(lab_id)
 
+    def get_labs_by_visit(self, visit_id: str):
+        """Get all lab results linked to a visit"""
+        with self.db_manager.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        l.*,
+                        d.first_name AS ordering_doctor_first_name,
+                        d.last_name AS ordering_doctor_last_name
+                    FROM lab_results l
+                    LEFT JOIN doctors d ON l.ordering_doctors_serial_number = d.doctor_serial_number
+                    WHERE l.visit_id = %s
+                    ORDER BY l.tested_date ASC
+                """, (visit_id,))
+
+                columns = [desc[0] for desc in cur.description]
+                
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
+
 lab_result_repository = LabResultRepository()

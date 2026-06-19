@@ -195,15 +195,17 @@ export const VisitModal = ({
 	return (
 		<div className='modal-overlay' onClick={isSubmitting ? undefined : onClose}>
 			<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-				<div className='modal-header'>
+				<div className='visit-modal-header'>
 					<h2>Visit Details</h2>
-					<button
-						className='modal-close'
-						onClick={isSubmitting ? undefined : onClose}
-						disabled={isSubmitting}
-					>
-						&times;
-					</button>
+					<div className='modal-header-actions'>
+						<button
+							className='modal-close'
+							onClick={isSubmitting ? undefined : onClose}
+							disabled={isSubmitting}
+						>
+							&times;
+						</button>
+					</div>
 				</div>
 
 				{view === 'details' && (

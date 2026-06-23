@@ -82,7 +82,7 @@ export const SidebarRecommendations = ({
 			const res = await scheduleFollowup({
 				patient_serial_number: patient_id,
 				doctor_serial_number: doctorSerialNumber,
-				visit_date: selectedDate,
+				visit_date: startDate.toISOString().slice(0, 19),
 				visit_type: 'followup',
 				summary: selectedRecommendation?.follow_up?.reason ?? '',
 				start_time: startDate.toISOString(),

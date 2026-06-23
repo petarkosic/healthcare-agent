@@ -25,6 +25,7 @@ class DatabaseManager:
             f" dbname={os.getenv('POSTGRES_DB', 'healthcare_agent')}"
             f" user={os.getenv('POSTGRES_USER', 'postgres')}"
             f" password={os.getenv('POSTGRES_PASSWORD', 'postgres')}"
+            f" options='-c timezone=UTC'"
         )
         
         self._pool = ConnectionPool(

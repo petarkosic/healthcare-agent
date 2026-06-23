@@ -45,7 +45,7 @@ def get_credentials(doctor_serial: str) -> Credentials:
     )
 
     if expiry:
-        creds.expiry = expiry
+        creds.expiry = expiry.replace(tzinfo=None) if expiry.tzinfo else expiry
 
     if creds.expired and creds.refresh_token:
         try:
@@ -85,8 +85,8 @@ def create_event(
         event = {
             "summary": summary,
             "description": description,
-            "start": {"dateTime": start_time, "timeZone": "GMT+01:00"},
-            "end": {"dateTime": end_time, "timeZone": "GMT+01:00"},
+            "start": {"dateTime": start_time},
+            "end": {"dateTime": end_time},
         }
 
         created = service.events().insert(calendarId="primary", body=event).execute()

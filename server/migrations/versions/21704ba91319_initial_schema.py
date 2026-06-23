@@ -64,8 +64,8 @@ def upgrade() -> None:
             emergency_contact_phone VARCHAR(20),
             allergies               TEXT[],
             chronic_conditions      TEXT[],
-            created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at              TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            updated_at              TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -79,7 +79,7 @@ def upgrade() -> None:
             license_number        VARCHAR(50) UNIQUE NOT NULL,
             email                 VARCHAR(255) UNIQUE,
             phone                 VARCHAR(20),
-            created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -88,7 +88,7 @@ def upgrade() -> None:
             visit_id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             patient_serial_number VARCHAR(8) NOT NULL REFERENCES patients(patient_serial_number) ON DELETE CASCADE,
             doctor_serial_number  VARCHAR(8) NOT NULL REFERENCES doctors(doctor_serial_number)  ON DELETE CASCADE,
-            visit_date            TIMESTAMP NOT NULL,
+            visit_date            TIMESTAMPTZ NOT NULL,
             visit_type            VARCHAR(50) NOT NULL CONSTRAINT visits_visit_type_check CHECK (visit_type IN (
                                       'checkup', 'followup', 'emergency', 'specialist', 'vaccination',
                                       'routine', 'urgent_care', 'surgical', 'telehealth'
@@ -99,8 +99,8 @@ def upgrade() -> None:
                                   )),
             duration_minutes      INTEGER,
             location              VARCHAR(100),
-            created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -108,7 +108,7 @@ def upgrade() -> None:
         CREATE TABLE vital_signs (
             vital_id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             visit_id                  UUID NOT NULL REFERENCES visits(visit_id) ON DELETE CASCADE,
-            measurement_time          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            measurement_time          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
             blood_pressure_systolic   INTEGER      CONSTRAINT vital_signs_blood_pressure_systolic_check  CHECK (blood_pressure_systolic  BETWEEN 50  AND 250),
             blood_pressure_diastolic  INTEGER      CONSTRAINT vital_signs_blood_pressure_diastolic_check CHECK (blood_pressure_diastolic BETWEEN 30  AND 150),
             heart_rate                INTEGER      CONSTRAINT vital_signs_heart_rate_check               CHECK (heart_rate               BETWEEN 30  AND 250),
@@ -139,8 +139,8 @@ def upgrade() -> None:
                                   )),
             prescribed_for        TEXT,
             instructions          TEXT,
-            created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -156,10 +156,10 @@ def upgrade() -> None:
             result_status                    VARCHAR(20) CONSTRAINT lab_results_result_status_check CHECK (result_status IN (
                                                  'normal', 'abnormal', 'critical', 'pending'
                                              )),
-            tested_date                      TIMESTAMP NOT NULL,
-            received_date                    TIMESTAMP,
+            tested_date                      TIMESTAMPTZ NOT NULL,
+            received_date                    TIMESTAMPTZ,
             ordering_doctors_serial_number   VARCHAR(8) REFERENCES doctors(doctor_serial_number),
-            created_at                       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at                       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -174,8 +174,8 @@ def upgrade() -> None:
                                  )),
             note_text            TEXT NOT NULL,
             summary              TEXT,
-            created_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at           TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            updated_at           TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -195,7 +195,7 @@ def upgrade() -> None:
             diagnosed_date                   DATE NOT NULL,
             resolved_date                    DATE,
             diagnosing_doctors_serial_number VARCHAR(8) REFERENCES doctors(doctor_serial_number),
-            created_at                       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at                       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -363,7 +363,7 @@ def upgrade() -> None:
     op.execute("ALTER TABLE doctors ADD COLUMN IF NOT EXISTS password_hash       VARCHAR(255)")
     op.execute("ALTER TABLE doctors ADD COLUMN IF NOT EXISTS google_access_token  TEXT")
     op.execute("ALTER TABLE doctors ADD COLUMN IF NOT EXISTS google_refresh_token TEXT")
-    op.execute("ALTER TABLE doctors ADD COLUMN IF NOT EXISTS google_token_expiry  TIMESTAMP")
+    op.execute("ALTER TABLE doctors ADD COLUMN IF NOT EXISTS google_token_expiry  TIMESTAMPTZ")
 
 
 def downgrade() -> None:

@@ -162,15 +162,15 @@ export const VisitModal = ({
 		try {
 			await dispatch(ensureGoogleConnected()).unwrap();
 
-			const startTime = rescheduleDate + ':00';
-			const endDate = new Date(rescheduleDate);
-			endDate.setMinutes(endDate.getMinutes() + (visit.duration_minutes || 30));
-			const endTime = formatDateTimeLocal(endDate) + ':00';
+			const localStart = new Date(rescheduleDate);
+			const localEnd = new Date(localStart.getTime() + (visit.duration_minutes || 30) * 60 * 1000);
+			const startTime = localStart.toISOString();
+			const endTime = localEnd.toISOString();
 
 			await scheduleFollowup({
 				patient_serial_number: visit.patient_serial_number,
 				doctor_serial_number: doctorSerialNumber,
-				visit_date: startTime,
+				visit_date: localStart.toISOString().slice(0, 19),
 				visit_type: visit.visit_type,
 				summary: `${visit.visit_type} visit`,
 				start_time: startTime,
@@ -220,7 +220,6 @@ export const VisitModal = ({
 										day: 'numeric',
 										hour: '2-digit',
 										minute: '2-digit',
-										timeZone: 'UTC',
 									})}
 								</span>
 							</div>

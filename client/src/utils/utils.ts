@@ -1,11 +1,10 @@
 export const formatDate = (dateStr: string) => {
-	return new Date(dateStr).toLocaleDateString('en-US', {
+	return new Date(dateStr).toLocaleString('en-US', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
 		hour: '2-digit',
 		minute: '2-digit',
-		timeZone: 'UTC',
 	});
 };
 
@@ -14,7 +13,6 @@ export const formatDateOnly = (dateStr: string) => {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
-		timeZone: 'UTC',
 	});
 };
 

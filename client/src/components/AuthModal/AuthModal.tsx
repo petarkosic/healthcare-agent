@@ -115,7 +115,7 @@ export const AuthModal = () => {
 				login({ serial: data.doctor_serial_number, name: data.doctor_name }),
 			);
 			handleClose();
-			navigate('/patients');
+			navigate('/dashboard');
 		} catch (err: unknown) {
 			const status = (err as { status?: number })?.status;
 			const detail = (err as { data?: { detail?: string } })?.data?.detail;

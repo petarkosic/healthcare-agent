@@ -18,6 +18,7 @@ const AddPatient = lazy(() =>
 const PatientProfile = lazy(
 	() => import('../components/PatientProfile/PatientProfile'),
 );
+const Dashboard = lazy(() => import('../components/Dashboard/Dashboard'));
 
 const RouteLoader = (
 	<div className='route-loader'>
@@ -44,6 +45,16 @@ const router = createBrowserRouter([
 			</div>
 		),
 		children: [
+			{
+				path: '/dashboard',
+				element: (
+					<ProtectedRoute>
+						<Suspense fallback={RouteLoader}>
+							<Dashboard />
+						</Suspense>
+					</ProtectedRoute>
+				),
+			},
 			{
 				path: '/patients',
 				element: (

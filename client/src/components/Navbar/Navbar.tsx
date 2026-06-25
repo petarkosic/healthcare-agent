@@ -225,6 +225,23 @@ export const Navbar = () => {
 						</span>
 						<span className='navbar-brand-text'>MediFlow</span>
 					</Link>
+
+					{doctorSerialNumber && (
+						<nav className='navbar-nav'>
+							<Link
+								to='/dashboard'
+								className={`navbar-nav-link${location.pathname === '/dashboard' ? ' navbar-nav-link--active' : ''}`}
+							>
+								Dashboard
+							</Link>
+							<Link
+								to='/patients'
+								className={`navbar-nav-link${location.pathname.startsWith('/patients') ? ' navbar-nav-link--active' : ''}`}
+							>
+								Patients
+							</Link>
+						</nav>
+					)}
 				</div>
 
 				{(session || isPatientProfile) && location.pathname !== '/' && (

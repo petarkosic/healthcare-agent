@@ -1,0 +1,44 @@
+import { baseApi } from './baseApi';
+
+export interface DashboardStats {
+	today_scheduled: number;
+	today_completed: number;
+	today_cancelled: number;
+	today_no_show: number;
+	active_medications_total: number;
+}
+
+export interface ScheduleVisit {
+	visit_id: string;
+	visit_date: string;
+	visit_type: string;
+	status: string;
+	duration_minutes: number;
+	location: string;
+}
+
+export const dashboardApi = baseApi.injectEndpoints({
+	endpoints: (builder) => ({
+		getDashboardStats: builder.query<DashboardStats, { start: string; end: string }>({
+			query: ({ start, end }) => ({
+				url: `/api/dashboard/stats?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+			}),
+		}),
+		getDashboardSchedule: builder.query<ScheduleVisit[], { start: string; end: string }>({
+			query: ({ start, end }) => ({
+				url: `/api/dashboard/schedule?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+			}),
+		}),
+	}),
+});
+
+export const { useGetDashboardStatsQuery, useGetDashboardScheduleQuery } =
+	dashboardApi;
+
+export function dayBounds(d: Date): { start: string; end: string } {
+	const start = new Date(d);
+	start.setHours(0, 0, 0, 0);
+	const end = new Date(d);
+	end.setHours(24, 0, 0, 0);
+	return { start: start.toISOString(), end: end.toISOString() };
+}

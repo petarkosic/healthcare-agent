@@ -1,7 +1,9 @@
 .dashboard {
+	width: 100%;
 	padding: 2rem;
-	max-width: 1200px;
+	max-width: 1440px;
 	margin: 0 auto;
+	box-sizing: border-box;
 }
 
 .dashboard-greeting {

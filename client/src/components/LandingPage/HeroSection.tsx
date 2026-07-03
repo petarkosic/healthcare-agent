@@ -11,7 +11,7 @@ const HeroSection: React.FC = () => {
 
 	const handleDashboard = () => {
 		if (doctorSerialNumber) {
-			navigate('/patients');
+			navigate('/dashboard');
 		} else {
 			dispatch(openModal());
 		}

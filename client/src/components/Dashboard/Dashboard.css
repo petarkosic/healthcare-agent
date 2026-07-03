@@ -186,7 +186,32 @@
 	}
 
 	.visit-item {
+		display: grid;
+		grid-auto-flow: column;
+		grid-template-rows: repeat(3, auto);
+		column-gap: 1rem;
+		row-gap: 0.35rem;
+		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem;
+	}
+
+	.visit-time {
+		order: 1;
+	}
+
+	.visit-type-badge {
+		order: 2;
+		justify-self: start;
+	}
+
+	.visit-status {
+		order: 3;
+	}
+
+	.visit-meta {
+		order: 4;
+		align-self: center;
+		text-align: right;
 	}
 }

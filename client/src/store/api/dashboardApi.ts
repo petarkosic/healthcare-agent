@@ -18,6 +18,7 @@ export interface ScheduleVisit {
 	status: string;
 	duration_minutes: number;
 	location: string;
+	chief_complaint: string | null;
 }
 
 export interface BreakdownPoint {

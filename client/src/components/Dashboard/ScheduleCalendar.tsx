@@ -87,6 +87,9 @@ export const ScheduleCalendar = ({
 								>
 									{v.status}
 								</span>
+								{v.chief_complaint && (
+									<span className='visit-reason'>{v.chief_complaint}</span>
+								)}
 							</li>
 						))}
 					</ul>

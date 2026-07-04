@@ -80,7 +80,7 @@ class DashboardRepository(BaseRepository):
     def get_schedule_for_date(self, doctor_serial: str, start: datetime, end: datetime) -> list[dict]:
         rows = self._execute_query(
             """
-            SELECT visit_id, visit_date, visit_type, status, duration_minutes, location
+            SELECT visit_id, visit_date, visit_type, status, duration_minutes, location, chief_complaint
             FROM visits
             WHERE doctor_serial_number = %s
               AND visit_date >= %s

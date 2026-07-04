@@ -198,6 +198,13 @@
 	text-transform: capitalize;
 }
 
+.visit-reason {
+	flex-basis: 100%;
+	font-size: 0.8rem;
+	font-style: italic;
+	color: var(--text-muted, #64748b);
+}
+
 @media (max-width: 768px) {
 	.dashboard {
 		padding: 1rem;
@@ -262,6 +269,13 @@
 	.visit-meta {
 		order: 4;
 		align-self: center;
-		text-align: right;
+		text-align: left;
+		grid-column: 2 / 4;
+	}
+
+	.visit-reason {
+		order: 5;
+		grid-column: 2 / 4;
+		grid-row: 2 / 4;
 	}
 }

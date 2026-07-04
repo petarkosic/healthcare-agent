@@ -16,3 +16,8 @@ async def get_stats(start: datetime, end: datetime, doctor: dict = Depends(get_c
 @router.get("/schedule")
 async def get_schedule(start: datetime, end: datetime, doctor: dict = Depends(get_current_doctor)):
     return dashboard_repository.get_schedule_for_date(doctor["serial"], start, end)
+
+
+@router.get("/breakdown")
+async def get_breakdown(doctor: dict = Depends(get_current_doctor)):
+    return dashboard_repository.get_visit_type_breakdown(doctor["serial"])

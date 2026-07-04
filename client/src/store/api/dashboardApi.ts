@@ -6,6 +6,9 @@ export interface DashboardStats {
 	today_cancelled: number;
 	today_no_show: number;
 	active_medications_total: number;
+	active_patients: number;
+	critical_labs_recent: number;
+	upcoming_7_days: number;
 }
 
 export interface ScheduleVisit {
@@ -17,23 +20,40 @@ export interface ScheduleVisit {
 	location: string;
 }
 
+export interface BreakdownPoint {
+	name: string;
+	value: number;
+}
+
 export const dashboardApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
-		getDashboardStats: builder.query<DashboardStats, { start: string; end: string }>({
+		getDashboardStats: builder.query<
+			DashboardStats,
+			{ start: string; end: string }
+		>({
 			query: ({ start, end }) => ({
 				url: `/api/dashboard/stats?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
 			}),
 		}),
-		getDashboardSchedule: builder.query<ScheduleVisit[], { start: string; end: string }>({
+		getDashboardSchedule: builder.query<
+			ScheduleVisit[],
+			{ start: string; end: string }
+		>({
 			query: ({ start, end }) => ({
 				url: `/api/dashboard/schedule?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
 			}),
 		}),
+		getDashboardBreakdown: builder.query<BreakdownPoint[], void>({
+			query: () => ({ url: '/api/dashboard/breakdown' }),
+		}),
 	}),
 });
 
-export const { useGetDashboardStatsQuery, useGetDashboardScheduleQuery } =
-	dashboardApi;
+export const {
+	useGetDashboardStatsQuery,
+	useGetDashboardScheduleQuery,
+	useGetDashboardBreakdownQuery,
+} = dashboardApi;
 
 export function dayBounds(d: Date): { start: string; end: string } {
 	const start = new Date(d);

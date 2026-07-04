@@ -12,23 +12,44 @@ class DashboardRepository(BaseRepository):
         rows = self._execute_query(
             """
             SELECT
-                COUNT(*) FILTER (WHERE status = 'scheduled') AS today_scheduled,
-                COUNT(*) FILTER (WHERE status = 'completed') AS today_completed,
-                COUNT(*) FILTER (WHERE status = 'cancelled') AS today_cancelled,
-                COUNT(*) FILTER (WHERE status = 'no-show')   AS today_no_show,
+                COUNT(*) FILTER (WHERE status = 'scheduled')  AS today_scheduled,
+                COUNT(*) FILTER (WHERE status = 'completed')  AS today_completed,
+                COUNT(*) FILTER (WHERE status = 'cancelled')  AS today_cancelled,
+                COUNT(*) FILTER (WHERE status = 'no-show')    AS today_no_show,
                 (
                     SELECT COUNT(*)
                     FROM medications
                     WHERE doctor_serial_number = %s
                       AND status = 'active'
                       AND (end_date IS NULL OR end_date >= CURRENT_DATE)
-                ) AS active_medications_total
+                ) AS active_medications_total,
+                (
+                    SELECT COUNT(DISTINCT patient_serial_number)
+                    FROM visits
+                    WHERE doctor_serial_number = %s
+                      AND visit_date >= NOW() - INTERVAL '180 days'
+                ) AS active_patients,
+                (
+                    SELECT COUNT(*)
+                    FROM lab_results
+                    WHERE ordering_doctors_serial_number = %s
+                      AND result_status = 'critical'
+                      AND received_date >= NOW() - INTERVAL '30 days'
+                ) AS critical_labs_recent,
+                (
+                    SELECT COUNT(*)
+                    FROM visits
+                    WHERE doctor_serial_number = %s
+                      AND visit_date >= NOW()
+                      AND visit_date < NOW() + INTERVAL '7 days'
+                      AND status = 'scheduled'
+                ) AS upcoming_7_days
             FROM visits
             WHERE doctor_serial_number = %s
               AND visit_date >= %s
               AND visit_date < %s
             """,
-            (doctor_serial, doctor_serial, start, end),
+            (doctor_serial, doctor_serial, doctor_serial, doctor_serial, doctor_serial, start, end),
         )
         row = rows[0] if rows else {}
         return {
@@ -37,7 +58,24 @@ class DashboardRepository(BaseRepository):
             "today_cancelled": int(row.get("today_cancelled", 0)),
             "today_no_show": int(row.get("today_no_show", 0)),
             "active_medications_total": int(row.get("active_medications_total", 0)),
+            "active_patients": int(row.get("active_patients", 0)),
+            "critical_labs_recent": int(row.get("critical_labs_recent", 0)),
+            "upcoming_7_days": int(row.get("upcoming_7_days", 0)),
         }
+
+    def get_visit_type_breakdown(self, doctor_serial: str) -> list[dict]:
+        """Visit count by type for the last 90 days."""
+        return self._execute_query(
+            """
+            SELECT visit_type AS name, COUNT(*) AS value
+            FROM visits
+            WHERE doctor_serial_number = %s
+              AND visit_date >= NOW() - INTERVAL '90 days'
+            GROUP BY visit_type
+            ORDER BY value DESC
+            """,
+            (doctor_serial,),
+        )
 
     def get_schedule_for_date(self, doctor_serial: str, start: datetime, end: datetime) -> list[dict]:
         rows = self._execute_query(

@@ -77,6 +77,38 @@ class DashboardRepository(BaseRepository):
             (doctor_serial,),
         )
 
+    def get_lab_alerts(self, doctor_serial: str) -> list[dict]:
+        """Critical and abnormal labs ordered by this doctor, last 30 days, newest first."""
+        rows = self._execute_query(
+            """
+            SELECT
+                lr.lab_id,
+                lr.test_name,
+                lr.result_value,
+                lr.unit,
+                lr.reference_range,
+                lr.result_status,
+                lr.tested_date,
+                p.first_name || ' ' || p.last_name AS patient_name,
+                p.patient_serial_number
+            FROM lab_results lr
+            JOIN patients p ON lr.patient_serial_number = p.patient_serial_number
+            WHERE lr.ordering_doctors_serial_number = %s
+              AND lr.result_status IN ('critical', 'abnormal')
+              AND lr.tested_date >= NOW() - INTERVAL '30 days'
+            ORDER BY
+                CASE lr.result_status WHEN 'critical' THEN 0 ELSE 1 END,
+                lr.tested_date DESC
+            LIMIT 20
+            """,
+            (doctor_serial,),
+        )
+        for row in rows:
+            if hasattr(row.get("tested_date"), "isoformat"):
+                row["tested_date"] = row["tested_date"].isoformat()
+            row["lab_id"] = str(row["lab_id"])
+        return rows
+
     def get_schedule_for_date(self, doctor_serial: str, start: datetime, end: datetime) -> list[dict]:
         rows = self._execute_query(
             """

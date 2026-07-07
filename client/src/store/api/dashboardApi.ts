@@ -26,6 +26,18 @@ export interface BreakdownPoint {
 	value: number;
 }
 
+export interface LabAlert {
+	lab_id: string;
+	test_name: string;
+	result_value: string;
+	unit: string | null;
+	reference_range: string | null;
+	result_status: 'critical' | 'abnormal';
+	tested_date: string;
+	patient_name: string;
+	patient_serial_number: string;
+}
+
 export const dashboardApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
 		getDashboardStats: builder.query<
@@ -47,6 +59,9 @@ export const dashboardApi = baseApi.injectEndpoints({
 		getDashboardBreakdown: builder.query<BreakdownPoint[], void>({
 			query: () => ({ url: '/api/dashboard/breakdown' }),
 		}),
+		getDashboardLabAlerts: builder.query<LabAlert[], void>({
+			query: () => ({ url: '/api/dashboard/lab-alerts' }),
+		}),
 	}),
 });
 
@@ -54,6 +69,7 @@ export const {
 	useGetDashboardStatsQuery,
 	useGetDashboardScheduleQuery,
 	useGetDashboardBreakdownQuery,
+	useGetDashboardLabAlertsQuery,
 } = dashboardApi;
 
 export function dayBounds(d: Date): { start: string; end: string } {

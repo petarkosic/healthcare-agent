@@ -4,13 +4,14 @@ import {
 	useGetDashboardStatsQuery,
 	useGetDashboardScheduleQuery,
 	useGetDashboardBreakdownQuery,
+	useGetDashboardLabAlertsQuery,
 	dayBounds,
 } from '../../store/api/dashboardApi';
 import { KpiCards } from './KpiCards';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { VisitTypeBar } from './VisitTypeBar';
+import { LabAlertsPanel } from './LabAlertsPanel';
 import './Dashboard.css';
-
 
 function greeting(): string {
 	const h = new Date().getHours();
@@ -24,11 +25,14 @@ const Dashboard = () => {
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
 	const selectedBounds = dayBounds(selectedDate);
-	const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery(selectedBounds);
+	const { data: stats, isLoading: statsLoading } =
+		useGetDashboardStatsQuery(selectedBounds);
 	const { data: visits = [], isLoading: scheduleLoading } =
 		useGetDashboardScheduleQuery(selectedBounds);
 	const { data: breakdown = [], isLoading: breakdownLoading } =
 		useGetDashboardBreakdownQuery();
+	const { data: labAlerts = [], isLoading: alertsLoading } =
+		useGetDashboardLabAlertsQuery();
 
 	return (
 		<div className='dashboard'>
@@ -38,6 +42,9 @@ const Dashboard = () => {
 			<KpiCards stats={stats} isLoading={statsLoading}>
 				<VisitTypeBar data={breakdown} isLoading={breakdownLoading} />
 			</KpiCards>
+			<div className='bottom-row'>
+				<LabAlertsPanel alerts={labAlerts} isLoading={alertsLoading} />
+			</div>
 			<ScheduleCalendar
 				selectedDate={selectedDate}
 				onDateChange={setSelectedDate}

@@ -2,6 +2,32 @@
 	grid-column: span 6;
 }
 
+.lab-row-clickable {
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.lab-row-clickable:hover {
+	background: #f1f5f9;
+}
+
+.lab-readonly {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.lab-readonly-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.lab-readonly-label {
+	font-weight: 600;
+	color: var(--text-muted, #94a3b8);
+}
+
 @media (max-width: 640px) {
 	.mini-table thead {
 		display: none;

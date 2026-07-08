@@ -87,8 +87,8 @@ export const Visits = () => {
 							{data.visits.map((visit) => (
 								<tr
 									key={visit.visit_id}
+									className='visit-row-clickable'
 									onClick={() => setSelectedVisit(visit)}
-									style={{ cursor: 'pointer' }}
 								>
 									<td>{formatDateOnly(visit.visit_date)}</td>
 									<td style={{ textTransform: 'capitalize' }}>

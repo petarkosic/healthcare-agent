@@ -23,6 +23,15 @@
 	border-bottom: 1px solid #e2e8f0;
 }
 
+.visit-row-clickable {
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.visit-row-clickable:hover {
+	background: #f1f5f9;
+}
+
 .chief-complaint-tooltip {
 	position: relative;
 }

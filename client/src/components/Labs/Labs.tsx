@@ -5,10 +5,15 @@ import {
 	useGetPatientQuery,
 	useAddLabMutation,
 } from '../../store/api/patientsApi';
+import type { PatientFullResponse } from '../../types/types';
+import { formatDate } from '../../utils/utils';
 import './Labs.css';
+
+type LabRow = PatientFullResponse['lab_results'][number];
 
 export const Labs = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedLab, setSelectedLab] = useState<LabRow | null>(null);
 	const [localError, setLocalError] = useState<string | null>(null);
 	const [form, setForm] = useState({
 		test_name: '',
@@ -106,7 +111,11 @@ export const Labs = () => {
 						</thead>
 						<tbody>
 							{data.lab_results.slice(0, 4).map((lab) => (
-								<tr key={lab.lab_id}>
+								<tr
+									key={lab.lab_id}
+									className='lab-row-clickable'
+									onClick={() => setSelectedLab(lab)}
+								>
 									<td>{lab.test_name}</td>
 									<td>
 										{lab.result_value} {lab.unit}
@@ -241,6 +250,57 @@ export const Labs = () => {
 								</button>
 							</div>
 						</form>
+					</div>
+				</div>
+			)}
+
+			{selectedLab && (
+				<div className='modal-overlay' onClick={() => setSelectedLab(null)}>
+					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
+						<div className='modal-header'>
+							<h2>{selectedLab.test_name}</h2>
+							<button
+								className='modal-close'
+								onClick={() => setSelectedLab(null)}
+							>
+								&times;
+							</button>
+						</div>
+						<div className='modal-body lab-readonly'>
+							<div className='lab-readonly-row'>
+								<span className='lab-readonly-label'>Result</span>
+								<span>
+									{selectedLab.result_value} {selectedLab.unit}
+								</span>
+							</div>
+							<div className='lab-readonly-row'>
+								<span className='lab-readonly-label'>Reference Range</span>
+								<span>{selectedLab.reference_range}</span>
+							</div>
+							<div className='lab-readonly-row'>
+								<span className='lab-readonly-label'>Status</span>
+								<span
+									className={`status-badge status-${selectedLab.result_status}`}
+								>
+									{selectedLab.result_status}
+								</span>
+							</div>
+							<div className='lab-readonly-row'>
+								<span className='lab-readonly-label'>Tested</span>
+								<span>{formatDate(selectedLab.tested_date)}</span>
+							</div>
+							<div className='lab-readonly-row'>
+								<span className='lab-readonly-label'>Received</span>
+								<span>{formatDate(selectedLab.received_date)}</span>
+							</div>
+							<div className='lab-readonly-row'>
+								<span className='lab-readonly-label'>Ordering Doctor</span>
+								<span>
+									Dr. {selectedLab.ordering_doctor_first_name}{' '}
+									{selectedLab.ordering_doctor_last_name}
+								</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			)}

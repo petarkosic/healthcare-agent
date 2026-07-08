@@ -38,6 +38,11 @@ export interface LabAlert {
 	patient_serial_number: string;
 }
 
+export interface DiagnosisPoint {
+	name: string;
+	patients: number;
+}
+
 export const dashboardApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
 		getDashboardStats: builder.query<
@@ -62,6 +67,9 @@ export const dashboardApi = baseApi.injectEndpoints({
 		getDashboardLabAlerts: builder.query<LabAlert[], void>({
 			query: () => ({ url: '/api/dashboard/lab-alerts' }),
 		}),
+		getDashboardTopDiagnoses: builder.query<DiagnosisPoint[], void>({
+			query: () => ({ url: '/api/dashboard/top-diagnoses' }),
+		}),
 	}),
 });
 
@@ -70,6 +78,7 @@ export const {
 	useGetDashboardScheduleQuery,
 	useGetDashboardBreakdownQuery,
 	useGetDashboardLabAlertsQuery,
+	useGetDashboardTopDiagnosesQuery,
 } = dashboardApi;
 
 export function dayBounds(d: Date): { start: string; end: string } {

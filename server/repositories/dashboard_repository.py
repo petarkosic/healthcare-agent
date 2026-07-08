@@ -109,6 +109,24 @@ class DashboardRepository(BaseRepository):
             row["lab_id"] = str(row["lab_id"])
         return rows
 
+    def get_top_diagnoses(self, doctor_serial: str) -> list[dict]:
+        """Top 6 active diagnoses by patient count for this doctor's patients."""
+        return self._execute_query(
+            """
+            SELECT
+                d.diagnosis_name AS name,
+                COUNT(DISTINCT d.patient_serial_number) AS patients
+            FROM diagnoses d
+            JOIN visits v ON d.patient_serial_number = v.patient_serial_number
+            WHERE v.doctor_serial_number = %s
+              AND d.status = 'active'
+            GROUP BY d.diagnosis_name
+            ORDER BY patients DESC
+            LIMIT 6
+            """,
+            (doctor_serial,),
+        )
+
     def get_schedule_for_date(self, doctor_serial: str, start: datetime, end: datetime) -> list[dict]:
         rows = self._execute_query(
             """

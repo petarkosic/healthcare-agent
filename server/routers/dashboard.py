@@ -26,3 +26,8 @@ async def get_breakdown(doctor: dict = Depends(get_current_doctor)):
 @router.get("/lab-alerts")
 async def get_lab_alerts(doctor: dict = Depends(get_current_doctor)):
     return dashboard_repository.get_lab_alerts(doctor["serial"])
+
+
+@router.get("/top-diagnoses")
+async def get_top_diagnoses(doctor: dict = Depends(get_current_doctor)):
+    return dashboard_repository.get_top_diagnoses(doctor["serial"])

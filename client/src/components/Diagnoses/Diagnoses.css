@@ -40,6 +40,11 @@
 		gap: 0.5rem;
 	}
 
+	.diag-header {
+		width: 100%;
+		justify-content: space-between;
+	}
+
 	.diag-meta {
 		flex-wrap: wrap;
 	}

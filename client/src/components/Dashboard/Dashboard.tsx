@@ -5,12 +5,14 @@ import {
 	useGetDashboardScheduleQuery,
 	useGetDashboardBreakdownQuery,
 	useGetDashboardLabAlertsQuery,
+	useGetDashboardTopDiagnosesQuery,
 	dayBounds,
 } from '../../store/api/dashboardApi';
 import { KpiCards } from './KpiCards';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { VisitTypeBar } from './VisitTypeBar';
 import { LabAlertsPanel } from './LabAlertsPanel';
+import { TopDiagnosesChart } from './TopDiagnosesChart';
 import './Dashboard.css';
 
 function greeting(): string {
@@ -33,6 +35,8 @@ const Dashboard = () => {
 		useGetDashboardBreakdownQuery();
 	const { data: labAlerts = [], isLoading: alertsLoading } =
 		useGetDashboardLabAlertsQuery();
+	const { data: topDiagnoses = [], isLoading: diagnosesLoading } =
+		useGetDashboardTopDiagnosesQuery();
 
 	return (
 		<div className='dashboard'>
@@ -44,6 +48,7 @@ const Dashboard = () => {
 			</KpiCards>
 			<div className='bottom-row'>
 				<LabAlertsPanel alerts={labAlerts} isLoading={alertsLoading} />
+				<TopDiagnosesChart data={topDiagnoses} isLoading={diagnosesLoading} />
 			</div>
 			<ScheduleCalendar
 				selectedDate={selectedDate}

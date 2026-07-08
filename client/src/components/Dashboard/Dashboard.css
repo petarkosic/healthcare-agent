@@ -228,13 +228,12 @@
 
 .alerts-panel {
 	flex: 1;
-	min-width: 320px;
 	background: var(--card-bg, #ffffff);
 	border: 1px solid var(--border-color, #e2e8f0);
 	border-radius: 0.5rem;
 	padding: 1.25rem 1.5rem;
-	max-height: 360px;
-	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
 }
 
 .alerts-list {
@@ -244,6 +243,10 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+	max-height: 320px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
 .alert-item {
@@ -288,6 +291,56 @@
 .alert-date {
 	font-size: 0.7rem;
 	color: var(--text-muted, #64748b);
+	white-space: nowrap;
+}
+
+.diagnoses-panel {
+	flex: 1;
+	background: var(--card-bg, #ffffff);
+	border: 1px solid var(--border-color, #e2e8f0);
+	border-radius: 0.5rem;
+	padding: 1.25rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+}
+
+.diagnosis-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	max-height: 340px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.diagnosis-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.55rem 0.75rem;
+	border: 1px solid var(--border-color, #e2e8f0);
+	border-radius: 0.5rem;
+	background: var(--surface-subtle, #f8fafc);
+}
+
+.diagnosis-name {
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--text-primary, #1e293b);
+}
+
+.diagnosis-count {
+	font-size: 0.7rem;
+	font-weight: 600;
+	color: #6366f1;
+	background: #eef2ff;
+	padding: 0.2rem 0.6rem;
+	border-radius: 999px;
 	white-space: nowrap;
 }
 

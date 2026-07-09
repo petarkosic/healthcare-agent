@@ -21,7 +21,7 @@ from models.patients import (
     UpdateAllergies,
 )
 from utils.auth import get_current_doctor
-from utils.authz import verify_patient_access
+from utils.authz import verify_patient_access, verify_visit_ownership
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
 from services.report_service import report_service
@@ -114,6 +114,8 @@ def set_note(
             status_code=400,
             detail="Visit ID, note type, and note text are required",
         )
+
+    verify_visit_ownership(str(note.visit_id), patient_serial, doctor["serial"])
 
     note.doctor_serial_number = doctor["serial"]
 
@@ -225,6 +227,8 @@ def add_vitals(
     _: None = Depends(verify_patient_access),
 ):
     try:
+        verify_visit_ownership(vitals.visit_id, patient_serial, doctor["serial"])
+
         vitals_data = vitals.model_dump(exclude={"visit_id"}, exclude_none=True)
         result = patient_service.add_vital_signs(
             visit_id=vitals.visit_id,
@@ -232,6 +236,8 @@ def add_vitals(
         )
 
         return result
+    except HTTPException:
+        raise
     except Exception:
         logger.exception("Error adding vitals for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error adding vitals")
@@ -245,6 +251,8 @@ def add_lab(
     _: None = Depends(verify_patient_access),
 ):
     try:
+        verify_visit_ownership(lab.visit_id, patient_serial, doctor["serial"])
+
         lab_data = lab.model_dump(
             exclude={"visit_id", "ordering_doctors_serial_number"}
         )
@@ -258,6 +266,8 @@ def add_lab(
         )
         
         return result
+    except HTTPException:
+        raise
     except Exception:
         logger.exception("Error adding lab result for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error adding lab result")
@@ -271,6 +281,8 @@ def add_diagnosis(
     _: None = Depends(verify_patient_access),
 ):
     try:
+        verify_visit_ownership(diagnosis.visit_id, patient_serial, doctor["serial"])
+
         diagnosis_data = diagnosis.model_dump(
             exclude={"visit_id", "diagnosing_doctors_serial_number"}
         )
@@ -284,6 +296,8 @@ def add_diagnosis(
         )
 
         return result
+    except HTTPException:
+        raise
     except Exception:
         logger.exception("Error adding diagnosis for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error adding diagnosis")
@@ -345,6 +359,8 @@ def get_visit_report(
     _: None = Depends(verify_patient_access),
 ):
     try:
+        verify_visit_ownership(visit_id, patient_serial, doctor["serial"])
+        
         report_data = report_service.build_report_data(
             patient_serial=patient_serial,
             visit_id=visit_id,
@@ -361,6 +377,8 @@ def get_visit_report(
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
     except Exception:
         logger.exception(
             "Error generating report for patient %s visit %s",

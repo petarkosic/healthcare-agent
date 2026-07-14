@@ -74,14 +74,16 @@ class Doctor(Base):
     password_hash = Column(String(255))
     google_access_token = Column(Text)
     google_refresh_token = Column(Text)
-    google_token_expiry = Column(DateTime)
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    google_token_expiry = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 class Patient(Base):
     __tablename__ = "patients"
     __table_args__ = (
+        # Keep in sync with Gender in models/enums.py
         CheckConstraint("gender IN ('Male', 'Female')", name="patients_gender_check"),
+        # Keep in sync with BloodType in models/enums.py
         CheckConstraint(
             "blood_type IN ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')",
             name="patients_blood_type_check",
@@ -103,8 +105,8 @@ class Patient(Base):
     emergency_contact_phone = Column(String(20))
     allergies = Column(ARRAY(Text))
     chronic_conditions = Column(ARRAY(Text))
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
-    updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 event.listen(
@@ -121,10 +123,12 @@ event.listen(
 class Visit(Base):
     __tablename__ = "visits"
     __table_args__ = (
+        # Keep in sync with VisitType in models/enums.py
         CheckConstraint(
             "visit_type IN ('checkup','followup','emergency','specialist','vaccination','routine','urgent_care','surgical','telehealth')",
             name="visits_visit_type_check",
         ),
+        # Keep in sync with VisitStatus in models/enums.py
         CheckConstraint(
             "status IN ('scheduled','in-progress','completed','cancelled','no-show')",
             name="visits_status_check",
@@ -142,14 +146,14 @@ class Visit(Base):
     doctor_serial_number = Column(
         String(8), ForeignKey("doctors.doctor_serial_number", ondelete="CASCADE"), nullable=False
     )
-    visit_date = Column(DateTime, nullable=False)
+    visit_date = Column(DateTime(timezone=True), nullable=False)
     visit_type = Column(String(50), nullable=False)
     chief_complaint = Column(Text)
     status = Column(String(20), server_default=text("'completed'"))
     duration_minutes = Column(Integer)
     location = Column(String(100))
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
-    updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 event.listen(
@@ -181,7 +185,7 @@ class VitalSign(Base):
 
     vital_id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
     visit_id = Column(UUID(as_uuid=True), ForeignKey("visits.visit_id", ondelete="CASCADE"), nullable=False)
-    measurement_time = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    measurement_time = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
     blood_pressure_systolic = Column(Integer)
     blood_pressure_diastolic = Column(Integer)
     heart_rate = Column(Integer)
@@ -226,6 +230,7 @@ event.listen(
 class Medication(Base):
     __tablename__ = "medications"
     __table_args__ = (
+        # Keep in sync with MedicationStatus in models/enums.py
         CheckConstraint(
             "status IN ('active','discontinued','completed','hold')",
             name="medications_status_check",
@@ -247,8 +252,8 @@ class Medication(Base):
     status = Column(String(20), server_default=text("'active'"))
     prescribed_for = Column(Text)
     instructions = Column(Text)
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
-    updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 event.listen(
@@ -265,6 +270,7 @@ event.listen(
 class ClinicalNote(Base):
     __tablename__ = "clinical_notes"
     __table_args__ = (
+        # Keep in sync with NoteType in models/enums.py
         CheckConstraint(
             "note_type IN ('soap_subjective','soap_objective','soap_assessment','soap_plan','progress_note','consult_note','discharge_summary','procedure_note')",
             name="clinical_notes_note_type_check",
@@ -279,8 +285,8 @@ class ClinicalNote(Base):
     note_type = Column(String(50), nullable=False)
     note_text = Column(Text, nullable=False)
     summary = Column(Text)
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
-    updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 event.listen(
@@ -297,6 +303,7 @@ event.listen(
 class LabResult(Base):
     __tablename__ = "lab_results"
     __table_args__ = (
+        # Keep in sync with ResultStatus in models/enums.py
         CheckConstraint(
             "result_status IN ('normal','abnormal','critical','pending')",
             name="lab_results_result_status_check",
@@ -315,19 +322,21 @@ class LabResult(Base):
     unit = Column(String(50))
     reference_range = Column(String(100))
     result_status = Column(String(20))
-    tested_date = Column(DateTime, nullable=False)
-    received_date = Column(DateTime)
+    tested_date = Column(DateTime(timezone=True), nullable=False)
+    received_date = Column(DateTime(timezone=True))
     ordering_doctors_serial_number = Column(String(8), ForeignKey("doctors.doctor_serial_number"))
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 class Diagnosis(Base):
     __tablename__ = "diagnoses"
     __table_args__ = (
+        # Keep in sync with DiagnosisType in models/enums.py
         CheckConstraint(
             "diagnosis_type IN ('primary','secondary','chronic','acute')",
             name="diagnoses_diagnosis_type_check",
         ),
+        # Keep in sync with DiagnosisStatus in models/enums.py
         CheckConstraint(
             "status IN ('active','resolved','chronic')",
             name="diagnoses_status_check",
@@ -345,10 +354,10 @@ class Diagnosis(Base):
     diagnosis_name = Column(String(200), nullable=False)
     diagnosis_type = Column(String(50))
     status = Column(String(20), server_default=text("'active'"))
-    diagnosed_date = Column(Date, nullable=False)
-    resolved_date = Column(Date)
+    diagnosed_date = Column(DateTime(timezone=True), nullable=False)
+    resolved_date = Column(DateTime(timezone=True))
     diagnosing_doctors_serial_number = Column(String(8), ForeignKey("doctors.doctor_serial_number"))
-    created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
+    created_at = Column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
 
 class AuditLog(Base):

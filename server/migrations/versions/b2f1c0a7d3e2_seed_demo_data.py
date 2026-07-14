@@ -459,7 +459,7 @@ def upgrade() -> None:
               ELSE
                 'Subjective: reviewed chief complaint and interval history. Objective: focused exam performed and documented. Assessment: ' || v.chief_complaint || '. Plan: management plan discussed with patient, follow-up as clinically indicated.'
             END,
-            CONCAT('Summary: ', LEFT(v.chief_complaint, 100)),
+            LEFT(v.chief_complaint, 100),
             v.visit_date + INTERVAL '15 minutes',
             v.visit_date + INTERVAL '20 minutes'
           FROM visits v

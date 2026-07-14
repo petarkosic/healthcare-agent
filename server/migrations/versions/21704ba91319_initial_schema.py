@@ -192,8 +192,8 @@ def upgrade() -> None:
             status                           VARCHAR(20) DEFAULT 'active' CONSTRAINT diagnoses_status_check CHECK (status IN (
                                                  'active', 'resolved', 'chronic'
                                              )),
-            diagnosed_date                   DATE NOT NULL,
-            resolved_date                    DATE,
+            diagnosed_date                   TIMESTAMPTZ NOT NULL,
+            resolved_date                    TIMESTAMPTZ,
             diagnosing_doctors_serial_number VARCHAR(8) REFERENCES doctors(doctor_serial_number),
             created_at                       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );

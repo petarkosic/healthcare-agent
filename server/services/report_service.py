@@ -2,6 +2,7 @@ import io
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
@@ -20,6 +21,19 @@ _TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 _jinja_env = Environment(loader=FileSystemLoader(str(_TEMPLATES_DIR)), autoescape=True)
 
 
+# Report PDFs are generated server-side with no access to the requesting
+# doctor's browser timezone, so timestamps are localized to a single hardcoded
+# clinic timezone. Replace with a per-clinic/user timezone setting later.
+_CLINIC_TIMEZONE = ZoneInfo("Europe/Belgrade")
+
+
+def _to_clinic_timezone(value):
+    if isinstance(value, datetime) and value.tzinfo is not None:
+        return value.astimezone(_CLINIC_TIMEZONE)
+
+    return value
+
+
 def _fmt_date(value) -> str:
     if value is None:
         return ""
@@ -27,7 +41,7 @@ def _fmt_date(value) -> str:
     if isinstance(value, str):
         return value
 
-    return value.strftime("%B %d, %Y")
+    return _to_clinic_timezone(value).strftime("%B %d, %Y")
 
 
 def _fmt_datetime(value) -> str:
@@ -37,7 +51,7 @@ def _fmt_datetime(value) -> str:
     if isinstance(value, str):
         return value
 
-    return value.strftime("%B %d, %Y at %I:%M %p")
+    return _to_clinic_timezone(value).strftime("%B %d, %Y at %I:%M %p")
 
 
 _jinja_env.filters["fmt_date"] = _fmt_date
@@ -75,7 +89,7 @@ class ReportService:
             "labs": labs,
             "medications": medications,
             "next_visit": next_visit,
-            "generated_at": datetime.now(timezone.utc).strftime("%B %d, %Y at %I:%M %p UTC"),
+            "generated_at": datetime.now(timezone.utc).astimezone(_CLINIC_TIMEZONE).strftime("%B %d, %Y at %I:%M %p"),
         }
 
     def render_pdf(self, report_data: dict) -> bytes:

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from langfuse import observe
 
 from models.agents import FollowUpRequest
-from utils.auth import get_current_doctor
+from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
 from rag.rag_service import RAGService
@@ -133,7 +133,7 @@ router = APIRouter(
 def get_overview(
     request: Request,
     patient_serial: str,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     cache_key = f"overview:{patient_serial}"
@@ -183,7 +183,7 @@ def get_overview(
 @router.post("/recommendations")
 @observe()
 @limiter.limit("2/minute")
-def get_recommendations(request: Request, payload: OverviewRequest, doctor: dict = Depends(get_current_doctor)):
+def get_recommendations(request: Request, payload: OverviewRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
     if not payload.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -275,7 +275,7 @@ def get_recommendations(request: Request, payload: OverviewRequest, doctor: dict
 @router.post("/medications")
 @observe()
 @limiter.limit("2/minute")
-def get_medications(request: Request, payload: MedicationsRequest, doctor: dict = Depends(get_current_doctor)):
+def get_medications(request: Request, payload: MedicationsRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
     if not payload.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -358,13 +358,13 @@ def get_medications(request: Request, payload: MedicationsRequest, doctor: dict 
 @router.post("/schedule-followup")
 @observe(as_type="chain")
 @limiter.limit("3/minute")
-def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: dict = Depends(get_current_doctor)):
+def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
     verify_patient_access(follow_up.patient_serial_number, doctor)
 
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
 
         Patient Serial: {follow_up.patient_serial_number}
-        Doctor Serial: {doctor['serial']}
+        Doctor Serial: {doctor.serial}
         Visit Date: {follow_up.visit_date}
         Visit Type: {follow_up.visit_type}
         Summary: {follow_up.summary}
@@ -403,7 +403,7 @@ def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: dict = 
                 if function_name == "schedule_visit_db":
                     result = schedule_visit_db(
                         patient_serial_number=arguments.get("patient_serial_number"),
-                        doctor_serial_number=doctor['serial'],
+                        doctor_serial_number=doctor.serial,
                         visit_date=arguments.get("visit_date"),
                         visit_type=arguments.get("visit_type"),
                         chief_complaint=arguments.get("chief_complaint"),
@@ -413,7 +413,7 @@ def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: dict = 
 
                 elif function_name == "create_calendar_event":
                     result = create_calendar_event_for_doctor(
-                        doctor_serial=doctor["serial"],
+                        doctor_serial=doctor.serial,
                         summary=arguments.get("summary"),
                         start_time=arguments.get("start_time"),
                         end_time=arguments.get("end_time"),

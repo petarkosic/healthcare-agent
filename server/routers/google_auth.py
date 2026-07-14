@@ -12,7 +12,7 @@ from jose import JWTError, jwt
 from google_auth_oauthlib.flow import Flow
 
 from db.database import db_manager
-from utils.auth import get_current_doctor
+from utils.auth import CurrentDoctor, get_current_doctor
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def _build_flow() -> tuple[Flow, str]:
 
 
 @router.get("/authorize")
-async def authorize(doctor: dict = Depends(get_current_doctor)):
+async def authorize(doctor: CurrentDoctor = Depends(get_current_doctor)):
     jwt_secret = os.getenv("JWT_SECRET_KEY")
 
     # Generate PKCE verifier + challenge
@@ -57,7 +57,7 @@ async def authorize(doctor: dict = Depends(get_current_doctor)):
     ).rstrip(b"=").decode()
 
     state_payload = {
-        "sub": doctor["serial"],
+        "sub": doctor.serial,
         "exp": datetime.now(timezone.utc) + timedelta(minutes=10),
         "cv": code_verifier,
     }
@@ -139,12 +139,12 @@ async def callback(
 
 
 @router.get("/status")
-async def status(doctor: dict = Depends(get_current_doctor)):
+async def status(doctor: CurrentDoctor = Depends(get_current_doctor)):
     with db_manager.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """SELECT google_access_token FROM doctors WHERE doctor_serial_number=%s""",
-                (doctor["serial"],),
+                (doctor.serial,),
             )
             
             row = cur.fetchone()

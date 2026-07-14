@@ -1,12 +1,18 @@
 import logging
 import os
 from datetime import datetime, timedelta, timezone
+from typing import NamedTuple
 
 from fastapi import Cookie, Header, HTTPException, status
 from jose import JWTError, jwt
 import bcrypt
 
 logger = logging.getLogger(__name__)
+
+
+class CurrentDoctor(NamedTuple):
+    serial: str
+    name: str
 
 _SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not _SECRET_KEY:
@@ -42,7 +48,7 @@ def decode_token(token: str) -> dict:
 def get_current_doctor(
     authorization: str | None = Header(default=None),
     ha_token: str | None = Cookie(default=None),
-) -> dict:
+) -> CurrentDoctor:
     token = None
 
     if ha_token:
@@ -68,7 +74,7 @@ def get_current_doctor(
                 detail="Invalid token payload",
             )
             
-        return {"serial": doctor_serial, "name": doctor_name}
+        return CurrentDoctor(serial=doctor_serial, name=doctor_name)
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

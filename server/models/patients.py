@@ -1,7 +1,12 @@
 from datetime import date, datetime
-from typing import List, Literal, Optional
+from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
+
+from models.enums import (
+    BloodType, DiagnosisStatus, DiagnosisType, Gender, MedicationStatus,
+    NoteType, ResultStatus, VisitLocation, VisitStatus, VisitType,
+)
 
 
 class PatientBase(BaseModel):
@@ -27,9 +32,9 @@ class VisitResponse(BaseModel):
     patient_serial_number: str
     doctor_serial_number: str
     visit_date: datetime
-    visit_type: Literal['checkup', 'followup', 'emergency', 'specialist', 'vaccination', 'routine', 'urgent_care', 'surgical', 'telehealth']
+    visit_type: VisitType
     chief_complaint: str
-    status: Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']
+    status: VisitStatus
     duration_minutes: int
     location: str
     created_at: datetime
@@ -65,13 +70,13 @@ class AddMedication(BaseModel):
     prescribed_for: str
     instructions: str
     end_date: Optional[str] = None
-    status: Literal['active', 'discontinued', 'completed', 'hold'] = 'active'
+    status: MedicationStatus = 'active'
 
 class UpdateMedication(BaseModel):
     dosage: Optional[str] = None
     frequency: Optional[str] = None
     end_date: Optional[str] = None
-    status: Optional[Literal['active', 'discontinued', 'completed', 'hold']] = None
+    status: Optional[MedicationStatus] = None
     prescribed_for: Optional[str] = None
     instructions: Optional[str] = None
 
@@ -95,7 +100,7 @@ class AddLabResult(BaseModel):
     result_value: str
     unit: Optional[str] = None
     reference_range: str
-    result_status: Literal['normal', 'abnormal', 'critical', 'pending']
+    result_status: ResultStatus
     tested_date: str
     received_date: str
 
@@ -104,8 +109,8 @@ class AddDiagnosis(BaseModel):
     diagnosing_doctors_serial_number: str
     diagnosis_code: str
     diagnosis_name: str
-    diagnosis_type: Literal['primary', 'secondary', 'chronic', 'acute']
-    status: Literal['active', 'resolved', 'chronic']
+    diagnosis_type: DiagnosisType
+    status: DiagnosisStatus
     diagnosed_date: str
     resolved_date: Optional[str] = None
 
@@ -119,7 +124,7 @@ class MedicationResponse(BaseModel):
     frequency: str
     start_date: date
     end_date: Optional[date] = None
-    status: Literal['active', 'discontinued', 'completed', 'hold']
+    status: MedicationStatus
     prescribed_for: str
     instructions: str
     created_at: Optional[datetime] = None
@@ -135,7 +140,7 @@ class LabResultResponse(BaseModel):
     result_value: str
     unit: Optional[str] = None
     reference_range: str
-    result_status: Literal['normal', 'abnormal', 'critical', 'pending']
+    result_status: ResultStatus
     tested_date: datetime
     received_date: datetime
     ordering_doctors_serial_number: str
@@ -147,7 +152,7 @@ class ClinicalNoteResponse(BaseModel):
     note_id: UUID
     visit_id: UUID
     doctor_serial_number: str
-    note_type: Literal['soap_subjective', 'soap_objective', 'soap_assessment', 'soap_plan','progress_note', 'consult_note', 'discharge_summary', 'procedure_note']
+    note_type: NoteType
     note_text: str
     summary: str
     created_at: datetime
@@ -162,10 +167,10 @@ class DiagnosisResponse(BaseModel):
     visit_id: UUID
     diagnosis_code: str
     diagnosis_name: str
-    diagnosis_type: Literal['primary', 'secondary', 'chronic', 'acute']
-    status: Literal['active', 'resolved', 'chronic']
-    diagnosed_date: date
-    resolved_date: Optional[date] = None
+    diagnosis_type: DiagnosisType
+    status: DiagnosisStatus
+    diagnosed_date: datetime
+    resolved_date: Optional[datetime] = None
     diagnosing_doctors_serial_number: str
     created_at: datetime
     diagnosing_doctor_first_name: str
@@ -185,8 +190,8 @@ class CreatePatient(BaseModel):
     first_name: str
     last_name: str
     date_of_birth: date
-    gender: Literal['Male', 'Female']
-    blood_type: Literal['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+    gender: Gender
+    blood_type: BloodType
     email: str
     phone: str
     address: str
@@ -198,15 +203,15 @@ class CreatePatient(BaseModel):
 class SetVisit(BaseModel):
     patient_serial_number: str
     doctor_serial_number: str
-    visit_type: Literal['checkup', 'followup', 'emergency', 'specialist', 'vaccination', 'routine', 'urgent_care', 'surgical', 'telehealth']
-    location: Optional[Literal['Clinic', 'Hospital', 'Telehealth', 'Home Visit', 'Urgent Care']] = 'Clinic'
+    visit_type: VisitType
+    location: Optional[VisitLocation] = 'Clinic'
     visit_date: Optional[str] = None
-    status: Optional[Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']] = 'in-progress'
+    status: Optional[VisitStatus] = 'in-progress'
     chief_complaint: Optional[str] = ""
 
 class UpdateVisit(BaseModel):
     chief_complaint: str
-    status: Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']
+    status: VisitStatus
     duration_minutes: int
     visit_id: UUID
 

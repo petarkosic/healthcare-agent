@@ -20,7 +20,7 @@ from models.patients import (
     UpdateMedication,
     UpdateAllergies,
 )
-from utils.auth import get_current_doctor
+from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access, verify_visit_ownership
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
@@ -40,22 +40,22 @@ router = APIRouter(
 
 
 @router.get("")
-def get_patients(doctor: dict = Depends(get_current_doctor)):
+def get_patients(doctor: CurrentDoctor = Depends(get_current_doctor)):
     try:
-        patients = patient_service.get_patients(doctor_serial_number=doctor["serial"])
+        patients = patient_service.get_patients(doctor_serial_number=doctor.serial)
 
         return patients
     except Exception:
-        logger.exception("Error fetching patients for doctor %s", doctor["serial"])
+        logger.exception("Error fetching patients for doctor %s", doctor.serial)
         raise HTTPException(status_code=500, detail="Error fetching patients")
 
 
 @router.post("")
 def create_patient(
-    patient: CreatePatient, doctor: dict = Depends(get_current_doctor)
+    patient: CreatePatient, doctor: CurrentDoctor = Depends(get_current_doctor)
 ):
     try:
-        patient.doctor_serial_number = doctor["serial"]
+        patient.doctor_serial_number = doctor.serial
         result = patient_service.create_patient(patient)
 
         return result
@@ -67,12 +67,12 @@ def create_patient(
 @router.get("/search")
 def search_patient(
     patient_serial_number: str = Query(...),
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
 ):
     try:
         results = patient_service.search_patient_by_serial(
             patient_serial_number=patient_serial_number,
-            doctor_serial_number=doctor["serial"],
+            doctor_serial_number=doctor.serial,
         )
 
         return results
@@ -84,7 +84,7 @@ def search_patient(
 @router.get("/{patient_serial}", response_model=PatientFullResponse)
 def get_patient(
     patient_serial: str,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
@@ -106,7 +106,7 @@ def get_patient(
 def set_note(
     patient_serial: str,
     note: Note,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     if not note.visit_id or not note.note_type or not note.note_text:
@@ -115,9 +115,9 @@ def set_note(
             detail="Visit ID, note type, and note text are required",
         )
 
-    verify_visit_ownership(str(note.visit_id), patient_serial, doctor["serial"])
+    verify_visit_ownership(str(note.visit_id), patient_serial, doctor.serial)
 
-    note.doctor_serial_number = doctor["serial"]
+    note.doctor_serial_number = doctor.serial
 
     prompt = f"""
     Generate a concise medical summary of this clinical note:
@@ -146,7 +146,7 @@ def set_note(
     try:
         result = patient_service.add_clinical_note(
             visit_id=str(note.visit_id),
-            doctor_serial_number=doctor["serial"],
+            doctor_serial_number=doctor.serial,
             note_type=note.note_type,
             note_text=note.note_text,
             summary=summary,
@@ -164,14 +164,14 @@ def set_note(
 def add_medication(
     patient_serial: str,
     medication: AddMedication,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
         medication_data = medication.model_dump(exclude={"doctor_serial_number"})
         result = patient_service.add_medication(
             patient_serial_number=patient_serial,
-            doctor_serial_number=doctor["serial"],
+            doctor_serial_number=doctor.serial,
             medication_data=medication_data,
         )
 
@@ -186,7 +186,7 @@ def update_medication(
     patient_serial: str,
     medication_id: str,
     payload: UpdateMedication,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
@@ -205,7 +205,7 @@ def update_medication(
 def delete_medication(
     patient_serial: str,
     medication_id: str,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
@@ -223,11 +223,11 @@ def delete_medication(
 def add_vitals(
     patient_serial: str,
     vitals: AddVitalSigns,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
-        verify_visit_ownership(vitals.visit_id, patient_serial, doctor["serial"])
+        verify_visit_ownership(vitals.visit_id, patient_serial, doctor.serial)
 
         vitals_data = vitals.model_dump(exclude={"visit_id"}, exclude_none=True)
         result = patient_service.add_vital_signs(
@@ -247,11 +247,11 @@ def add_vitals(
 def add_lab(
     patient_serial: str,
     lab: AddLabResult,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
-        verify_visit_ownership(lab.visit_id, patient_serial, doctor["serial"])
+        verify_visit_ownership(lab.visit_id, patient_serial, doctor.serial)
 
         lab_data = lab.model_dump(
             exclude={"visit_id", "ordering_doctors_serial_number"}
@@ -261,7 +261,7 @@ def add_lab(
             visit_id=lab.visit_id,
             lab_data={
                 **lab_data,
-                "ordering_doctors_serial_number": doctor["serial"],
+                "ordering_doctors_serial_number": doctor.serial,
             },
         )
         
@@ -277,11 +277,11 @@ def add_lab(
 def add_diagnosis(
     patient_serial: str,
     diagnosis: AddDiagnosis,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
-        verify_visit_ownership(diagnosis.visit_id, patient_serial, doctor["serial"])
+        verify_visit_ownership(diagnosis.visit_id, patient_serial, doctor.serial)
 
         diagnosis_data = diagnosis.model_dump(
             exclude={"visit_id", "diagnosing_doctors_serial_number"}
@@ -291,7 +291,7 @@ def add_diagnosis(
             visit_id=diagnosis.visit_id,
             diagnosis_data={
                 **diagnosis_data,
-                "diagnosing_doctors_serial_number": doctor["serial"],
+                "diagnosing_doctors_serial_number": doctor.serial,
             },
         )
 
@@ -307,7 +307,7 @@ def add_diagnosis(
 def update_allergies(
     patient_serial: str,
     body: UpdateAllergies,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
@@ -325,9 +325,9 @@ def update_allergies(
 
 
 @router.post("/visits")
-def set_visit(visit: SetVisit, doctor: dict = Depends(get_current_doctor)):
+def set_visit(visit: SetVisit, doctor: CurrentDoctor = Depends(get_current_doctor)):
     try:
-        visit.doctor_serial_number = doctor["serial"]
+        visit.doctor_serial_number = doctor.serial
         result = patient_service.create_visit(visit)
 
         return result
@@ -339,7 +339,7 @@ def set_visit(visit: SetVisit, doctor: dict = Depends(get_current_doctor)):
 
 
 @router.put("/visits")
-def update_visit(visit: UpdateVisit, doctor: dict = Depends(get_current_doctor)):
+def update_visit(visit: UpdateVisit, doctor: CurrentDoctor = Depends(get_current_doctor)):
     try:
         result = patient_service.update_visit(visit)
 
@@ -355,11 +355,11 @@ def update_visit(visit: UpdateVisit, doctor: dict = Depends(get_current_doctor))
 def get_visit_report(
     patient_serial: str,
     visit_id: str,
-    doctor: dict = Depends(get_current_doctor),
+    doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
     try:
-        verify_visit_ownership(visit_id, patient_serial, doctor["serial"])
+        verify_visit_ownership(visit_id, patient_serial, doctor.serial)
         
         report_data = report_service.build_report_data(
             patient_serial=patient_serial,

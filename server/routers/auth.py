@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 from db.database import db_manager
 from models.auth import AuthResponse, LoginRequest, MeResponse, SignUpRequest
-from utils.auth import create_token, get_current_doctor, hash_password, verify_password
+from utils.auth import CurrentDoctor, create_token, get_current_doctor, hash_password, verify_password
 from utils.csrf import generate_csrf_token
 from utils.limiter import limiter
 
@@ -122,8 +122,8 @@ async def login(request: Request, req: LoginRequest):
 
 
 @router.get("/me", response_model=MeResponse)
-async def me(doctor: dict = Depends(get_current_doctor)):
-    return {"doctor_serial_number": doctor["serial"], "doctor_name": doctor["name"]}
+async def me(doctor: CurrentDoctor = Depends(get_current_doctor)):
+    return {"doctor_serial_number": doctor.serial, "doctor_name": doctor.name}
 
 
 @router.post("/logout")

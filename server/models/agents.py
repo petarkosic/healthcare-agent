@@ -1,12 +1,14 @@
-from typing import Literal, Optional
+from typing import Optional
 from pydantic import BaseModel, Field
+
+from models.enums import DiagnosisStatus, DiagnosisType, ResultStatus, VisitStatus, VisitType
 
 
 class ActiveDiagnoses(BaseModel):
 	code: str = Field(description="Standard diagnosis code (e.g., ICD-10)")
 	name: str = Field(description="Name of the diagnosis")
-	type: Literal['primary', 'secondary', 'chronic', 'acute']
-	status: Literal['active', 'resolved', 'chronic']
+	type: DiagnosisType
+	status: DiagnosisStatus
 
 class ActiveMedications(BaseModel):
 	name: str
@@ -18,7 +20,7 @@ class LatestLab(BaseModel):
 	date: str
 	reference_range: str
 	result: str
-	status: Literal['normal', 'abnormal', 'critical', 'pending']
+	status: ResultStatus
 	test_name: str
 	unit: Optional[str] = None
 
@@ -27,8 +29,8 @@ class LatestVisit(BaseModel):
 	date: str
 	doctor: str
 	specialty: str
-	status: Literal['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']
-	type: Literal['checkup', 'followup', 'emergency', 'specialist', 'vaccination', 'routine', 'urgent_care', 'surgical', 'telehealth']
+	status: VisitStatus
+	type: VisitType
 	visit_id: str
 
 class LatestVitals(BaseModel):
@@ -66,7 +68,7 @@ class FollowUpRequest(BaseModel):
 	patient_serial_number: str = Field(description='Patient serial number')
 	doctor_serial_number: str = Field(description='Doctor serial number')
 	visit_date: str = Field(description='Visit date in ISO 8601 format')
-	visit_type: str = Field(default='followup', description='Type of visit')
+	visit_type: VisitType = Field(default='followup', description='Type of visit')
 	summary: str = Field(description='Visit summary/title')
 	start_time: str = Field(description='Start time in ISO 8601 format')
 	end_time: str = Field(description='End time in ISO 8601 format')

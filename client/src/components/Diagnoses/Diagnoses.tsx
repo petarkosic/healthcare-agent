@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router';
 import type { Diagnosis } from '../../types/types';
 import { useAppSelector } from '../../store/hooks';
-import { formatDateOnly } from '../../utils/utils';
+import { formatDate } from '../../utils/utils';
 import {
 	useGetPatientQuery,
 	useAddDiagnosisMutation,
@@ -62,6 +62,10 @@ export const Diagnoses = () => {
 					status: form.status as DiagnosisStatus,
 					visit_id: session!.visitId as string,
 					diagnosing_doctors_serial_number: doctorSerialNumber!,
+					diagnosed_date: new Date(form.diagnosed_date).toISOString(),
+					resolved_date: form.resolved_date
+						? new Date(form.resolved_date).toISOString()
+						: null,
 				},
 			}).unwrap();
 			resetForm();
@@ -110,7 +114,7 @@ export const Diagnoses = () => {
 									<span className={`status-badge status-${diag.status}`}>
 										{diag.status}
 									</span>
-									<span>{formatDateOnly(diag.diagnosed_date)}</span>
+									<span>{formatDate(diag.diagnosed_date)}</span>
 								</div>
 							</li>
 						))}
@@ -186,9 +190,9 @@ export const Diagnoses = () => {
 								</select>
 							</div>
 							<div className='form-group'>
-								<label>Diagnosed Date</label>
+								<label>Diagnosed Date &amp; Time</label>
 								<input
-									type='date'
+									type='datetime-local'
 									name='diagnosed_date'
 									value={form.diagnosed_date}
 									onChange={handleChange}
@@ -197,9 +201,9 @@ export const Diagnoses = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Resolved Date (optional)</label>
+								<label>Resolved Date &amp; Time (optional)</label>
 								<input
-									type='date'
+									type='datetime-local'
 									name='resolved_date'
 									value={form.resolved_date}
 									onChange={handleChange}

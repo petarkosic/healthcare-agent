@@ -67,6 +67,8 @@ export const Labs = () => {
 					visit_id: session!.visitId as string,
 					ordering_doctors_serial_number: doctorSerialNumber!,
 					unit: form.unit || null,
+					tested_date: new Date(form.tested_date).toISOString(),
+					received_date: new Date(form.received_date).toISOString(),
 				},
 			}).unwrap();
 

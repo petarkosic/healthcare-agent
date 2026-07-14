@@ -8,6 +8,7 @@ import {
 	type VisitStatus,
 } from '../../types/enums';
 import {
+	formatDate,
 	formatDateTimeLocal,
 	secondsToRoundedMinutes,
 } from '../../utils/utils';
@@ -170,7 +171,9 @@ export const VisitModal = ({
 			await dispatch(ensureGoogleConnected()).unwrap();
 
 			const localStart = new Date(rescheduleDate);
-			const localEnd = new Date(localStart.getTime() + (visit.duration_minutes || 30) * 60 * 1000);
+			const localEnd = new Date(
+				localStart.getTime() + (visit.duration_minutes || 30) * 60 * 1000,
+			);
 			const startTime = localStart.toISOString();
 			const endTime = localEnd.toISOString();
 
@@ -221,13 +224,7 @@ export const VisitModal = ({
 							<div className='visit-detail-item'>
 								<span className='visit-detail-label'>Date</span>
 								<span className='visit-detail-value'>
-									{new Date(visit.visit_date).toLocaleString('en-US', {
-										year: 'numeric',
-										month: 'short',
-										day: 'numeric',
-										hour: '2-digit',
-										minute: '2-digit',
-									})}
+									{formatDate(visit.visit_date)}
 								</span>
 							</div>
 							<div className='visit-detail-item'>

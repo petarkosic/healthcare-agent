@@ -13,6 +13,7 @@ import {
 	useCreateVisitMutation,
 	useUpdateVisitMutation,
 } from '../../store/api/patientsApi';
+import type { VisitType, VisitLocation, VisitStatus } from '../../types/enums';
 import { SettingsModal } from '../SettingsModal/SettingsModal';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
@@ -137,9 +138,11 @@ export const Navbar = () => {
 				patientId,
 				body: {
 					patient_serial_number: patientId,
-					doctor_serial_number: doctorSerialNumber,
-					visit_type: selectedType,
-					location: selectedLocation,
+					doctor_serial_number: doctorSerialNumber!,
+					visit_type: selectedType as VisitType,
+					location: selectedLocation as VisitLocation,
+					status: 'in-progress',
+					chief_complaint: '',
 				},
 			}).unwrap();
 
@@ -177,7 +180,7 @@ export const Navbar = () => {
 		const sessionData = {
 			duration_minutes: secondsToRoundedMinutes(elapsedTime),
 			chief_complaint: chiefComplaint,
-			status: 'completed',
+			status: 'completed' as VisitStatus,
 		};
 
 		try {

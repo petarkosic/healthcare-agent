@@ -1,5 +1,8 @@
 import { baseApi } from './baseApi';
 import type { PatientFullResponse, TPatients } from '../../types/types';
+import type { components } from '../../types/api';
+
+type Schemas = components['schemas'];
 
 export const patientsApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
@@ -19,7 +22,10 @@ export const patientsApi = baseApi.injectEndpoints({
 			providesTags: (_result, _err, id) => [{ type: 'Patient' as const, id }],
 		}),
 
-		addMedication: builder.mutation<void, { patientId: string; body: unknown }>(
+		addMedication: builder.mutation<
+			void,
+			{ patientId: string; body: Schemas['AddMedication'] }
+		>(
 			{
 				query: ({ patientId, body }) => ({
 					url: `/api/patients/${patientId}/medications`,
@@ -34,7 +40,11 @@ export const patientsApi = baseApi.injectEndpoints({
 
 		updateMedication: builder.mutation<
 			void,
-			{ patientId: string; medicationId: string; body: unknown }
+			{
+				patientId: string;
+				medicationId: string;
+				body: Schemas['UpdateMedication'];
+			}
 		>({
 			query: ({ patientId, medicationId, body }) => ({
 				url: `/api/patients/${patientId}/medications/${medicationId}`,
@@ -59,7 +69,10 @@ export const patientsApi = baseApi.injectEndpoints({
 			],
 		}),
 
-		addDiagnosis: builder.mutation<void, { patientId: string; body: unknown }>({
+		addDiagnosis: builder.mutation<
+			void,
+			{ patientId: string; body: Schemas['AddDiagnosis'] }
+		>({
 			query: ({ patientId, body }) => ({
 				url: `/api/patients/${patientId}/diagnoses`,
 				method: 'POST',
@@ -84,7 +97,10 @@ export const patientsApi = baseApi.injectEndpoints({
 			],
 		}),
 
-		addVital: builder.mutation<void, { patientId: string; body: unknown }>({
+		addVital: builder.mutation<
+			void,
+			{ patientId: string; body: Schemas['AddVitalSigns'] }
+		>({
 			query: ({ patientId, body }) => ({
 				url: `/api/patients/${patientId}/vitals`,
 				method: 'POST',
@@ -95,7 +111,10 @@ export const patientsApi = baseApi.injectEndpoints({
 			],
 		}),
 
-		addLab: builder.mutation<void, { patientId: string; body: unknown }>({
+		addLab: builder.mutation<
+			void,
+			{ patientId: string; body: Schemas['AddLabResult'] }
+		>({
 			query: ({ patientId, body }) => ({
 				url: `/api/patients/${patientId}/labs`,
 				method: 'POST',
@@ -106,7 +125,10 @@ export const patientsApi = baseApi.injectEndpoints({
 			],
 		}),
 
-		addNote: builder.mutation<void, { patientId: string; body: unknown }>({
+		addNote: builder.mutation<
+			void,
+			{ patientId: string; body: Schemas['Note'] }
+		>({
 			query: ({ patientId, body }) => ({
 				url: `/api/patients/${patientId}/notes`,
 				method: 'POST',
@@ -119,7 +141,7 @@ export const patientsApi = baseApi.injectEndpoints({
 
 		updateVisit: builder.mutation<
 			unknown,
-			{ patientId: string; body: unknown }
+			{ patientId: string; body: Schemas['UpdateVisit'] }
 		>({
 			query: ({ body }) => ({
 				url: '/api/patients/visits',
@@ -134,7 +156,7 @@ export const patientsApi = baseApi.injectEndpoints({
 
 		createVisit: builder.mutation<
 			{ visit_id: string },
-			{ patientId: string; body: unknown }
+			{ patientId: string; body: Schemas['SetVisit'] }
 		>({
 			query: ({ body }) => ({
 				url: '/api/patients/visits',
@@ -148,8 +170,8 @@ export const patientsApi = baseApi.injectEndpoints({
 		}),
 
 		createPatient: builder.mutation<
-			{ patient_serial_number: number; visit_id: string },
-			unknown
+			{ patient_serial_number: string; visit_id: string },
+			Schemas['CreatePatient']
 		>({
 			query: (body) => ({ url: '/api/patients', method: 'POST', body }),
 			invalidatesTags: ['PatientList'],

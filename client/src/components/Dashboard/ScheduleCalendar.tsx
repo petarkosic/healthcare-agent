@@ -1,6 +1,7 @@
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import type { ScheduleVisit } from '../../store/api/dashboardApi';
+import type { VisitStatus, VisitType } from '../../types/enums';
 
 interface ScheduleCalendarProps {
 	selectedDate: Date;
@@ -19,7 +20,7 @@ const VISIT_TYPE_COLORS: Record<string, string> = {
 	urgent_care: '#f43f5e',
 	surgical: '#78716c',
 	telehealth: '#14b8a6',
-};
+} satisfies Record<VisitType, string>;
 
 const STATUS_COLORS: Record<string, string> = {
 	scheduled: '#6366f1',
@@ -27,7 +28,7 @@ const STATUS_COLORS: Record<string, string> = {
 	completed: '#22c55e',
 	cancelled: '#ef4444',
 	'no-show': '#f97316',
-};
+} satisfies Record<VisitStatus, string>;
 
 function formatTime(isoDate: string): string {
 	return new Date(isoDate).toLocaleTimeString([], {

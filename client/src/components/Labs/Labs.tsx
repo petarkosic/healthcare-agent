@@ -6,6 +6,7 @@ import {
 	useAddLabMutation,
 } from '../../store/api/patientsApi';
 import type { PatientFullResponse } from '../../types/types';
+import type { ResultStatus } from '../../types/enums';
 import { formatDate } from '../../utils/utils';
 import './Labs.css';
 
@@ -62,8 +63,9 @@ export const Labs = () => {
 				patientId: patient_serial!,
 				body: {
 					...form,
-					visit_id: session!.visitId,
-					ordering_doctors_serial_number: doctorSerialNumber,
+					result_status: form.result_status as ResultStatus,
+					visit_id: session!.visitId as string,
+					ordering_doctors_serial_number: doctorSerialNumber!,
 					unit: form.unit || null,
 				},
 			}).unwrap();

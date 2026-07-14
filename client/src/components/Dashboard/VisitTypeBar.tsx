@@ -1,4 +1,5 @@
 import type { BreakdownPoint } from '../../store/api/dashboardApi';
+import type { VisitType } from '../../types/enums';
 
 const TYPE_COLORS: Record<string, string> = {
 	checkup: '#2a78d6',
@@ -10,7 +11,7 @@ const TYPE_COLORS: Record<string, string> = {
 	surgical: '#e87ba4',
 	telehealth: '#eb6834',
 	routine: '#0f766e',
-};
+} satisfies Record<VisitType, string>;
 
 interface Props {
 	data: BreakdownPoint[];

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { startSession } from '../../store/sessionSlice';
 import { useCreatePatientMutation } from '../../store/api/patientsApi';
+import type { Gender, BloodType } from '../../types/enums';
 import './AddPatient.css';
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -54,12 +55,12 @@ export const AddPatient = () => {
 
 		try {
 			const data = await createPatient({
-				doctor_serial_number: doctorSerialNumber,
+				doctor_serial_number: doctorSerialNumber!,
 				first_name: form.first_name,
 				last_name: form.last_name,
 				date_of_birth: form.date_of_birth,
-				gender: form.gender,
-				blood_type: form.blood_type,
+				gender: form.gender as Gender,
+				blood_type: form.blood_type as BloodType,
 				email: form.email,
 				phone: form.phone,
 				address: `${form.street_number} ${form.street}, ${form.city}, ${form.country}`,

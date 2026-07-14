@@ -7,6 +7,7 @@ import {
 	useGetPatientQuery,
 	useAddDiagnosisMutation,
 } from '../../store/api/patientsApi';
+import type { DiagnosisType, DiagnosisStatus } from '../../types/enums';
 import './Diagnoses.css';
 
 export const Diagnoses = () => {
@@ -57,9 +58,10 @@ export const Diagnoses = () => {
 				patientId: patient_serial!,
 				body: {
 					...form,
-					visit_id: session!.visitId,
-					diagnosing_doctors_serial_number: doctorSerialNumber,
-					resolved_date: form.resolved_date || null,
+					diagnosis_type: form.diagnosis_type as DiagnosisType,
+					status: form.status as DiagnosisStatus,
+					visit_id: session!.visitId as string,
+					diagnosing_doctors_serial_number: doctorSerialNumber!,
 				},
 			}).unwrap();
 			resetForm();

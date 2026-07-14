@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import type { PatientFullResponse } from '../../types/types';
+import type { MedicationStatus } from '../../types/enums';
 import { useAppSelector } from '../../store/hooks';
 import {
 	useGetPatientQuery,
@@ -111,7 +112,11 @@ export const Medications = () => {
 			await updateMedication({
 				patientId: patient_serial!,
 				medicationId: selectedMed.medication_id,
-				body: { ...editForm, end_date: editForm.end_date || null },
+				body: {
+					...editForm,
+					status: editForm.status as MedicationStatus,
+					end_date: editForm.end_date || null,
+				},
 			}).unwrap();
 
 			setSelectedMed(null);
@@ -147,7 +152,8 @@ export const Medications = () => {
 				patientId: patient_serial!,
 				body: {
 					...addForm,
-					doctor_serial_number: doctorSerialNumber,
+					status: addForm.status as MedicationStatus,
+					doctor_serial_number: doctorSerialNumber!,
 					end_date: addForm.end_date || null,
 				},
 			}).unwrap();

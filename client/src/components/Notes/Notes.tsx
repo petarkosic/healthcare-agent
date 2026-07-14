@@ -8,6 +8,7 @@ import {
 	useGetPatientQuery,
 	useAddNoteMutation,
 } from '../../store/api/patientsApi';
+import type { NoteType } from '../../types/enums';
 
 export const Notes = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,10 +35,10 @@ export const Notes = () => {
 			await addNote({
 				patientId: patient_serial!,
 				body: {
-					visit_id: session?.visitId,
-					note_type: newNoteType,
+					visit_id: session!.visitId as string,
+					note_type: newNoteType as NoteType,
 					note_text: newNoteText,
-					doctor_serial_number: doctorSerialNumber,
+					doctor_serial_number: doctorSerialNumber!,
 				},
 			}).unwrap();
 

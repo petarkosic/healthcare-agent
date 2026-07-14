@@ -66,7 +66,7 @@ export const Vitals = () => {
 			await addVital({
 				patientId: patient_serial!,
 				body: {
-					visit_id: session!.visitId,
+					visit_id: session!.visitId as string,
 					blood_pressure_systolic: toNumber(form.blood_pressure_systolic),
 					blood_pressure_diastolic: toNumber(form.blood_pressure_diastolic),
 					heart_rate: toNumber(form.heart_rate),

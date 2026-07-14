@@ -1,9 +1,20 @@
+import type {
+	VisitType,
+	VisitStatus,
+	VisitLocation,
+	MedicationStatus,
+	ResultStatus,
+	DiagnosisType,
+	DiagnosisStatus,
+	NoteType,
+} from './enums';
+
 export type Error = {
 	message: string;
 };
 
 export interface TPatients {
-	patient_serial_number: number;
+	patient_serial_number: string;
 	full_name: string;
 	age: number;
 	gender: string;
@@ -12,7 +23,7 @@ export interface TPatients {
 	active_medications_count: number;
 }
 
-interface PatientBase {
+export interface PatientBase {
 	address: string;
 	allergies: string[];
 	blood_type: string;
@@ -38,14 +49,14 @@ export interface Visit {
 	doctor_last_name: string;
 	doctor_serial_number: string;
 	duration_minutes: number;
-	location: string;
+	location: VisitLocation;
 	patient_serial_number: string;
 	specialty: string;
-	status: string;
+	status: VisitStatus;
 	updated_at: string;
 	visit_date: string;
 	visit_id: string;
-	visit_type: string;
+	visit_type: VisitType;
 }
 
 export interface VitalSigns {
@@ -66,7 +77,7 @@ export interface VitalSigns {
 	weight_kg: number;
 }
 
-interface Medication {
+export interface Medication {
 	created_at: string;
 	doctor_serial_number: string;
 	dosage: string;
@@ -81,11 +92,11 @@ interface Medication {
 	prescriber_first_name: string;
 	prescriber_last_name: string;
 	start_date: string;
-	status: string;
+	status: MedicationStatus;
 	updated_at: string;
 }
 
-interface LabResult {
+export interface LabResult {
 	created_at: string;
 	lab_id: string;
 	ordering_doctor_first_name: string;
@@ -94,7 +105,7 @@ interface LabResult {
 	patient_serial_number: string;
 	received_date: string;
 	reference_range: string;
-	result_status: string;
+	result_status: ResultStatus;
 	result_value: string;
 	test_name: string;
 	tested_date: string;
@@ -111,10 +122,10 @@ export interface Diagnosis {
 	diagnosis_code: string;
 	diagnosis_id: string;
 	diagnosis_name: string;
-	diagnosis_type: string;
+	diagnosis_type: DiagnosisType;
 	patient_serial_number: string;
 	resolved_date: string;
-	status: string;
+	status: DiagnosisStatus;
 	visit_id: string;
 }
 
@@ -125,7 +136,7 @@ export interface ClinicalNote {
 	doctor_serial_number: string;
 	note_id: string;
 	note_text: string;
-	note_type: string;
+	note_type: NoteType;
 	summary: string;
 	updated_at: string;
 	visit_date: string;
@@ -150,7 +161,7 @@ interface AIOverview {
 }
 
 export interface Overview {
-	patient_serial: number;
+	patient_serial: string;
 	ai_overview: AIOverview;
 	chroma_sources: number;
 }

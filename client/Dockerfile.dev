@@ -10,4 +10,7 @@ COPY . .
 
 EXPOSE 3000
 
+# Regenerate src/types/api.d.ts after changing server models:
+#   docker compose -f docker-compose.dev.yml exec client sh -c "OPENAPI_SCHEMA_URL=http://server:8000/openapi.json npm run gen:api-types"
+# or with the server running locally: cd client && npm run gen:api-types
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

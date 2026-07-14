@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import type { Visit } from '../../types/types';
 import {
+	VISIT_TYPES,
+	VISIT_LOCATIONS,
+	type VisitType,
+	type VisitLocation,
+	type VisitStatus,
+} from '../../types/enums';
+import {
 	formatDateTimeLocal,
 	secondsToRoundedMinutes,
 } from '../../utils/utils';
@@ -67,8 +74,8 @@ export const VisitModal = ({
 				patientId: visit.patient_serial_number,
 				body: {
 					visit_id: visit.visit_id,
-					status: newStatus,
-					chief_complaint: visit.chief_complaint,
+					status: newStatus as VisitStatus,
+					chief_complaint: visit.chief_complaint || '',
 					duration_minutes: visit.duration_minutes || 30,
 				},
 			}).unwrap();
@@ -93,8 +100,8 @@ export const VisitModal = ({
 				patientId: visit.patient_serial_number,
 				body: {
 					visit_id: visit.visit_id,
-					status: 'in-progress',
-					chief_complaint: visit.chief_complaint,
+					status: 'in-progress' as VisitStatus,
+					chief_complaint: visit.chief_complaint || '',
 					duration_minutes: visit.duration_minutes || 30,
 				},
 			}).unwrap();
@@ -303,20 +310,12 @@ export const VisitModal = ({
 													<select
 														className='complete-form-input'
 														value={startType}
-														onChange={(e) => setStartType(e.target.value)}
+														onChange={(e) =>
+															setStartType(e.target.value as VisitType)
+														}
 														disabled={isSubmitting}
 													>
-														{[
-															'Checkup',
-															'Followup',
-															'Emergency',
-															'Specialist',
-															'Vaccination',
-															'Routine',
-															'Urgent Care',
-															'Surgical',
-															'Telehealth',
-														].map((t) => (
+														{VISIT_TYPES.map((t) => (
 															<option key={t} value={t}>
 																{t.replace(/_/g, ' ')}
 															</option>
@@ -325,16 +324,12 @@ export const VisitModal = ({
 													<select
 														className='complete-form-input'
 														value={startLocation}
-														onChange={(e) => setStartLocation(e.target.value)}
+														onChange={(e) =>
+															setStartLocation(e.target.value as VisitLocation)
+														}
 														disabled={isSubmitting}
 													>
-														{[
-															'Clinic',
-															'Hospital',
-															'Telehealth',
-															'Home Visit',
-															'Urgent Care',
-														].map((l) => (
+														{VISIT_LOCATIONS.map((l) => (
 															<option key={l} value={l}>
 																{l}
 															</option>

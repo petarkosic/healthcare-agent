@@ -1,9 +1,8 @@
 from psycopg import sql
 from typing import Optional
 from .base_repository import BaseRepository
-from models.patients import VitalSignsResponse
 
-class VitalSignsRepository(BaseRepository[VitalSignsResponse]):
+class VitalSignsRepository(BaseRepository):
     def __init__(self):
         super().__init__("vital_signs")
     

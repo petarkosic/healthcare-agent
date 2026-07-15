@@ -2,7 +2,7 @@ from typing import Optional
 from .base_repository import BaseRepository
 from models.patients import PatientBase, PatientFullResponse, VisitResponse, VitalSignsResponse, MedicationResponse, LabResultResponse, ClinicalNoteResponse, DiagnosisResponse
 
-class PatientRepository(BaseRepository[PatientBase]):
+class PatientRepository(BaseRepository):
     def __init__(self):
         super().__init__("patients")
 

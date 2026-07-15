@@ -4,7 +4,7 @@ from .base_repository import BaseRepository
 from models.patients import VisitResponse
 
 
-class VisitRepository(BaseRepository[VisitResponse]):
+class VisitRepository(BaseRepository):
     def __init__(self):
         super().__init__("visits")
     

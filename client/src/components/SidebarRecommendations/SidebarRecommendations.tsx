@@ -7,7 +7,7 @@ import type {
 import './SidebarRecommendations.css';
 import { formatDateTimeLocal } from '../../utils/utils';
 import { useLocation } from 'react-router';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { useAppDispatch } from '../../store/hooks';
 import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
 import { useScheduleFollowupMutation } from '../../store/api/agentsApi';
 
@@ -35,9 +35,6 @@ export const SidebarRecommendations = ({
 
 	const location = useLocation();
 	const patient_id = location.pathname.split('/')[2];
-	const doctorSerialNumber = useAppSelector(
-		(state) => state.auth.doctorSerialNumber,
-	);
 	const dispatch = useAppDispatch();
 	const [scheduleFollowup] = useScheduleFollowupMutation();
 
@@ -81,7 +78,6 @@ export const SidebarRecommendations = ({
 
 			const res = await scheduleFollowup({
 				patient_serial_number: patient_id,
-				doctor_serial_number: doctorSerialNumber,
 				visit_date: startDate.toISOString().slice(0, 19),
 				visit_type: 'followup',
 				summary: selectedRecommendation?.follow_up?.reason ?? '',

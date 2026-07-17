@@ -66,7 +66,6 @@ class OverviewPromptResponse(BaseModel):
 
 class FollowUpRequest(BaseModel):
 	patient_serial_number: str = Field(description='Patient serial number')
-	doctor_serial_number: str = Field(description='Doctor serial number')
 	visit_date: str = Field(description='Visit date in ISO 8601 format')
 	visit_type: VisitType = Field(default='followup', description='Type of visit')
 	summary: str = Field(description='Visit summary/title')

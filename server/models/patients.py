@@ -61,7 +61,6 @@ class VitalSignsResponse(BaseModel):
     visit_date: datetime
 
 class AddMedication(BaseModel):
-    doctor_serial_number: str
     medication_name: str
     generic_name: str
     dosage: str
@@ -95,7 +94,6 @@ class AddVitalSigns(BaseModel):
 
 class AddLabResult(BaseModel):
     visit_id: str
-    ordering_doctors_serial_number: str
     test_name: str
     result_value: str
     unit: Optional[str] = None
@@ -106,7 +104,6 @@ class AddLabResult(BaseModel):
 
 class AddDiagnosis(BaseModel):
     visit_id: str
-    diagnosing_doctors_serial_number: str
     diagnosis_code: str
     diagnosis_name: str
     diagnosis_type: DiagnosisType
@@ -186,7 +183,6 @@ class PatientFullResponse(BaseModel):
     diagnoses: List[DiagnosisResponse]
 
 class CreatePatient(BaseModel):
-    doctor_serial_number: str
     first_name: str
     last_name: str
     date_of_birth: date
@@ -202,7 +198,6 @@ class CreatePatient(BaseModel):
 
 class SetVisit(BaseModel):
     patient_serial_number: str
-    doctor_serial_number: str
     visit_type: VisitType
     location: Optional[VisitLocation] = 'Clinic'
     visit_date: Optional[str] = None

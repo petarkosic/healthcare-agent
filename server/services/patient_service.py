@@ -30,7 +30,7 @@ class PatientService:
         return patient_repository.search_by_serial(patient_serial_number, doctor_serial_number)
 
     @observe()
-    def create_patient(self, patient_data: CreatePatient) -> Dict[str, Any]:
+    def create_patient(self, patient_data: CreatePatient, doctor_serial_number: str) -> Dict[str, Any]:
         """Add new patient"""
         serial = patient_repository.create_patient(patient_data)
         if not serial:
@@ -38,7 +38,7 @@ class PatientService:
 
         visit_id = visit_repository.create_visit(
             patient_serial_number=serial,
-            doctor_serial_number=patient_data.doctor_serial_number,
+            doctor_serial_number=doctor_serial_number,
             visit_type="checkup",
             location="Clinic",
             status="in-progress",
@@ -51,11 +51,11 @@ class PatientService:
         }
 
     @observe()
-    def create_visit(self, visit_data: SetVisit) -> Dict[str, Any]:
+    def create_visit(self, visit_data: SetVisit, doctor_serial_number: str) -> Dict[str, Any]:
         """Create a new visit"""
         visit_id = visit_repository.create_visit(
             patient_serial_number=visit_data.patient_serial_number,
-            doctor_serial_number=visit_data.doctor_serial_number,
+            doctor_serial_number=doctor_serial_number,
             visit_type=visit_data.visit_type,
             location=visit_data.location,
             visit_date=visit_data.visit_date,

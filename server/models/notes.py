@@ -9,5 +9,4 @@ class Note(BaseModel):
     visit_id: UUID
     note_type: NoteType
     note_text: str
-    doctor_serial_number: str
     summary: Optional[str] = None

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { Visit } from '../../types/types';
 import { formatDateOnly } from '../../utils/utils';
 import { useParams } from 'react-router';
-import { useAppSelector } from '../../store/hooks';
 import { useGetPatientQuery } from '../../store/api/patientsApi';
 import { VisitModal } from '../VisitModal/VisitModal';
 import { apiFetch, API_BASE } from '../../lib/api';
@@ -13,9 +12,6 @@ export const Visits = () => {
 	const [printingVisitId, setPrintingVisitId] = useState<string | null>(null);
 
 	const { id: patient_serial } = useParams();
-	const doctorSerialNumber = useAppSelector(
-		(state) => state.auth.doctorSerialNumber,
-	);
 	const { data } = useGetPatientQuery(patient_serial!);
 
 	if (!data) return null;
@@ -143,7 +139,6 @@ export const Visits = () => {
 				<VisitModal
 					visit={selectedVisit}
 					onClose={() => setSelectedVisit(null)}
-					doctorSerialNumber={doctorSerialNumber}
 				/>
 			)}
 		</>

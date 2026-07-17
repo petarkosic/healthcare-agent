@@ -536,8 +536,6 @@ export interface components {
         AddDiagnosis: {
             /** Visit Id */
             visit_id: string;
-            /** Diagnosing Doctors Serial Number */
-            diagnosing_doctors_serial_number: string;
             /** Diagnosis Code */
             diagnosis_code: string;
             /** Diagnosis Name */
@@ -561,8 +559,6 @@ export interface components {
         AddLabResult: {
             /** Visit Id */
             visit_id: string;
-            /** Ordering Doctors Serial Number */
-            ordering_doctors_serial_number: string;
             /** Test Name */
             test_name: string;
             /** Result Value */
@@ -583,8 +579,6 @@ export interface components {
         };
         /** AddMedication */
         AddMedication: {
-            /** Doctor Serial Number */
-            doctor_serial_number: string;
             /** Medication Name */
             medication_name: string;
             /** Generic Name */
@@ -688,8 +682,6 @@ export interface components {
         };
         /** CreatePatient */
         CreatePatient: {
-            /** Doctor Serial Number */
-            doctor_serial_number: string;
             /** First Name */
             first_name: string;
             /** Last Name */
@@ -784,11 +776,6 @@ export interface components {
              * @description Patient serial number
              */
             patient_serial_number: string;
-            /**
-             * Doctor Serial Number
-             * @description Doctor serial number
-             */
-            doctor_serial_number: string;
             /**
              * Visit Date
              * @description Visit date in ISO 8601 format
@@ -959,8 +946,6 @@ export interface components {
             note_type: "soap_subjective" | "soap_objective" | "soap_assessment" | "soap_plan" | "progress_note" | "consult_note" | "discharge_summary" | "procedure_note";
             /** Note Text */
             note_text: string;
-            /** Doctor Serial Number */
-            doctor_serial_number: string;
             /** Summary */
             summary?: string | null;
         };
@@ -1036,8 +1021,6 @@ export interface components {
         SetVisit: {
             /** Patient Serial Number */
             patient_serial_number: string;
-            /** Doctor Serial Number */
-            doctor_serial_number: string;
             /**
              * Visit Type
              * @enum {string}

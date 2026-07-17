@@ -38,7 +38,6 @@ export const Notes = () => {
 					visit_id: session!.visitId as string,
 					note_type: newNoteType as NoteType,
 					note_text: newNoteText,
-					doctor_serial_number: doctorSerialNumber!,
 				},
 			}).unwrap();
 

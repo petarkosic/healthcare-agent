@@ -55,7 +55,6 @@ export const AddPatient = () => {
 
 		try {
 			const data = await createPatient({
-				doctor_serial_number: doctorSerialNumber!,
 				first_name: form.first_name,
 				last_name: form.last_name,
 				date_of_birth: form.date_of_birth,

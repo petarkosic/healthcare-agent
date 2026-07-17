@@ -138,7 +138,6 @@ export const Navbar = () => {
 				patientId,
 				body: {
 					patient_serial_number: patientId,
-					doctor_serial_number: doctorSerialNumber!,
 					visit_type: selectedType as VisitType,
 					location: selectedLocation as VisitLocation,
 					status: 'in-progress',

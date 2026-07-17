@@ -153,7 +153,6 @@ export const Medications = () => {
 				body: {
 					...addForm,
 					status: addForm.status as MedicationStatus,
-					doctor_serial_number: doctorSerialNumber!,
 					end_date: addForm.end_date || null,
 				},
 			}).unwrap();

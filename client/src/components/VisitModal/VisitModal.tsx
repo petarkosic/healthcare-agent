@@ -22,7 +22,6 @@ import './VisitModal.css';
 type VisitModalProps = {
 	visit: Visit;
 	onClose: () => void;
-	doctorSerialNumber: string | null;
 };
 
 type View = 'details' | 'reschedule';
@@ -30,7 +29,6 @@ type View = 'details' | 'reschedule';
 export const VisitModal = ({
 	visit,
 	onClose,
-	doctorSerialNumber,
 }: VisitModalProps) => {
 	const minDate = (() => {
 		const d = new Date();
@@ -179,7 +177,6 @@ export const VisitModal = ({
 
 			await scheduleFollowup({
 				patient_serial_number: visit.patient_serial_number,
-				doctor_serial_number: doctorSerialNumber,
 				visit_date: localStart.toISOString().slice(0, 19),
 				visit_type: visit.visit_type,
 				summary: `${visit.visit_type} visit`,

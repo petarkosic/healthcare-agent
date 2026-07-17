@@ -61,7 +61,6 @@ export const Diagnoses = () => {
 					diagnosis_type: form.diagnosis_type as DiagnosisType,
 					status: form.status as DiagnosisStatus,
 					visit_id: session!.visitId as string,
-					diagnosing_doctors_serial_number: doctorSerialNumber!,
 					diagnosed_date: new Date(form.diagnosed_date).toISOString(),
 					resolved_date: form.resolved_date
 						? new Date(form.resolved_date).toISOString()

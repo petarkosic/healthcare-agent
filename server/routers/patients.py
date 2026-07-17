@@ -55,8 +55,7 @@ def create_patient(
     patient: CreatePatient, doctor: CurrentDoctor = Depends(get_current_doctor)
 ):
     try:
-        patient.doctor_serial_number = doctor.serial
-        result = patient_service.create_patient(patient)
+        result = patient_service.create_patient(patient, doctor_serial_number=doctor.serial)
 
         return result
     except Exception:
@@ -117,8 +116,6 @@ def set_note(
 
     verify_visit_ownership(str(note.visit_id), patient_serial, doctor.serial)
 
-    note.doctor_serial_number = doctor.serial
-
     prompt = f"""
     Generate a concise medical summary of this clinical note:
 
@@ -168,7 +165,7 @@ def add_medication(
     _: None = Depends(verify_patient_access),
 ):
     try:
-        medication_data = medication.model_dump(exclude={"doctor_serial_number"})
+        medication_data = medication.model_dump()
         result = patient_service.add_medication(
             patient_serial_number=patient_serial,
             doctor_serial_number=doctor.serial,
@@ -253,9 +250,7 @@ def add_lab(
     try:
         verify_visit_ownership(lab.visit_id, patient_serial, doctor.serial)
 
-        lab_data = lab.model_dump(
-            exclude={"visit_id", "ordering_doctors_serial_number"}
-        )
+        lab_data = lab.model_dump(exclude={"visit_id"})
         result = patient_service.add_lab_result(
             patient_serial_number=patient_serial,
             visit_id=lab.visit_id,
@@ -283,9 +278,7 @@ def add_diagnosis(
     try:
         verify_visit_ownership(diagnosis.visit_id, patient_serial, doctor.serial)
 
-        diagnosis_data = diagnosis.model_dump(
-            exclude={"visit_id", "diagnosing_doctors_serial_number"}
-        )
+        diagnosis_data = diagnosis.model_dump(exclude={"visit_id"})
         result = patient_service.add_diagnosis(
             patient_serial_number=patient_serial,
             visit_id=diagnosis.visit_id,
@@ -327,8 +320,7 @@ def update_allergies(
 @router.post("/visits")
 def set_visit(visit: SetVisit, doctor: CurrentDoctor = Depends(get_current_doctor)):
     try:
-        visit.doctor_serial_number = doctor.serial
-        result = patient_service.create_visit(visit)
+        result = patient_service.create_visit(visit, doctor_serial_number=doctor.serial)
 
         return result
     except HTTPException:

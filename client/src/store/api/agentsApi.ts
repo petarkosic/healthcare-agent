@@ -2,7 +2,6 @@ import { baseApi } from './baseApi';
 
 interface ScheduleFollowupBody {
 	patient_serial_number: string;
-	doctor_serial_number: string | null;
 	visit_date: string;
 	visit_type: string;
 	summary: string;

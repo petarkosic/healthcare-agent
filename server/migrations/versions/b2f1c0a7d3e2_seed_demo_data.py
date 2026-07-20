@@ -289,7 +289,7 @@ def upgrade() -> None:
               ELSE                                'Vitals to be measured at check-in'
             END
           FROM visits v
-          WHERE v.status NOT IN ('cancelled', 'no-show')
+          WHERE v.status NOT IN ('cancelled', 'no-show', 'scheduled')
           RETURNING vital_id, visit_id
         ),
 
@@ -463,7 +463,7 @@ def upgrade() -> None:
             v.visit_date + INTERVAL '15 minutes',
             v.visit_date + INTERVAL '20 minutes'
           FROM visits v
-          WHERE v.status NOT IN ('cancelled', 'no-show')
+          WHERE v.status NOT IN ('cancelled', 'no-show', 'scheduled')
           RETURNING note_id
         ),
 

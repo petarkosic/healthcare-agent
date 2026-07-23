@@ -82,7 +82,7 @@ class PatientRepository(BaseRepository):
                     diagnoses=[DiagnosisResponse(**d) for d in diagnoses],
                 )
 
-    def create_patient(self, data) -> Optional[str]:
+    def create_patient(self, data, conn=None) -> Optional[str]:
         return self._execute_insert(
             """
             INSERT INTO patients (
@@ -99,6 +99,7 @@ class PatientRepository(BaseRepository):
                 data.emergency_contact_name, data.emergency_contact_phone,
                 data.allergies, data.chronic_conditions,
             ),
+            conn=conn,
         )
 
     def get_patients(self, doctor_serial_number: str, limit: int = 100, offset: int = 0):

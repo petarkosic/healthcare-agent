@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Optional
+from db.database import db_manager
 from repositories.patient_repository import patient_repository
 from repositories.visit_repository import visit_repository
 from repositories.vital_signs_repository import vital_signs_repository
@@ -31,18 +32,24 @@ class PatientService:
 
     @observe()
     def create_patient(self, patient_data: CreatePatient, doctor_serial_number: str) -> Dict[str, Any]:
-        """Add new patient"""
-        serial = patient_repository.create_patient(patient_data)
-        if not serial:
-            raise Exception("Failed to create patient")
+        """Add new patient and their initial visit"""
+        with db_manager.transaction() as conn:
+            serial = patient_repository.create_patient(patient_data, conn=conn)
 
-        visit_id = visit_repository.create_visit(
-            patient_serial_number=serial,
-            doctor_serial_number=doctor_serial_number,
-            visit_type="checkup",
-            location="Clinic",
-            status="in-progress",
-        )
+            if not serial:
+                raise Exception("Failed to create patient")
+
+            visit_id = visit_repository.create_visit(
+                patient_serial_number=serial,
+                doctor_serial_number=doctor_serial_number,
+                visit_type="checkup",
+                location="Clinic",
+                status="in-progress",
+                conn=conn,
+            )
+
+            if not visit_id:
+                raise Exception("Failed to create initial visit")
 
         return {
             "message": "Patient created successfully",

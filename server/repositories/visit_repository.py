@@ -10,7 +10,7 @@ class VisitRepository(BaseRepository):
     def create_visit(self, patient_serial_number: str, doctor_serial_number: str,
                      visit_type: str, location: str, visit_date: str = None,
                      status: str = 'in-progress', chief_complaint: str = "",
-                     duration_minutes: int = 30) -> Optional[str]:
+                     duration_minutes: int = 30, conn=None) -> Optional[str]:
         """Create a new visit and return the visit ID"""
         if visit_date:
             visit_id = self._execute_insert("""
@@ -27,7 +27,7 @@ class VisitRepository(BaseRepository):
                 location,
                 chief_complaint,
                 duration_minutes
-            ))
+            ), conn=conn)
         else:
             visit_id = self._execute_insert("""
                 INSERT INTO visits
@@ -42,7 +42,7 @@ class VisitRepository(BaseRepository):
                 location,
                 chief_complaint,
                 duration_minutes
-            ))
+            ), conn=conn)
 
         return str(visit_id) if visit_id else None
 

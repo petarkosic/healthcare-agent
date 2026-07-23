@@ -41,10 +41,20 @@ class DatabaseManager:
         """Get a connection from the pool"""
         if self._pool is None:
             raise RuntimeError("Database pool not initialized")
-        
+
         with self._pool.connection() as conn:
             yield conn
-    
+
+    @contextmanager
+    def transaction(self) -> Generator:
+        """Get a connection with an explicit transaction (commits on success, rolls back on exception)"""
+        if self._pool is None:
+            raise RuntimeError("Database pool not initialized")
+
+        with self._pool.connection() as conn:
+            with conn.transaction():
+                yield conn
+
     def close(self):
         """Close all connections in the pool"""
         if self._pool:

@@ -40,22 +40,18 @@ def _set_auth_cookie(response: JSONResponse, token: str) -> None:
 
 
 @router.post("/signup", response_model=AuthResponse, status_code=201)
-async def signup(req: SignUpRequest):
+@limiter.limit("5/minute")
+async def signup(request: Request, req: SignUpRequest):
     with db_manager.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT doctor_id FROM doctors WHERE email = %s", (req.email,)
-            )
-            if cur.fetchone():
-                raise HTTPException(status_code=409, detail="Email already registered")
-
-            cur.execute(
-                "SELECT doctor_id FROM doctors WHERE license_number = %s",
-                (req.license_number,),
+                "SELECT doctor_id FROM doctors WHERE email = %s OR license_number = %s",
+                (req.email, req.license_number),
             )
             if cur.fetchone():
                 raise HTTPException(
-                    status_code=409, detail="License number already registered"
+                    status_code=409,
+                    detail="Account could not be created with the provided details",
                 )
 
             cur.execute(

@@ -34,8 +34,12 @@ class DatabaseManager:
             max_size=20,
             open=False,
         )
-        self._pool.open()
-    
+
+    def open(self):
+        """Open the connection pool. Call from the app's lifespan startup."""
+        if self._pool:
+            self._pool.open()
+
     @contextmanager
     def get_connection(self) -> Generator:
         """Get a connection from the pool"""

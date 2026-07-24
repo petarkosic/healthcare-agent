@@ -11,7 +11,7 @@ from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
-from rag.rag_service import RAGService
+from rag.rag_service import rag_service as rag
 from models.agents import AIOverviewResponse, MedicationsRequest, OverviewPromptResponse, OverviewRequest
 from utils.cache import cache, hash_key
 from utils.limiter import limiter
@@ -20,8 +20,6 @@ from services.patient_service import visit_repository
 from services.google_calendar_service import create_event as create_calendar_event_for_doctor
 
 load_dotenv()
-
-rag = RAGService()
 
 @observe(as_type="span")
 def schedule_visit_db(

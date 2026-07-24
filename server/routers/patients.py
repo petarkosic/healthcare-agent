@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from langfuse import observe
 
-from rag.rag_service import RAGService
+from rag.rag_service import rag_service as rag
 from models.notes import Note
 from models.patients import (
     AddDiagnosis,
@@ -29,8 +29,6 @@ from services.report_service import report_service
 logger = logging.getLogger(__name__)
 
 load_dotenv()
-
-rag = RAGService()
 
 router = APIRouter(
     prefix="/patients",

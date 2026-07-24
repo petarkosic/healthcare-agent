@@ -91,3 +91,5 @@ class RAGService:
             print(f"Error deleting data for patient {patient_serial}: {e}")
 
             return False
+
+rag_service = RAGService()

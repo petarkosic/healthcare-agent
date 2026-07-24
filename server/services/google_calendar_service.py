@@ -8,6 +8,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 from db.database import db_manager
+from utils.crypto import decrypt_token, encrypt_token
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ def get_credentials(doctor_serial: str) -> Credentials:
         raise HTTPException(status_code=403, detail="Google Calendar not connected")
 
     access_token, refresh_token, expiry = row
+    access_token = decrypt_token(access_token)
+    refresh_token = decrypt_token(refresh_token)
 
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -58,10 +61,9 @@ def get_credentials(doctor_serial: str) -> Credentials:
                 with conn.cursor() as cur:
                     cur.execute(
                         """
-                        UPDATE doctors SET google_access_token=%s, google_token_expiry=%s,
-                        google_refresh_token=%s WHERE doctor_serial_number=%s
+                        UPDATE doctors SET google_access_token=%s, google_refresh_token=%s google_token_expiry=%s, WHERE doctor_serial_number=%s
                         """,
-                        (creds.token, creds.expiry, creds.refresh_token, doctor_serial),
+                        (encrypt_token(creds.token),  encrypt_token(creds.refresh_token), creds.expiry, doctor_serial),
                     )
 
                     conn.commit()

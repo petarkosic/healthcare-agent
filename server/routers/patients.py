@@ -21,7 +21,11 @@ from models.patients import (
     UpdateAllergies,
 )
 from utils.auth import CurrentDoctor, get_current_doctor
-from utils.authz import verify_patient_access, verify_visit_ownership
+from utils.authz import (
+    verify_patient_access,
+    verify_visit_belongs_to_doctor,
+    verify_visit_ownership,
+)
 from utils.openai_client import openai_client
 from services.patient_service import patient_service
 from services.report_service import report_service
@@ -331,6 +335,8 @@ def set_visit(visit: SetVisit, doctor: CurrentDoctor = Depends(get_current_docto
 @router.put("/visits")
 def update_visit(visit: UpdateVisit, doctor: CurrentDoctor = Depends(get_current_doctor)):
     try:
+        verify_visit_belongs_to_doctor(str(visit.visit_id), doctor.serial)
+
         result = patient_service.update_visit(visit)
 
         return result

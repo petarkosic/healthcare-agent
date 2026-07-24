@@ -13,6 +13,7 @@ from google_auth_oauthlib.flow import Flow
 
 from db.database import db_manager
 from utils.auth import CurrentDoctor, get_current_doctor
+from utils.crypto import encrypt_token
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ async def callback(
         with conn.cursor() as cur:
             cur.execute(
                 """UPDATE doctors SET google_access_token=%s, google_refresh_token=%s, google_token_expiry=%s WHERE doctor_serial_number=%s""",
-                (access_token, refresh_token, expiry, doctor_serial_number),
+                (encrypt_token(access_token), encrypt_token(refresh_token), expiry, doctor_serial_number),
             )
 
             if cur.rowcount == 0:

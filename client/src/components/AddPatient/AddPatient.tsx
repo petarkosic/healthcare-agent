@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { useAppDispatch } from '../../store/hooks';
 import { startSession } from '../../store/sessionSlice';
 import { useCreatePatientMutation } from '../../store/api/patientsApi';
 import type { Gender, BloodType } from '../../types/enums';
@@ -27,9 +27,6 @@ export const AddPatient = () => {
 	});
 	const [error, setError] = useState<string | null>(null);
 
-	const doctorSerialNumber = useAppSelector(
-		(state) => state.auth.doctorSerialNumber,
-	);
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 	const [createPatient, { isLoading: submitting }] = useCreatePatientMutation();

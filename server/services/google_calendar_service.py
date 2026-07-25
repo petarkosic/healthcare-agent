@@ -61,9 +61,9 @@ def get_credentials(doctor_serial: str) -> Credentials:
                 with conn.cursor() as cur:
                     cur.execute(
                         """
-                        UPDATE doctors SET google_access_token=%s, google_refresh_token=%s google_token_expiry=%s, WHERE doctor_serial_number=%s
+                        UPDATE doctors SET google_access_token=%s, google_refresh_token=%s, google_token_expiry=%s WHERE doctor_serial_number=%s
                         """,
-                        (encrypt_token(creds.token),  encrypt_token(creds.refresh_token), creds.expiry, doctor_serial),
+                        (encrypt_token(creds.token), encrypt_token(creds.refresh_token), creds.expiry, doctor_serial),
                     )
 
                     conn.commit()

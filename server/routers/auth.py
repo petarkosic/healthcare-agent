@@ -41,7 +41,7 @@ def _set_auth_cookie(response: JSONResponse, token: str) -> None:
 
 @router.post("/signup", response_model=AuthResponse, status_code=201)
 @limiter.limit("5/minute")
-async def signup(request: Request, req: SignUpRequest):
+def signup(request: Request, req: SignUpRequest):
     with db_manager.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -88,7 +88,7 @@ async def signup(request: Request, req: SignUpRequest):
 
 @router.post("/login", response_model=AuthResponse)
 @limiter.limit("5/minute")
-async def login(request: Request, req: LoginRequest):
+def login(request: Request, req: LoginRequest):
     with db_manager.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(

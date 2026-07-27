@@ -48,7 +48,7 @@ def _build_flow() -> tuple[Flow, str]:
 
 
 @router.get("/authorize")
-async def authorize(doctor: CurrentDoctor = Depends(get_current_doctor)):
+def authorize(doctor: CurrentDoctor = Depends(get_current_doctor)):
     jwt_secret = os.getenv("JWT_SECRET_KEY")
 
     # Generate PKCE verifier + challenge
@@ -77,7 +77,7 @@ async def authorize(doctor: CurrentDoctor = Depends(get_current_doctor)):
 
 
 @router.get("/callback")
-async def callback(
+def callback(
     code: str = Query(None),
     state: str = Query(None),
     error: str = Query(None),
@@ -140,7 +140,7 @@ async def callback(
 
 
 @router.get("/status")
-async def status(doctor: CurrentDoctor = Depends(get_current_doctor)):
+def status(doctor: CurrentDoctor = Depends(get_current_doctor)):
     with db_manager.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(

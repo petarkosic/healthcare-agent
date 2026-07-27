@@ -9,25 +9,25 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/stats")
-async def get_stats(start: datetime, end: datetime, doctor: CurrentDoctor = Depends(get_current_doctor)):
+def get_stats(start: datetime, end: datetime, doctor: CurrentDoctor = Depends(get_current_doctor)):
     return dashboard_repository.get_dashboard_stats(doctor.serial, start, end)
 
 
 @router.get("/schedule")
-async def get_schedule(start: datetime, end: datetime, doctor: CurrentDoctor = Depends(get_current_doctor)):
+def get_schedule(start: datetime, end: datetime, doctor: CurrentDoctor = Depends(get_current_doctor)):
     return dashboard_repository.get_schedule_for_date(doctor.serial, start, end)
 
 
 @router.get("/breakdown")
-async def get_breakdown(doctor: CurrentDoctor = Depends(get_current_doctor)):
+def get_breakdown(doctor: CurrentDoctor = Depends(get_current_doctor)):
     return dashboard_repository.get_visit_type_breakdown(doctor.serial)
 
 
 @router.get("/lab-alerts")
-async def get_lab_alerts(doctor: CurrentDoctor = Depends(get_current_doctor)):
+def get_lab_alerts(doctor: CurrentDoctor = Depends(get_current_doctor)):
     return dashboard_repository.get_lab_alerts(doctor.serial)
 
 
 @router.get("/top-diagnoses")
-async def get_top_diagnoses(doctor: CurrentDoctor = Depends(get_current_doctor)):
+def get_top_diagnoses(doctor: CurrentDoctor = Depends(get_current_doctor)):
     return dashboard_repository.get_top_diagnoses(doctor.serial)

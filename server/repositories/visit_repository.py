@@ -76,6 +76,23 @@ class VisitRepository(BaseRepository):
 
         return results[0] if results else None
 
+    def get_latest_visit(self, patient_serial_number: str):
+        """Get the most recent visit (by visit_date) for a patient, with doctor info"""
+        results = self._execute_query("""
+            SELECT
+                v.*,
+                d.first_name AS doctor_first_name,
+                d.last_name AS doctor_last_name,
+                d.specialty
+            FROM visits v
+            JOIN doctors d ON v.doctor_serial_number = d.doctor_serial_number
+            WHERE v.patient_serial_number = %s
+            ORDER BY v.visit_date DESC
+            LIMIT 1
+        """, (patient_serial_number,))
+
+        return results[0] if results else None
+
     def get_next_scheduled_visit(self, patient_serial_number: str):
         """Get the earliest future scheduled visit for a patient"""
         results = self._execute_query("""

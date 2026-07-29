@@ -67,7 +67,7 @@ class ReportService:
         if visit["patient_serial_number"] != patient_serial:
             raise ValueError(f"Visit {visit_id} does not belong to patient {patient_serial}")
 
-        patient = patient_repository.get_patient_full(patient_serial)
+        patient = patient_repository.get_patient(patient_serial)
         if not patient:
             raise ValueError(f"Patient {patient_serial} not found")
 
@@ -82,7 +82,7 @@ class ReportService:
 
         return {
             "visit": visit,
-            "patient": patient.patient,
+            "patient": patient,
             "vitals": vitals,
             "notes": notes,
             "diagnoses": diagnoses,

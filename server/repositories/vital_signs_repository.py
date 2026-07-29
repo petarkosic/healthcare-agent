@@ -50,6 +50,19 @@ class VitalSignsRepository(BaseRepository):
 
         return str(vital_id) if vital_id else None
 
+    def get_latest_vital(self, patient_serial_number: str):
+        """Get the most recent vital signs entry (by measurement_time) for a patient"""
+        results = self._execute_query("""
+            SELECT vs.*
+            FROM vital_signs vs
+            JOIN visits v ON vs.visit_id = v.visit_id
+            WHERE v.patient_serial_number = %s
+            ORDER BY vs.measurement_time DESC
+            LIMIT 1
+        """, (patient_serial_number,))
+
+        return results[0] if results else None
+
     def get_vitals_by_visit(self, visit_id: str):
         """Get all vital signs recorded for a visit"""
         return self._execute_query("""

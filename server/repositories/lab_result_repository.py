@@ -34,6 +34,18 @@ class LabResultRepository(BaseRepository):
 
         return str(lab_id) if lab_id else None
 
+    def get_latest_lab(self, patient_serial_number: str):
+        """Get the most recently created lab result for a patient"""
+        results = self._execute_query("""
+            SELECT l.*
+            FROM lab_results l
+            WHERE l.patient_serial_number = %s
+            ORDER BY l.created_at DESC
+            LIMIT 1
+        """, (patient_serial_number,))
+
+        return results[0] if results else None
+
     def get_labs_by_visit(self, visit_id: str):
         """Get all lab results linked to a visit"""
         return self._execute_query("""

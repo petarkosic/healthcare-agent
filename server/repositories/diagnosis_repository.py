@@ -33,6 +33,23 @@ class DiagnosisRepository(BaseRepository):
 
         return str(diagnosis_id) if diagnosis_id else None
 
+    def get_patient_diagnoses(self, patient_serial_number: str, statuses: Optional[list[str]] = None):
+        """Get diagnoses for a patient, optionally filtered to a set of statuses"""
+        if statuses:
+            return self._execute_query("""
+                SELECT diag.*
+                FROM diagnoses diag
+                WHERE diag.patient_serial_number = %s AND diag.status = ANY(%s)
+                ORDER BY diag.created_at DESC, diag.status
+            """, (patient_serial_number, list(statuses)))
+
+        return self._execute_query("""
+            SELECT diag.*
+            FROM diagnoses diag
+            WHERE diag.patient_serial_number = %s
+            ORDER BY diag.created_at DESC, diag.status
+        """, (patient_serial_number,))
+
     def get_diagnoses_by_visit(self, visit_id: str):
         """Get all diagnoses linked to a visit"""
         return self._execute_query("""

@@ -6,6 +6,14 @@ class PatientRepository(BaseRepository):
     def __init__(self):
         super().__init__("patients")
 
+    def get_patient(self, patient_serial_number: str) -> Optional[PatientBase]:
+        results = self._execute_query(
+            "SELECT * FROM patients WHERE patient_serial_number = %s",
+            (patient_serial_number,),
+        )
+
+        return PatientBase(**results[0]) if results else None
+
     def get_patient_full(self, patient_serial_number: str) -> Optional[PatientFullResponse]:
         with self.db_manager.get_connection() as conn:
             with conn.cursor() as cur:

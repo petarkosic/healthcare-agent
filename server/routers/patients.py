@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from langfuse import observe
 
-from rag.rag_service import rag_service as rag
+from rag.queue import enqueue_note_upsert
 from models.notes import Note
 from models.patients import (
     AddDiagnosis,
@@ -127,10 +127,6 @@ def set_note(
     """
 
     try:
-        rag.upsert_patient_note(
-            patient_serial=str(patient_serial), note_summary=note.note_text
-        )
-
         resp = openai_client.chat.completions.create(
             model="gemini-3.1-flash-lite",
             messages=[{"role": "user", "content": prompt}],
@@ -150,13 +146,15 @@ def set_note(
             note_text=note.note_text,
             summary=summary,
         )
-
-        return result
     except HTTPException:
         raise
     except Exception:
         logger.exception("Error adding note for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error adding note")
+
+    enqueue_note_upsert(str(patient_serial), note.note_text)
+
+    return result
 
 
 @router.post("/{patient_serial}/medications")

@@ -1,5 +1,6 @@
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends, HTTPException, Request
 from dotenv import load_dotenv
 
@@ -124,6 +125,8 @@ router = APIRouter(
     tags=["agents"],
 )
 
+_overview_executor = ThreadPoolExecutor(max_workers=4)
+
 
 @router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 @observe()
@@ -140,11 +143,12 @@ def get_overview(
     if cached:
         return cached
 
-    docs = rag.get_patient_overview(patient_serial=patient_serial)
+    docs_future = _overview_executor.submit(rag.get_patient_overview, patient_serial=patient_serial)
+    patient_data_future = _overview_executor.submit(agent_service.get_patient_overview_data, patient_serial)
 
-    # Get patient overview data using the service layer
-    patient_data = agent_service.get_patient_overview_data(patient_serial)
-    
+    docs = docs_future.result()
+    patient_data = patient_data_future.result()
+
     if not patient_data:
         raise ValueError(
             f"Patient with serial number {patient_serial} not found in database."

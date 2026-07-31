@@ -1,8 +1,27 @@
 import { baseApi } from './baseApi';
+import { clearPatientAiCache } from '../aiSlice';
+import type { AppDispatch } from '../index';
 import type { PatientFullResponse, TPatients } from '../../types/types';
 import type { components } from '../../types/api';
 
 type Schemas = components['schemas'];
+
+const invalidateAiCacheOnSuccess =
+	<Arg extends { patientId: string }>() =>
+	async (
+		arg: Arg,
+		{
+			dispatch,
+			queryFulfilled,
+		}: { dispatch: AppDispatch; queryFulfilled: Promise<unknown> },
+	) => {
+		try {
+			await queryFulfilled;
+			dispatch(clearPatientAiCache(arg.patientId));
+		} catch (err) {
+			console.error('Mutation failed, AI cache left untouched:', err);
+		}
+	};
 
 export const patientsApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
@@ -25,18 +44,17 @@ export const patientsApi = baseApi.injectEndpoints({
 		addMedication: builder.mutation<
 			void,
 			{ patientId: string; body: Schemas['AddMedication'] }
-		>(
-			{
-				query: ({ patientId, body }) => ({
-					url: `/api/patients/${patientId}/medications`,
-					method: 'POST',
-					body,
-				}),
-				invalidatesTags: (_r, _e, { patientId }) => [
-					{ type: 'Patient' as const, id: patientId },
-				],
-			},
-		),
+		>({
+			query: ({ patientId, body }) => ({
+				url: `/api/patients/${patientId}/medications`,
+				method: 'POST',
+				body,
+			}),
+			invalidatesTags: (_r, _e, { patientId }) => [
+				{ type: 'Patient' as const, id: patientId },
+			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
+		}),
 
 		updateMedication: builder.mutation<
 			void,
@@ -54,6 +72,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		deleteMedication: builder.mutation<
@@ -67,6 +86,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		addDiagnosis: builder.mutation<
@@ -81,6 +101,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		updateAllergies: builder.mutation<
@@ -95,6 +116,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		addVital: builder.mutation<
@@ -109,6 +131,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		addLab: builder.mutation<
@@ -123,6 +146,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		addNote: builder.mutation<
@@ -137,6 +161,7 @@ export const patientsApi = baseApi.injectEndpoints({
 			invalidatesTags: (_r, _e, { patientId }) => [
 				{ type: 'Patient' as const, id: patientId },
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		updateVisit: builder.mutation<
@@ -152,6 +177,7 @@ export const patientsApi = baseApi.injectEndpoints({
 				{ type: 'Patient' as const, id: patientId },
 				'PatientList',
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		createVisit: builder.mutation<
@@ -167,6 +193,7 @@ export const patientsApi = baseApi.injectEndpoints({
 				{ type: 'Patient' as const, id: patientId },
 				'PatientList',
 			],
+			onQueryStarted: invalidateAiCacheOnSuccess(),
 		}),
 
 		createPatient: builder.mutation<

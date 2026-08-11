@@ -2,11 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { startSession, endSession } from '../../store/sessionSlice';
 import './Navbar.css';
-import {
-	formatTime,
-	getInitials,
-	secondsToRoundedMinutes,
-} from '../../utils/utils';
+import { getInitials, secondsToRoundedMinutes } from '../../utils/utils';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { openModal, logoutUser } from '../../store/authSlice';
 import {
@@ -15,6 +11,7 @@ import {
 } from '../../store/api/patientsApi';
 import type { VisitType, VisitLocation, VisitStatus } from '../../types/enums';
 import { SettingsModal } from '../SettingsModal/SettingsModal';
+import { SessionTimer } from '../SessionTimer/SessionTimer';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 const VISIT_TYPES = [
@@ -58,15 +55,6 @@ export const Navbar = () => {
 		location.pathname,
 	);
 	const session = useAppSelector((state) => state.session.session);
-	const [elapsedTime, setElapsedTime] = useState(0);
-
-	useEffect(() => {
-		if (!session) return;
-		const id = window.setInterval(() => {
-			setElapsedTime(Math.floor((Date.now() - session.startTime) / 1000));
-		}, 1000);
-		return () => clearInterval(id);
-	}, [session]);
 	const dispatch = useAppDispatch();
 	const { doctorSerialNumber, doctorName } = useAppSelector(
 		(state) => state.auth,
@@ -176,8 +164,12 @@ export const Navbar = () => {
 			return;
 		}
 
+		const elapsedSeconds = session
+			? Math.floor((Date.now() - session.startTime) / 1000)
+			: 0;
+
 		const sessionData = {
-			duration_minutes: secondsToRoundedMinutes(elapsedTime),
+			duration_minutes: secondsToRoundedMinutes(elapsedSeconds),
 			chief_complaint: chiefComplaint,
 			status: 'completed' as VisitStatus,
 		};
@@ -282,9 +274,8 @@ export const Navbar = () => {
 											<span className='session-type'>
 												{session.type} - {session.location}
 											</span>
-											<span className='session-timer'>
-												{formatTime(elapsedTime)}
-											</span>
+
+											<SessionTimer startTime={session.startTime} />
 										</div>
 										<button
 											onClick={handleEndClick}

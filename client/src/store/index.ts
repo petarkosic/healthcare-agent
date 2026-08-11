@@ -21,8 +21,15 @@ export const store = configureStore({
 		getDefaultMiddleware().concat(baseApi.middleware),
 });
 
+let prevSession:
+	| ReturnType<typeof store.getState>['session']['session']
+	| null = null;
+
 store.subscribe(() => {
 	const { session } = store.getState().session;
+
+	if (session === prevSession) return;
+	prevSession = session;
 
 	if (session) {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(session));

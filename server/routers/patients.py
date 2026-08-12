@@ -4,7 +4,7 @@ import io
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
-from langfuse import observe
+from langfuse import observe, propagate_attributes
 
 from rag.queue import enqueue_note_upsert
 from models.notes import Note
@@ -112,6 +112,13 @@ def set_note(
     doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": patient_serial},
+        tags=["note-summary"],
+    ):
+        pass
+
     if not note.visit_id or not note.note_type or not note.note_text:
         raise HTTPException(
             status_code=400,

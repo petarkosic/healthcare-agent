@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-from langfuse import observe
+from langfuse import observe, propagate_attributes
 
 from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
@@ -137,6 +137,13 @@ def get_overview(
     doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": patient_serial},
+        tags=["overview"],
+    ):
+        pass
+
     cache_key = f"overview:{patient_serial}"
     cached = cache.get(cache_key)
 
@@ -186,6 +193,9 @@ def get_overview(
 @observe()
 @limiter.limit("2/minute")
 def get_recommendations(request: Request, payload: OverviewRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
+    with propagate_attributes(user_id=doctor.serial, tags=["recommendations"]):
+        pass
+
     if not payload.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -282,6 +292,9 @@ def get_recommendations(request: Request, payload: OverviewRequest, doctor: Curr
 @observe()
 @limiter.limit("2/minute")
 def get_medications(request: Request, payload: MedicationsRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
+    with propagate_attributes(user_id=doctor.serial, tags=["medications"]):
+        pass
+
     if not payload.overview:
         raise HTTPException(status_code=400, detail="Overview is required")
 
@@ -370,6 +383,13 @@ def get_medications(request: Request, payload: MedicationsRequest, doctor: Curre
 @limiter.limit("3/minute")
 def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
     verify_patient_access(follow_up.patient_serial_number, doctor)
+
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": follow_up.patient_serial_number},
+        tags=["schedule-followup"],
+    ):
+        pass
 
     prompt = f"""You are a medical scheduling assistant. A doctor wants to schedule a follow-up visit for a patient.
 

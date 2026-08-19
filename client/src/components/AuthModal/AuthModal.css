@@ -111,6 +111,17 @@
 	color: var(--danger-text);
 }
 
+.demo-disclaimer {
+	background: var(--bg-body);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	padding: 0.625rem 0.875rem;
+	font-size: 0.8125rem;
+	line-height: 1.45;
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+}
+
 .modal-error {
 	background: var(--danger-bg);
 	color: var(--danger-text);

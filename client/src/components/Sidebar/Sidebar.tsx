@@ -4,7 +4,6 @@ import './Sidebar.css';
 import { SidebarRecommendations } from '../SidebarRecommendations/SidebarRecommendations';
 import { SidebarMedications } from '../SidebarMedications/SidebarMedications';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { useGetPatientQuery } from '../../store/api/patientsApi';
 import {
 	fetchAiOverview,
 	fetchAiRecommendations,
@@ -28,7 +27,6 @@ export const Sidebar = ({
 
 	const { id: patient_serial } = useParams();
 	const dispatch = useAppDispatch();
-	const { data: patientData } = useGetPatientQuery(patient_serial!);
 
 	const aiCache = useAppSelector(
 		(state) => state.ai.byPatient[patient_serial!],
@@ -63,14 +61,9 @@ export const Sidebar = ({
 		setActiveView(action);
 		setError(null);
 
-		const overviewText = overview.ai_overview.overview;
-
 		if (action === 'recommendations') {
 			const result = await dispatch(
-				fetchAiRecommendations({
-					patientSerial: patient_serial!,
-					overviewText,
-				}),
+				fetchAiRecommendations({ patientSerial: patient_serial! }),
 			);
 
 			if (
@@ -81,21 +74,8 @@ export const Sidebar = ({
 				setActiveView(null);
 			}
 		} else {
-			const currentMedications = (patientData?.medications ?? [])
-				.filter((m) => m.status === 'active')
-				.map((m) => ({
-					name: m.medication_name,
-					dosage: m.dosage,
-					frequency: m.frequency,
-					reason: m.prescribed_for,
-				}));
-
 			const result = await dispatch(
-				fetchAiMedications({
-					patientSerial: patient_serial!,
-					overviewText,
-					currentMedications,
-				}),
+				fetchAiMedications({ patientSerial: patient_serial! }),
 			);
 
 			if (fetchAiMedications.rejected.match(result) && !result.meta.condition) {

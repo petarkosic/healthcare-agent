@@ -42,6 +42,12 @@ router = APIRouter(
 )
 
 
+def invalidate_ai_cache(patient_serial: str) -> None:
+    cache.delete(f"overview:{patient_serial}")
+    cache.delete(f"recommendations:{patient_serial}")
+    cache.delete(f"medications:{patient_serial}")
+
+
 
 @router.get("")
 def get_patients(doctor: CurrentDoctor = Depends(get_current_doctor)):
@@ -162,7 +168,7 @@ def set_note(
         raise HTTPException(status_code=500, detail="Error adding note")
 
     enqueue_note_upsert(str(patient_serial), note.note_text)
-    cache.delete(f"overview:{patient_serial}")
+    invalidate_ai_cache(patient_serial)
 
     return result
 
@@ -181,7 +187,7 @@ def add_medication(
             doctor_serial_number=doctor.serial,
             medication_data=medication_data,
         )
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except Exception:
@@ -200,7 +206,7 @@ def update_medication(
     try:
         fields = {k: v for k, v in payload.model_dump().items() if v is not None}
         result = patient_service.update_medication(medication_id, patient_serial, fields)
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except HTTPException:
@@ -219,7 +225,7 @@ def delete_medication(
 ):
     try:
         result = patient_service.delete_medication(medication_id, patient_serial)
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except HTTPException:
@@ -244,7 +250,7 @@ def add_vitals(
             visit_id=vitals.visit_id,
             vital_signs_data=vitals_data,
         )
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except HTTPException:
@@ -273,7 +279,7 @@ def add_lab(
                 "ordering_doctors_serial_number": doctor.serial,
             },
         )
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except HTTPException:
@@ -302,7 +308,7 @@ def add_diagnosis(
                 "diagnosing_doctors_serial_number": doctor.serial,
             },
         )
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except HTTPException:
@@ -324,7 +330,7 @@ def update_allergies(
             patient_serial_number=patient_serial,
             allergies=body.allergies,
         )
-        cache.delete(f"overview:{patient_serial}")
+        invalidate_ai_cache(patient_serial)
 
         return result
     except HTTPException:
@@ -338,7 +344,7 @@ def update_allergies(
 def set_visit(visit: SetVisit, doctor: CurrentDoctor = Depends(get_current_doctor)):
     try:
         result = patient_service.create_visit(visit, doctor_serial_number=doctor.serial)
-        cache.delete(f"overview:{visit.patient_serial_number}")
+        invalidate_ai_cache(visit.patient_serial_number)
 
         return result
     except HTTPException:
@@ -357,7 +363,7 @@ def update_visit(visit: UpdateVisit, doctor: CurrentDoctor = Depends(get_current
 
         existing_visit = visit_repository.get_visit_by_id(str(visit.visit_id))
         if existing_visit:
-            cache.delete(f"overview:{existing_visit['patient_serial_number']}")
+            invalidate_ai_cache(existing_visit['patient_serial_number'])
 
         return result
     except HTTPException:

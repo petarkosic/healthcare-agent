@@ -59,18 +59,20 @@ export const fetchAiOverview = createAsyncThunk(
 
 export const fetchAiRecommendations = createAsyncThunk(
 	'ai/fetchRecommendations',
-	async ({ overviewText }: { patientSerial: string; overviewText: string }) => {
-		const res = await apiFetch(`${API_BASE}/api/agents/recommendations`, {
-			method: 'POST',
-			body: JSON.stringify({ overview: overviewText }),
-		});
+	async ({ patientSerial }: { patientSerial: string }) => {
+		const res = await apiFetch(
+			`${API_BASE}/api/agents/recommendations/${patientSerial}`,
+			{ method: 'POST' },
+		);
 
 		if (res.status === 429)
 			throw new Error('Rate limit reached. Please wait a minute.');
 
 		if (!res.ok) throw new Error('Failed to get recommendations');
 
-		return (await res.json()) as RecommendationsResponse;
+		const data = (await res.json()) as RecommendationsResponse;
+
+		return data;
 	},
 	{
 		condition: ({ patientSerial }, { getState }) => {
@@ -84,33 +86,20 @@ export const fetchAiRecommendations = createAsyncThunk(
 
 export const fetchAiMedications = createAsyncThunk(
 	'ai/fetchMedications',
-	async ({
-		overviewText,
-		currentMedications,
-	}: {
-		patientSerial: string;
-		overviewText: string;
-		currentMedications: {
-			name: string;
-			dosage: string;
-			frequency: string;
-			reason: string;
-		}[];
-	}) => {
-		const res = await apiFetch(`${API_BASE}/api/agents/medications`, {
-			method: 'POST',
-			body: JSON.stringify({
-				overview: overviewText,
-				current_medications: currentMedications,
-			}),
-		});
+	async ({ patientSerial }: { patientSerial: string }) => {
+		const res = await apiFetch(
+			`${API_BASE}/api/agents/medications/${patientSerial}`,
+			{ method: 'POST' },
+		);
 
 		if (res.status === 429)
 			throw new Error('Rate limit reached. Please wait a minute.');
 
 		if (!res.ok) throw new Error('Failed to get medications');
 
-		return (await res.json()) as MedicationsResponse;
+		const data = (await res.json()) as MedicationsResponse;
+
+		return data;
 	},
 	{
 		condition: ({ patientSerial }, { getState }) => {

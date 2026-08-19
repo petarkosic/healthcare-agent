@@ -10,12 +10,6 @@ class ActiveDiagnoses(BaseModel):
 	type: DiagnosisType
 	status: DiagnosisStatus
 
-class ActiveMedications(BaseModel):
-	name: str
-	dosage: str
-	frequency: str
-	reason: str
-
 class LatestLab(BaseModel):
 	date: str
 	reference_range: str
@@ -51,13 +45,6 @@ class AIOverviewResponse(BaseModel):
     patient_serial: str
     ai_overview: AIOverview
     chroma_sources: int
-
-class OverviewRequest(BaseModel):
-    overview: str
-
-class MedicationsRequest(BaseModel):
-    overview: str
-    current_medications: list[ActiveMedications] = []
 
 class OverviewPromptResponse(BaseModel):
     overview: str

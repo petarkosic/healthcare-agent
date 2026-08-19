@@ -341,7 +341,11 @@
 .form-group textarea {
 	width: 100%;
 	height: 100%;
+	max-width: 100%;
+	min-width: 250px;
+	max-height: 250px;
 	min-height: 100px;
+	resize: vertical;
 }
 
 .modal-actions {

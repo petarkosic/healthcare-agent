@@ -186,6 +186,12 @@ export const AuthModal = () => {
 						</div>
 					) : (
 						<form className='modal-form' onSubmit={handleSignUp}>
+							<div className='demo-disclaimer'>
+								This application is not a real medical record system. Do not
+								enter real patient names or real personal health information —
+								use fictional data only.
+							</div>
+
 							<div className='form-row'>
 								<div className='form-field'>
 									<label htmlFor='firstName'>First Name</label>

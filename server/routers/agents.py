@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import date
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends, HTTPException, Request
 from dotenv import load_dotenv
@@ -13,11 +14,12 @@ from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
 from rag.rag_service import rag_service as rag
-from models.agents import AIOverviewResponse, MedicationsRequest, OverviewPromptResponse, OverviewRequest
-from utils.cache import cache, hash_key
+from models.agents import AIOverviewResponse, OverviewPromptResponse
+from utils.cache import cache
 from utils.limiter import limiter
 from services.agent_service import agent_service
 from services.patient_service import visit_repository
+from repositories.medication_repository import medication_repository
 from services.google_calendar_service import create_event as create_calendar_event_for_doctor
 
 load_dotenv()
@@ -128,22 +130,8 @@ router = APIRouter(
 _overview_executor = ThreadPoolExecutor(max_workers=4)
 
 
-@router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
-@observe()
-@limiter.limit("2/minute")
-def get_overview(
-    request: Request,
-    patient_serial: str,
-    doctor: CurrentDoctor = Depends(get_current_doctor),
-    _: None = Depends(verify_patient_access),
-):
-    with propagate_attributes(
-        user_id=doctor.serial,
-        metadata={"patient_serial": patient_serial},
-        tags=["overview"],
-    ):
-        pass
-
+@observe(as_type="span")
+def get_or_generate_overview(patient_serial: str) -> dict:
     cache_key = f"overview:{patient_serial}"
     cached = cache.get(cache_key)
 
@@ -189,26 +177,53 @@ def get_overview(
     return result
 
 
-@router.post("/recommendations")
+@router.get("/overview/{patient_serial}", response_model=AIOverviewResponse)
 @observe()
 @limiter.limit("2/minute")
-def get_recommendations(request: Request, payload: OverviewRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
-    with propagate_attributes(user_id=doctor.serial, tags=["recommendations"]):
+def get_overview(
+    request: Request,
+    patient_serial: str,
+    doctor: CurrentDoctor = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
+):
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": patient_serial},
+        tags=["overview"],
+    ):
         pass
 
-    if not payload.overview:
-        raise HTTPException(status_code=400, detail="Overview is required")
+    return get_or_generate_overview(patient_serial)
 
-    cache_key = f"recommendations:{hash_key(payload.overview)}"
+
+@router.post("/recommendations/{patient_serial}")
+@observe()
+@limiter.limit("2/minute")
+def get_recommendations(
+    request: Request,
+    patient_serial: str,
+    doctor: CurrentDoctor = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
+):
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": patient_serial},
+        tags=["recommendations"],
+    ):
+        pass
+
+    cache_key = f"recommendations:{patient_serial}"
     cached = cache.get(cache_key)
     if cached:
         return cached
+
+    overview_text = get_or_generate_overview(patient_serial)["ai_overview"]["overview"]
 
     prompt = f"""
         Based on this overview, provide patient recommendations.
 
         <untrusted_overview>
-        {payload.overview}
+        {overview_text}
         </untrusted_overview>
 
         Return only valid JSON with the following format:
@@ -288,32 +303,45 @@ def get_recommendations(request: Request, payload: OverviewRequest, doctor: Curr
         raise HTTPException(status_code=500, detail="Error generating recommendations")
 
 
-@router.post("/medications")
+@router.post("/medications/{patient_serial}")
 @observe()
 @limiter.limit("2/minute")
-def get_medications(request: Request, payload: MedicationsRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
-    with propagate_attributes(user_id=doctor.serial, tags=["medications"]):
+def get_medications(
+    request: Request,
+    patient_serial: str,
+    doctor: CurrentDoctor = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
+):
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": patient_serial},
+        tags=["medications"],
+    ):
         pass
 
-    if not payload.overview:
-        raise HTTPException(status_code=400, detail="Overview is required")
-
-    meds_key = ":".join(f"{m.name}:{m.dosage}:{m.frequency}" for m in payload.current_medications)
-    cache_key = f"medications:{hash_key(payload.overview + meds_key)}"
+    cache_key = f"medications:{patient_serial}"
     cached = cache.get(cache_key)
 
     if cached:
         return cached
 
+    overview_text = get_or_generate_overview(patient_serial)["ai_overview"]["overview"]
+
+    active_medications = medication_repository.get_patient_medications(patient_serial, status="active")
+    current_medications = [
+        m for m in active_medications
+        if not m["end_date"] or m["end_date"] >= date.today()
+    ]
+
     meds_list = "\n".join(
-        f"- {m.name}: {m.dosage}, {m.frequency}" for m in payload.current_medications
+        f"- {m['medication_name']}: {m['dosage']}, {m['frequency']}" for m in current_medications
     ) or "None provided"
 
     prompt = f"""
         Based on this overview, provide patient medications alternatives.
 
         <untrusted_overview>
-        {payload.overview}
+        {overview_text}
         </untrusted_overview>
 
         Current medications (accurate, from patient record):

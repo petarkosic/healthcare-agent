@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 from models.enums import DiagnosisStatus, DiagnosisType, ResultStatus, VisitStatus, VisitType
@@ -50,6 +50,38 @@ class OverviewPromptResponse(BaseModel):
     overview: str
     critical_alerts: list[str]
     suggested_questions: list[str]
+
+class FollowUp(BaseModel):
+    offset_days: int
+    reason: str
+
+class RecommendationItem(BaseModel):
+    recommendation: str
+    reason: str
+    priority: Literal["urgent", "high", "routine"]
+    follow_up: Optional[FollowUp] = None
+
+class RecommendationsOutput(BaseModel):
+    recommendations: list[RecommendationItem] = []
+
+class CurrentMedicationItem(BaseModel):
+    name: str
+    dosage: str
+    frequency: str
+
+class MedicationChangeItem(BaseModel):
+    action: Literal["add", "increase", "decrease", "continue", "discontinue", "change"]
+    name: str
+    dosage: str
+    frequency: str
+    reason: str
+
+class MedicationsBody(BaseModel):
+    current_medications: list[CurrentMedicationItem] = []
+    prescribed_changes: list[MedicationChangeItem] = []
+
+class MedicationsOutput(BaseModel):
+    medications: MedicationsBody
 
 class FollowUpRequest(BaseModel):
 	patient_serial_number: str = Field(description='Patient serial number')

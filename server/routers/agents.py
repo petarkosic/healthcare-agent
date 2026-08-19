@@ -9,12 +9,19 @@ logger = logging.getLogger(__name__)
 
 from langfuse import observe, propagate_attributes
 
+from pydantic import ValidationError
+
 from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client
 from rag.rag_service import rag_service as rag
-from models.agents import AIOverviewResponse, OverviewPromptResponse
+from models.agents import (
+    AIOverviewResponse,
+    OverviewPromptResponse,
+    RecommendationsOutput,
+    MedicationsOutput,
+)
 from utils.cache import cache
 from utils.limiter import limiter
 from services.agent_service import agent_service
@@ -235,14 +242,8 @@ def get_recommendations(
                     "priority": "string",
                     "follow_up": {{
                         "offset_days": "int",
-                        "reason": "string",
+                        "reason": "string"
                     }}
-                }},
-                {{
-                    "recommendation": "string",
-                    "reason": "string",
-                    "priority": "string",
-                    "follow_up": null
                 }}
             ]
         }}
@@ -294,6 +295,11 @@ def get_recommendations(
         )
 
         llm_output = json.loads(response.choices[0].message.content)
+
+        try:
+            RecommendationsOutput.model_validate(llm_output)
+        except ValidationError:
+            logger.warning("Recommendations output failed shape validation for patient %s: %r", patient_serial, llm_output)
 
         cache.set(cache_key, llm_output)
 
@@ -349,7 +355,7 @@ def get_medications(
 
         Return only valid JSON with the following format:
         {{
-            "medications": [
+            "medications": {{
                 "current_medications": [
                     {{
                         "name": "string",
@@ -366,7 +372,7 @@ def get_medications(
                         "reason": "string"
                     }}
                 ]
-            ],
+            }}
         }}
 
         Guidelines:
@@ -397,6 +403,11 @@ def get_medications(
         )
 
         llm_output = json.loads(response.choices[0].message.content)
+
+        try:
+            MedicationsOutput.model_validate(llm_output)
+        except ValidationError:
+            logger.warning("Medications output failed shape validation for patient %s: %r", patient_serial, llm_output)
 
         cache.set(cache_key, llm_output)
 

@@ -166,10 +166,20 @@ export interface Overview {
 	chroma_sources: number;
 }
 
+export type Priority = 'urgent' | 'high' | 'routine';
+
+export type MedicationAction =
+	| 'add'
+	| 'increase'
+	| 'decrease'
+	| 'continue'
+	| 'discontinue'
+	| 'change';
+
 export type Recommendation = {
 	recommendation: string;
 	reason: string;
-	priority: string;
+	priority: Priority;
 	follow_up?: {
 		offset_days: number;
 		reason: string;
@@ -177,7 +187,7 @@ export type Recommendation = {
 };
 
 export type MedicationChange = {
-	action: string;
+	action: MedicationAction;
 	name: string;
 	dosage: string;
 	frequency: string;
@@ -191,7 +201,7 @@ type CurrentMedication = {
 };
 
 export type RecommendationsResponse = {
-	recommendations?: Recommendation[];
+	recommendations: Recommendation[];
 };
 
 export type MedicationsResponse = {

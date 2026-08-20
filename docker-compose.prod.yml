@@ -12,6 +12,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-healthcare_agent}
       API_KEY: ${API_KEY}
       BASE_URL: ${BASE_URL:-https://generativelanguage.googleapis.com/v1beta/openai/}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-gemini-3.1-flash-lite}
       CHROMA_HOST: chroma
       CHROMA_PORT: 8000
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}

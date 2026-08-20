@@ -27,7 +27,7 @@ from utils.authz import (
     verify_visit_ownership,
 )
 from utils.cache import cache
-from utils.openai_client import openai_client
+from utils.openai_client import openai_client, LLM_MODEL_NAME
 from services.patient_service import patient_service
 from repositories.visit_repository import visit_repository
 from services.report_service import report_service
@@ -143,7 +143,7 @@ def set_note(
 
     try:
         resp = openai_client.chat.completions.create(
-            model="gemini-3.1-flash-lite",
+            model=LLM_MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
         )
 

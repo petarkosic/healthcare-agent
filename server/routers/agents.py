@@ -14,7 +14,7 @@ from pydantic import ValidationError
 from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
-from utils.openai_client import openai_client
+from utils.openai_client import openai_client, LLM_MODEL_NAME
 from rag.rag_service import rag_service as rag
 from models.agents import (
     AIOverviewResponse,
@@ -158,7 +158,7 @@ def get_or_generate_overview(patient_serial: str) -> dict:
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-3.1-flash-lite",
+            model=LLM_MODEL_NAME,
             messages=[
                 {
                     "role": "system",
@@ -284,7 +284,7 @@ def get_recommendations(
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-3.1-flash-lite",
+            model=LLM_MODEL_NAME,
             messages=[
                 {
                     "role": "system",
@@ -392,7 +392,7 @@ def get_medications(
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-3.1-flash-lite",
+            model=LLM_MODEL_NAME,
             messages=[
                 {
                     "role": "system",
@@ -459,7 +459,7 @@ def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: Current
 
     try:
         response = openai_client.chat.completions.create(
-            model="gemini-3.1-flash-lite",
+            model=LLM_MODEL_NAME,
             messages=[
                 {
                     "role": "system",

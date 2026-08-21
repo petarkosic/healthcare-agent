@@ -145,6 +145,7 @@ def set_note(
         resp = openai_client.chat.completions.create(
             model=LLM_MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
         )
 
         summary = resp.choices[0].message.content.strip()

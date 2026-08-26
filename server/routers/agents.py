@@ -9,19 +9,18 @@ logger = logging.getLogger(__name__)
 
 from langfuse import observe, propagate_attributes
 
-from pydantic import ValidationError
-
+from guardrails import (
+    GuardrailViolation,
+    generate_medications,
+    generate_overview,
+    generate_recommendations,
+)
 from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client, LLM_MODEL_NAME
 from rag.rag_service import rag_service as rag
-from models.agents import (
-    AIOverviewResponse,
-    OverviewPromptResponse,
-    RecommendationsOutput,
-    MedicationsOutput,
-)
+from models.agents import AIOverviewResponse, OverviewPromptResponse
 from utils.cache import cache
 from utils.limiter import limiter
 from services.agent_service import agent_service
@@ -157,8 +156,7 @@ def get_or_generate_overview(patient_serial: str) -> dict:
     prompt = build_prompt(patient_data, docs)
 
     try:
-        response = openai_client.chat.completions.create(
-            model=LLM_MODEL_NAME,
+        ai_overview = generate_overview(
             messages=[
                 {
                     "role": "system",
@@ -166,18 +164,18 @@ def get_or_generate_overview(patient_serial: str) -> dict:
                 },
                 {"role": "user", "content": prompt},
             ],
-            response_format={"type": "json_object"},
-            temperature=0.0,
+            patient_serial=patient_serial,
         )
-
-        llm_output = json.loads(response.choices[0].message.content)
+    except GuardrailViolation:
+        logger.exception("Overview generation failed validation for patient %s", patient_serial)
+        raise HTTPException(status_code=502, detail="AI response failed validation")
     except Exception:
         logger.exception("Error generating overview for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error generating overview")
 
     result = {
         "patient_serial": patient_serial,
-        "ai_overview": llm_output,
+        "ai_overview": ai_overview,
         "chroma_sources": len(docs),
     }
 
@@ -283,8 +281,7 @@ def get_recommendations(
     """
 
     try:
-        response = openai_client.chat.completions.create(
-            model=LLM_MODEL_NAME,
+        llm_output = generate_recommendations(
             messages=[
                 {
                     "role": "system",
@@ -292,23 +289,18 @@ def get_recommendations(
                 },
                 {"role": "user", "content": prompt},
             ],
-            response_format={"type": "json_object"},
-            temperature=0.0,
+            patient_serial=patient_serial,
         )
-
-        llm_output = json.loads(response.choices[0].message.content)
-
-        try:
-            RecommendationsOutput.model_validate(llm_output)
-        except ValidationError:
-            logger.warning("Recommendations output failed shape validation for patient %s: %r", patient_serial, llm_output)
-
-        cache.set(cache_key, llm_output)
-
-        return llm_output
+    except GuardrailViolation:
+        logger.exception("Recommendations generation failed validation for patient %s", patient_serial)
+        raise HTTPException(status_code=502, detail="AI response failed validation")
     except Exception:
         logger.exception("Error generating recommendations")
         raise HTTPException(status_code=500, detail="Error generating recommendations")
+
+    cache.set(cache_key, llm_output)
+
+    return llm_output
 
 
 @router.post("/medications/{patient_serial}")
@@ -391,8 +383,7 @@ def get_medications(
     """
 
     try:
-        response = openai_client.chat.completions.create(
-            model=LLM_MODEL_NAME,
+        llm_output = generate_medications(
             messages=[
                 {
                     "role": "system",
@@ -400,23 +391,18 @@ def get_medications(
                 },
                 {"role": "user", "content": prompt},
             ],
-            response_format={"type": "json_object"},
-            temperature=0.0,
+            patient_serial=patient_serial,
         )
-
-        llm_output = json.loads(response.choices[0].message.content)
-
-        try:
-            MedicationsOutput.model_validate(llm_output)
-        except ValidationError:
-            logger.warning("Medications output failed shape validation for patient %s: %r", patient_serial, llm_output)
-
-        cache.set(cache_key, llm_output)
-
-        return llm_output
+    except GuardrailViolation:
+        logger.exception("Medications generation failed validation for patient %s", patient_serial)
+        raise HTTPException(status_code=502, detail="AI response failed validation")
     except Exception:
         logger.exception("Error generating medications")
         raise HTTPException(status_code=500, detail="Error generating medications")
+
+    cache.set(cache_key, llm_output)
+
+    return llm_output
 
 
 @router.post("/schedule-followup")
@@ -551,7 +537,7 @@ def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
             {{
                 "overview": "string",
                 "critical_alerts": ["string"],
-                "suggested_questions": ["string"],
+                "suggested_questions": ["string"]
             }}
 
             Guidelines:

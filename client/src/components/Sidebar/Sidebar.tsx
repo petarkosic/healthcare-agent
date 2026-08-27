@@ -132,6 +132,18 @@ export const Sidebar = ({
 						<div className='ai-message ai-ai'>
 							<p>{overview.ai_overview.overview}</p>
 						</div>
+						{overview.ai_overview.critical_alerts?.length > 0 && (
+							<div className='ai-message ai-critical'>
+								<p className='ai-critical-heading'>Critical findings</p>
+								<ul className='ai-critical-list'>
+									{overview.ai_overview.critical_alerts.map(
+										(finding: string, index: number) => (
+											<li key={index}>{finding}</li>
+										),
+									)}
+								</ul>
+							</div>
+						)}
 						<div>
 							{overview.ai_overview.suggested_questions?.map(
 								(question: string, index: number) => (

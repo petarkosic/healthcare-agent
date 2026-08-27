@@ -64,6 +64,7 @@ body {
 	align-items: center;
 	gap: 0.25rem;
 	margin-left: 1.5rem;
+	margin-right: auto;
 }
 
 .navbar-nav-link {
@@ -541,17 +542,26 @@ body {
 	}
 }
 
-@media (max-width: 480px) {
-	.session-type {
-		display: none;
+@media (max-width: 600px) {
+	.navbar {
+		flex-wrap: wrap;
+		height: auto;
+		min-height: 64px;
 	}
 
 	.navbar-nav {
-		margin-left: 0.5rem;
+		order: 3;
+		flex-basis: 100%;
+		margin-left: 0;
+		margin-right: 0;
+		border-top: 1px solid var(--border);
+		padding: 0.35rem 0;
+		overflow-x: auto;
 	}
+}
 
-	.navbar-nav-link {
-		font-size: 0.75rem;
-		padding: 0.25rem 0.4rem;
+@media (max-width: 480px) {
+	.session-type {
+		display: none;
 	}
 }

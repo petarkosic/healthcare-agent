@@ -380,6 +380,15 @@ def get_medications(
         - Dosage format: "1000mg", "20mg", "500mg/5ml", "1 capsule", "10 units", etc.
         - Frequency format: "daily", "twice daily", "weekly", "as needed", etc.
         - For reasons, summarize briefly from the note
+        - Every prescribed change MUST have a concrete "dosage" and "frequency". Never return
+          "unknown", "n/a", "TBD", or an empty string.
+            - "continue" / "discontinue": copy the exact dosage and frequency from the
+              current medications list above.
+            - "increase" / "decrease" / "change": state the new target dosage and frequency,
+              adjusted one step from the current value (e.g. Lisinopril 10mg daily -> 20mg daily).
+            - "add": choose a standard clinical starting dose and frequency appropriate for
+              that drug and for this patient's conditions, age, and other medications as
+              described in the overview.
     """
 
     try:

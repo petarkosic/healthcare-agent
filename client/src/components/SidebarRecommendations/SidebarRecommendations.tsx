@@ -93,11 +93,14 @@ export const SidebarRecommendations = ({
 			}
 		} catch (error) {
 			const status = (error as { status?: number })?.status;
+			const message = (error as { message?: string })?.message;
 
 			setScheduleError(
 				status === 429
 					? 'Rate limit reached. Please wait a minute.'
-					: 'Failed to schedule. Please try again.',
+					: message?.startsWith('Google') || message?.startsWith('Popup')
+						? message
+						: 'Failed to schedule. Please try again.',
 			);
 		} finally {
 			setIsLoading(false);

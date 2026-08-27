@@ -188,11 +188,14 @@ export const VisitModal = ({
 			onClose();
 		} catch (err) {
 			const status = (err as { status?: number })?.status;
+			const message = (err as { message?: string })?.message;
 
 			setApiError(
 				status === 429
 					? 'Rate limit reached. Please wait a minute.'
-					: 'Failed to reschedule visit',
+					: message?.startsWith('Google') || message?.startsWith('Popup')
+						? message
+						: 'Failed to reschedule visit',
 			);
 		} finally {
 			setIsSubmitting(false);

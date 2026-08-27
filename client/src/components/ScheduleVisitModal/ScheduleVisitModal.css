@@ -1,0 +1,107 @@
+.schedule-visit-form {
+	padding: 1.25rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.schedule-visit-form label {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #334155;
+	margin-bottom: 0.25rem;
+	display: block;
+}
+
+.schedule-visit-form input[type='datetime-local'],
+.schedule-visit-form input[type='text'],
+.schedule-visit-form select {
+	width: 100%;
+	padding: 0.65rem 0.75rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 6px;
+	font-size: 0.9375rem;
+	color: var(--text-main);
+	background: #fff;
+	box-sizing: border-box;
+	outline: none;
+}
+
+.schedule-visit-form select {
+	text-transform: capitalize;
+}
+
+.schedule-visit-form input:focus,
+.schedule-visit-form select:focus {
+	border-color: var(--accent-blue);
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.schedule-visit-field-error {
+	margin: 0.35rem 0 0;
+	color: #dc2626;
+	font-size: 0.8125rem;
+}
+
+.schedule-visit-success {
+	padding: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 0.75rem;
+}
+
+.schedule-visit-success-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #ecfdf5;
+	color: #059669;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.schedule-visit-success p {
+	margin: 0.25rem 0 0;
+	color: var(--text-muted);
+	font-size: 0.875rem;
+}
+
+/* Visit History card header */
+.visits-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.5rem;
+}
+
+.visits-card-header h3 {
+	margin: 0;
+}
+
+.btn-schedule-visit {
+	background: var(--accent-blue, #2563eb);
+	color: #fff;
+	border: none;
+	padding: 0.5rem 0.9rem;
+	border-radius: 6px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.15s ease;
+	white-space: nowrap;
+}
+
+.btn-schedule-visit:hover {
+	background: var(--accent-blue-hover, #1d4ed8);
+}
+
+.btn-schedule-visit:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}

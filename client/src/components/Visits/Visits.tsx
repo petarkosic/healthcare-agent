@@ -2,16 +2,20 @@ import { useState } from 'react';
 import type { Visit } from '../../types/types';
 import { formatDateOnly } from '../../utils/utils';
 import { useParams } from 'react-router';
+import { useAppSelector } from '../../store/hooks';
 import { useGetPatientQuery } from '../../store/api/patientsApi';
 import { VisitModal } from '../VisitModal/VisitModal';
+import { ScheduleVisitModal } from '../ScheduleVisitModal/ScheduleVisitModal';
 import { apiFetch, API_BASE } from '../../lib/api';
 import './Visits.css';
 
 export const Visits = () => {
 	const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
 	const [printingVisitId, setPrintingVisitId] = useState<string | null>(null);
+	const [showScheduleModal, setShowScheduleModal] = useState(false);
 
 	const { id: patient_serial } = useParams();
+	const session = useAppSelector((state) => state.session.session);
 	const { data } = useGetPatientQuery(patient_serial!);
 
 	if (!data) return null;
@@ -66,7 +70,23 @@ export const Visits = () => {
 	return (
 		<>
 			<div className='card card-visits full-width'>
-				<h3>Visit History</h3>
+				<div className='visits-card-header'>
+					<h3>Visit History</h3>
+					<span
+						className={!session ? 'btn-tooltip-wrap' : undefined}
+						data-tooltip={
+							!session ? 'Start a session to schedule a visit' : undefined
+						}
+					>
+						<button
+							className='btn-schedule-visit'
+							onClick={() => setShowScheduleModal(true)}
+							disabled={!session}
+						>
+							Schedule Visit
+						</button>
+					</span>
+				</div>
 				<div className='visits-timeline'>
 					<table className='data-table'>
 						<thead>
@@ -139,6 +159,13 @@ export const Visits = () => {
 				<VisitModal
 					visit={selectedVisit}
 					onClose={() => setSelectedVisit(null)}
+				/>
+			)}
+
+			{showScheduleModal && (
+				<ScheduleVisitModal
+					patientSerial={patient_serial!}
+					onClose={() => setShowScheduleModal(false)}
 				/>
 			)}
 		</>

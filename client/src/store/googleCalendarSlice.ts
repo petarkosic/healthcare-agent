@@ -28,27 +28,44 @@ export const ensureGoogleConnected = createAsyncThunk(
 				'width=500,height=600',
 			);
 
+			if (!popup) {
+				reject(new Error('Popup blocked. Allow popups and try again.'));
+				return;
+			}
+
+			let settled = false;
+
+			const cleanup = () => {
+				settled = true;
+				window.removeEventListener('message', handler);
+				window.clearInterval(closedPoll);
+				window.clearTimeout(timeout);
+			};
+
 			const handler = (e: MessageEvent) => {
 				if (e.data === 'google_connected') {
-					window.removeEventListener('message', handler);
-
-					popup?.close();
-
+					cleanup();
+					popup.close();
 					resolve();
 				} else if (e.data === 'google_auth_failed') {
-					window.removeEventListener('message', handler);
-
-					popup?.close();
-
+					cleanup();
+					popup.close();
 					reject(new Error('Google authorization failed or was denied'));
 				}
 			};
 
 			window.addEventListener('message', handler);
 
-			setTimeout(() => {
-				window.removeEventListener('message', handler);
+			const closedPoll = window.setInterval(() => {
+				if (popup.closed && !settled) {
+					cleanup();
+					reject(new Error('Google authorization was cancelled'));
+				}
+			}, 500);
 
+			const timeout = window.setTimeout(() => {
+				cleanup();
+				popup.close();
 				reject(new Error('OAuth timeout'));
 			}, 300000);
 		});

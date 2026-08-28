@@ -8,6 +8,7 @@ import {
 	useAddDiagnosisMutation,
 } from '../../store/api/patientsApi';
 import type { DiagnosisType, DiagnosisStatus } from '../../types/enums';
+import { Modal } from '../Modal/Modal';
 import './Diagnoses.css';
 
 export const Diagnoses = () => {
@@ -124,22 +125,12 @@ export const Diagnoses = () => {
 			</div>
 
 			{isModalOpen && (
-				<div
-					className='modal-overlay'
-					onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+				<Modal
+					title='Add Diagnosis'
+					onClose={() => setIsModalOpen(false)}
+					disabled={isSubmitting}
 				>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>Add Diagnosis</h2>
-							<button
-								className='modal-close'
-								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
-								disabled={isSubmitting}
-							>
-								&times;
-							</button>
-						</div>
-						<form onSubmit={handleSubmit}>
+					<form onSubmit={handleSubmit}>
 							<div className='form-group'>
 								<label>ICD-10 Code</label>
 								<input
@@ -226,11 +217,10 @@ export const Diagnoses = () => {
 									disabled={isSubmitting}
 								>
 									{isSubmitting ? 'Saving...' : 'Save Diagnosis'}
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
+							</button>
+						</div>
+					</form>
+				</Modal>
 			)}
 		</>
 	);

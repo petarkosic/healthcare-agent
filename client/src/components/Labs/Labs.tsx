@@ -8,6 +8,7 @@ import {
 import type { PatientFullResponse } from '../../types/types';
 import type { ResultStatus } from '../../types/enums';
 import { formatDate } from '../../utils/utils';
+import { Modal } from '../Modal/Modal';
 import './Labs.css';
 
 type LabRow = PatientFullResponse['lab_results'][number];
@@ -140,22 +141,12 @@ export const Labs = () => {
 			</div>
 
 			{isModalOpen && (
-				<div
-					className='modal-overlay'
-					onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+				<Modal
+					title='Add Lab Result'
+					onClose={() => setIsModalOpen(false)}
+					disabled={isSubmitting}
 				>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>Add Lab Result</h2>
-							<button
-								className='modal-close'
-								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
-								disabled={isSubmitting}
-							>
-								&times;
-							</button>
-						</div>
-						<form onSubmit={handleSubmit}>
+					<form onSubmit={handleSubmit}>
 							<div className='form-group'>
 								<label>Test Name</label>
 								<input
@@ -250,26 +241,15 @@ export const Labs = () => {
 									disabled={isSubmitting}
 								>
 									{isSubmitting ? 'Saving...' : 'Save Lab Result'}
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
+							</button>
+						</div>
+					</form>
+				</Modal>
 			)}
 
 			{selectedLab && (
-				<div className='modal-overlay' onClick={() => setSelectedLab(null)}>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>{selectedLab.test_name}</h2>
-							<button
-								className='modal-close'
-								onClick={() => setSelectedLab(null)}
-							>
-								&times;
-							</button>
-						</div>
-						<div className='modal-body lab-readonly'>
+				<Modal title={selectedLab.test_name} onClose={() => setSelectedLab(null)}>
+					<div className='modal-body lab-readonly'>
 							<div className='lab-readonly-row'>
 								<span className='lab-readonly-label'>Result</span>
 								<span>
@@ -301,11 +281,10 @@ export const Labs = () => {
 								<span>
 									Dr. {selectedLab.ordering_doctor_first_name}{' '}
 									{selectedLab.ordering_doctor_last_name}
-								</span>
-							</div>
+							</span>
 						</div>
 					</div>
-				</div>
+				</Modal>
 			)}
 		</>
 	);

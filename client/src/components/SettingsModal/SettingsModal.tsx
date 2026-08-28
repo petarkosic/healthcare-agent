@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { useModalA11y } from '../../hooks/useModalA11y';
 import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
 import './SettingsModal.css';
 
@@ -37,21 +38,11 @@ export const SettingsModal = ({
 	const connected = useAppSelector((state) => state.googleCalendar.connected);
 	const [copied, setCopied] = useState(false);
 	const [connecting, setConnecting] = useState(false);
+	const dialogRef = useModalA11y<HTMLDivElement>(onClose, { active: isOpen });
 
 	useEffect(() => {
 		if (isOpen) setActiveSection(defaultSection);
 	}, [isOpen, defaultSection]);
-
-	useEffect(() => {
-		if (!isOpen) return;
-		const handler = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') onClose();
-		};
-
-		document.addEventListener('keydown', handler);
-
-		return () => document.removeEventListener('keydown', handler);
-	}, [isOpen, onClose]);
 
 	const copySerial = useCallback(() => {
 		if (!doctorSerialNumber) return;
@@ -79,12 +70,16 @@ export const SettingsModal = ({
 			<div
 				className='settings-modal'
 				onClick={(e) => e.stopPropagation()}
+				ref={dialogRef}
 				role='dialog'
 				aria-modal='true'
-				aria-label='Settings'
+				aria-labelledby='settings-modal-title'
+				tabIndex={-1}
 			>
 				<div className='settings-modal-header'>
-					<span className='settings-modal-title'>Settings</span>
+					<span className='settings-modal-title' id='settings-modal-title'>
+						Settings
+					</span>
 					<button
 						className='settings-close'
 						onClick={onClose}

@@ -9,6 +9,7 @@ import {
 	useUpdateMedicationMutation,
 	useDeleteMedicationMutation,
 } from '../../store/api/patientsApi';
+import { Modal } from '../Modal/Modal';
 import './Medications.css';
 
 type MedicationRow = PatientFullResponse['medications'][number];
@@ -217,30 +218,16 @@ export const Medications = () => {
 			</div>
 
 			{selectedMed && (
-				<div
-					className='modal-overlay'
-					onClick={isSubmitting ? undefined : closeEditModal}
+				<Modal
+					title={
+						selectedMed.generic_name
+							? `${selectedMed.medication_name} (${selectedMed.generic_name})`
+							: selectedMed.medication_name
+					}
+					onClose={closeEditModal}
+					disabled={isSubmitting}
 				>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>
-								{selectedMed.medication_name}
-								{selectedMed.generic_name && (
-									<span className='modal-generic'>
-										{' '}
-										({selectedMed.generic_name})
-									</span>
-								)}
-							</h2>
-							<button
-								className='modal-close'
-								onClick={isSubmitting ? undefined : closeEditModal}
-								disabled={isSubmitting}
-							>
-								&times;
-							</button>
-						</div>
-						{session ? (
+					{session ? (
 							<form onSubmit={handleEditSubmit}>
 								<div className='form-group'>
 									<label>Dosage</label>
@@ -392,32 +379,19 @@ export const Medications = () => {
 								<div className='med-readonly-row'>
 									<span className='med-readonly-label'>Instructions</span>
 									<span>{selectedMed.instructions}</span>
-								</div>
 							</div>
-						)}
-					</div>
-				</div>
+						</div>
+					)}
+				</Modal>
 			)}
 
 			{isAddModalOpen && (
-				<div
-					className='modal-overlay'
-					onClick={isSubmitting ? undefined : () => setIsAddModalOpen(false)}
+				<Modal
+					title='Add Medication'
+					onClose={() => setIsAddModalOpen(false)}
+					disabled={isSubmitting}
 				>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>Add Medication</h2>
-							<button
-								className='modal-close'
-								onClick={
-									isSubmitting ? undefined : () => setIsAddModalOpen(false)
-								}
-								disabled={isSubmitting}
-							>
-								&times;
-							</button>
-						</div>
-						<form onSubmit={handleAddSubmit}>
+					<form onSubmit={handleAddSubmit}>
 							<div className='form-group'>
 								<label>Medication Name</label>
 								<input
@@ -533,11 +507,10 @@ export const Medications = () => {
 									disabled={isSubmitting}
 								>
 									{isSubmitting ? 'Saving...' : 'Save Medication'}
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
+							</button>
+						</div>
+					</form>
+				</Modal>
 			)}
 		</>
 	);

@@ -13,6 +13,7 @@ import {
 	secondsToRoundedMinutes,
 } from '../../utils/utils';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { Modal } from '../Modal/Modal';
 import { startSession, endSession } from '../../store/sessionSlice';
 import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
 import { useUpdateVisitMutation } from '../../store/api/patientsApi';
@@ -203,21 +204,12 @@ export const VisitModal = ({
 	};
 
 	return (
-		<div className='modal-overlay' onClick={isSubmitting ? undefined : onClose}>
-			<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-				<div className='visit-modal-header'>
-					<h2>Visit Details</h2>
-					<div className='modal-header-actions'>
-						<button
-							className='modal-close'
-							onClick={isSubmitting ? undefined : onClose}
-							disabled={isSubmitting}
-						>
-							&times;
-						</button>
-					</div>
-				</div>
-
+		<Modal
+			title={view === 'reschedule' ? 'Reschedule Visit' : 'Visit Details'}
+			onClose={onClose}
+			disabled={isSubmitting}
+		>
+			<>
 				{view === 'details' && (
 					<>
 						<div className='visit-details-grid'>
@@ -468,19 +460,8 @@ export const VisitModal = ({
 					</>
 				)}
 
-				{apiError && (
-					<p
-						style={{
-							padding: '0.75rem 1.5rem',
-							color: '#dc2626',
-							fontSize: '0.875rem',
-							margin: 0,
-						}}
-					>
-						{apiError}
-					</p>
-				)}
-			</div>
-		</div>
+				{apiError && <p className='modal-inline-error'>{apiError}</p>}
+			</>
+		</Modal>
 	);
 };

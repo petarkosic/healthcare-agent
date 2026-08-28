@@ -5,6 +5,7 @@ import {
 	useGetPatientQuery,
 	useUpdateAllergiesMutation,
 } from '../../store/api/patientsApi';
+import { Modal } from '../Modal/Modal';
 import './Allergies.css';
 
 export const Allergies = () => {
@@ -96,22 +97,12 @@ export const Allergies = () => {
 			</div>
 
 			{isModalOpen && (
-				<div
-					className='modal-overlay'
-					onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+				<Modal
+					title='Edit Allergies'
+					onClose={() => setIsModalOpen(false)}
+					disabled={isSubmitting}
 				>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>Edit Allergies</h2>
-							<button
-								className='modal-close'
-								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
-								disabled={isSubmitting}
-							>
-								&times;
-							</button>
-						</div>
-						<form onSubmit={handleSubmit}>
+					<form onSubmit={handleSubmit}>
 							<div className='form-group'>
 								<label>Current Allergies</label>
 								<div className='allergy-chips'>
@@ -170,11 +161,10 @@ export const Allergies = () => {
 									disabled={isSubmitting}
 								>
 									{isSubmitting ? 'Saving...' : 'Save Changes'}
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
+							</button>
+						</div>
+					</form>
+				</Modal>
 			)}
 		</>
 	);

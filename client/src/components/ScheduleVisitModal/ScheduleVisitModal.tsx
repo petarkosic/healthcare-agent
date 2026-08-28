@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { VISIT_TYPES, type VisitType } from '../../types/enums';
 import { formatDateTimeLocal } from '../../utils/utils';
 import { useAppDispatch } from '../../store/hooks';
+import { Modal } from '../Modal/Modal';
 import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
 import { useScheduleFollowupMutation } from '../../store/api/agentsApi';
-import '../VisitModal/VisitModal.css';
 import './ScheduleVisitModal.css';
 
 type ScheduleVisitModalProps = {
@@ -99,21 +99,12 @@ export const ScheduleVisitModal = ({
 	};
 
 	return (
-		<div className='modal-overlay' onClick={isSubmitting ? undefined : onClose}>
-			<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-				<div className='visit-modal-header'>
-					<h2>Schedule Visit</h2>
-					<div className='modal-header-actions'>
-						<button
-							className='modal-close'
-							onClick={isSubmitting ? undefined : onClose}
-							disabled={isSubmitting}
-						>
-							&times;
-						</button>
-					</div>
-				</div>
-
+		<Modal
+			title='Schedule Visit'
+			onClose={onClose}
+			disabled={isSubmitting}
+		>
+			<>
 				{done ? (
 					<div className='schedule-visit-success'>
 						<span className='schedule-visit-success-icon'>✓</span>
@@ -202,19 +193,8 @@ export const ScheduleVisitModal = ({
 					</>
 				)}
 
-				{apiError && (
-					<p
-						style={{
-							padding: '0.75rem 1.5rem',
-							color: '#dc2626',
-							fontSize: '0.875rem',
-							margin: 0,
-						}}
-					>
-						{apiError}
-					</p>
-				)}
-			</div>
-		</div>
+				{apiError && <p className='modal-inline-error'>{apiError}</p>}
+			</>
+		</Modal>
 	);
 };

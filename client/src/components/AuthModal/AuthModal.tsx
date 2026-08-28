@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { useModalA11y } from '../../hooks/useModalA11y';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login, closeModal } from '../../store/authSlice';
 import {
@@ -46,6 +47,10 @@ export const AuthModal = () => {
 		setSignUpSuccess(null);
 		dispatch(closeModal());
 	};
+
+	const dialogRef = useModalA11y<HTMLDivElement>(handleClose, {
+		active: isModalOpen,
+	});
 
 	const resetSignUpFields = () => {
 		setFirstName('');
@@ -137,7 +142,14 @@ export const AuthModal = () => {
 			ref={overlayRef}
 			onClick={handleOverlayClick}
 		>
-			<div className='modal-card'>
+			<div
+				className='modal-card'
+				ref={dialogRef}
+				role='dialog'
+				aria-modal='true'
+				aria-label='Sign in or sign up'
+				tabIndex={-1}
+			>
 				<button
 					className='modal-close'
 					onClick={handleClose}

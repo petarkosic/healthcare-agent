@@ -5,6 +5,7 @@ import {
 	useGetPatientQuery,
 	useAddVitalMutation,
 } from '../../store/api/patientsApi';
+import { Modal } from '../Modal/Modal';
 import './Vitals.css';
 
 export const Vitals = () => {
@@ -187,22 +188,12 @@ export const Vitals = () => {
 			</div>
 
 			{isModalOpen && (
-				<div
-					className='modal-overlay'
-					onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+				<Modal
+					title='Add Vitals'
+					onClose={() => setIsModalOpen(false)}
+					disabled={isSubmitting}
 				>
-					<div className='modal-content' onClick={(e) => e.stopPropagation()}>
-						<div className='modal-header'>
-							<h2>Add Vitals</h2>
-							<button
-								className='modal-close'
-								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
-								disabled={isSubmitting}
-							>
-								&times;
-							</button>
-						</div>
-						<form onSubmit={handleSubmit}>
+					<form onSubmit={handleSubmit}>
 							<div className='form-group'>
 								<label>Systolic BP (mmHg)</label>
 								<input
@@ -338,11 +329,10 @@ export const Vitals = () => {
 									disabled={isSubmitting}
 								>
 									{isSubmitting ? 'Saving...' : 'Save Vitals'}
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
+							</button>
+						</div>
+					</form>
+				</Modal>
 			)}
 		</>
 	);

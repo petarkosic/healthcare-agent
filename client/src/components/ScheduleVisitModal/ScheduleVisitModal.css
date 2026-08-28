@@ -71,19 +71,6 @@
 	font-size: 0.875rem;
 }
 
-/* Visit History card header */
-.visits-card-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-	margin-bottom: 0.5rem;
-}
-
-.visits-card-header h3 {
-	margin: 0;
-}
-
 .btn-schedule-visit {
 	background: var(--accent-blue, #2563eb);
 	color: #fff;

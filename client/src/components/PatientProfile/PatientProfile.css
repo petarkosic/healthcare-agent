@@ -614,6 +614,13 @@
 	}
 }
 
+@media (max-width: 600px) {
+	.card > h3,
+	.card-header-row {
+		top: 80px;
+	}
+}
+
 @media (max-width: 480px) {
 	.profile-container {
 		padding: 1rem;

@@ -74,7 +74,7 @@ export const Visits = () => {
 	return (
 		<>
 			<div className='card card-visits full-width'>
-				<div className='visits-card-header'>
+				<div className='card-header-row'>
 					<h3>Visit History</h3>
 					<span
 						className={!session ? 'btn-tooltip-wrap' : undefined}

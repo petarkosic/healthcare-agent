@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Visit } from '../../types/types';
 import { formatDateOnly } from '../../utils/utils';
 import { useParams } from 'react-router';
@@ -17,6 +17,10 @@ export const Visits = () => {
 	const { id: patient_serial } = useParams();
 	const session = useAppSelector((state) => state.session.session);
 	const { data } = useGetPatientQuery(patient_serial!);
+
+	useEffect(() => {
+		if (!session) setShowScheduleModal(false);
+	}, [session]);
 
 	if (!data) return null;
 

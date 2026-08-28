@@ -170,6 +170,7 @@ export const ScheduleVisitModal = ({
 									id='schedule-visit-reason'
 									type='text'
 									placeholder='Reason for visit...'
+									maxLength={200}
 									value={reason}
 									onChange={(e) => {
 										setReason(e.target.value);

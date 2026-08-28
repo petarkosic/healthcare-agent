@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import date
+from datetime import date, datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends, HTTPException, Request
 from dotenv import load_dotenv
@@ -419,6 +419,17 @@ def get_medications(
 @limiter.limit("3/minute")
 def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: CurrentDoctor = Depends(get_current_doctor)):
     verify_patient_access(follow_up.patient_serial_number, doctor)
+
+    for field in ("visit_date", "start_time"):
+        raw = getattr(follow_up, field)
+        try:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail=f"Invalid {field}")
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        if parsed <= datetime.now(timezone.utc):
+            raise HTTPException(status_code=422, detail="Visit date must be in the future")
 
     with propagate_attributes(
         user_id=doctor.serial,

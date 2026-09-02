@@ -11,10 +11,15 @@ from langfuse import observe, propagate_attributes
 
 from guardrails import (
     GuardrailViolation,
+    apply_alert_floor,
+    apply_allergy_gate,
+    apply_referential_integrity,
+    check_name_leak,
     generate_medications,
     generate_overview,
     generate_recommendations,
 )
+from guardrails.schemas import MedicationsOutput, OverviewOutput, RecommendationsOutput
 from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
@@ -26,6 +31,7 @@ from utils.limiter import limiter
 from services.agent_service import agent_service
 from services.patient_service import visit_repository
 from repositories.medication_repository import medication_repository
+from repositories.patient_repository import patient_repository
 from services.google_calendar_service import create_event as create_calendar_event_for_doctor
 
 load_dotenv()
@@ -173,9 +179,16 @@ def get_or_generate_overview(patient_serial: str) -> dict:
         logger.exception("Error generating overview for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error generating overview")
 
+    ai_overview = OverviewOutput.model_validate(ai_overview)
+    ai_overview = apply_alert_floor(ai_overview, patient_data)
+
+    leaks = check_name_leak(ai_overview, patient_data["full_name"])
+    if leaks:
+        logger.warning("Overview for patient %s leaked name parts: %s", patient_serial, leaks)
+
     result = {
         "patient_serial": patient_serial,
-        "ai_overview": ai_overview,
+        "ai_overview": ai_overview.model_dump(),
         "chroma_sources": len(docs),
     }
 
@@ -298,6 +311,16 @@ def get_recommendations(
         logger.exception("Error generating recommendations")
         raise HTTPException(status_code=500, detail="Error generating recommendations")
 
+    recommendations = RecommendationsOutput.model_validate(llm_output)
+
+    patient = patient_repository.get_patient(patient_serial)
+    if patient:
+        leaks = check_name_leak(recommendations, f"{patient.first_name} {patient.last_name}")
+        if leaks:
+            logger.warning("Recommendations for patient %s leaked name parts: %s", patient_serial, leaks)
+
+    llm_output = recommendations.model_dump()
+
     cache.set(cache_key, llm_output)
 
     return llm_output
@@ -327,6 +350,10 @@ def get_medications(
 
     overview_text = get_or_generate_overview(patient_serial)["ai_overview"]["overview"]
 
+    patient = patient_repository.get_patient(patient_serial)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
     active_medications = medication_repository.get_patient_medications(patient_serial, status="active")
     current_medications = [
         m for m in active_medications
@@ -337,6 +364,8 @@ def get_medications(
         f"- {m['medication_name']}: {m['dosage']}, {m['frequency']}" for m in current_medications
     ) or "None provided"
 
+    allergies_list = "\n".join(f"- {a}" for a in (patient.allergies or [])) or "None recorded"
+
     prompt = f"""
         Based on this overview, provide patient medications alternatives.
 
@@ -346,6 +375,10 @@ def get_medications(
 
         Current medications (accurate, from patient record):
         {meds_list}
+
+        Patient allergies (accurate, from patient record) — do NOT suggest any medication
+        matching one of these, or a medication in the same drug class:
+        {allergies_list}
 
         Return only valid JSON with the following format:
         {{
@@ -408,6 +441,27 @@ def get_medications(
     except Exception:
         logger.exception("Error generating medications")
         raise HTTPException(status_code=500, detail="Error generating medications")
+
+    medications = MedicationsOutput.model_validate(llm_output)
+
+    medications, allergy_withheld = apply_allergy_gate(medications, patient.allergies or [])
+
+    current_medication_names = {m["medication_name"] for m in current_medications}
+    medications, referential_withheld = apply_referential_integrity(medications, current_medication_names)
+
+    withheld = allergy_withheld + referential_withheld
+    if withheld:
+        logger.warning(
+            "Medications for patient %s: %d item(s) withheld by guardrails: %s",
+            patient_serial, len(withheld), [w.detail for w in withheld],
+        )
+
+    leaks = check_name_leak(medications, f"{patient.first_name} {patient.last_name}")
+    if leaks:
+        logger.warning("Medications for patient %s leaked name parts: %s", patient_serial, leaks)
+
+    llm_output = medications.model_dump()
+    llm_output["withheld"] = [w.model_dump() for w in withheld]
 
     cache.set(cache_key, llm_output)
 

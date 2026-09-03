@@ -19,7 +19,6 @@ from guardrails import (
     generate_overview,
     generate_recommendations,
 )
-from guardrails.schemas import MedicationsOutput, OverviewOutput, RecommendationsOutput
 from models.agents import FollowUpRequest
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
@@ -179,12 +178,7 @@ def get_or_generate_overview(patient_serial: str) -> dict:
         logger.exception("Error generating overview for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error generating overview")
 
-    ai_overview = OverviewOutput.model_validate(ai_overview)
     ai_overview = apply_alert_floor(ai_overview, patient_data)
-
-    leaks = check_name_leak(ai_overview, patient_data["full_name"])
-    if leaks:
-        logger.warning("Overview for patient %s leaked name parts: %s", patient_serial, leaks)
 
     result = {
         "patient_serial": patient_serial,
@@ -294,7 +288,7 @@ def get_recommendations(
     """
 
     try:
-        llm_output = generate_recommendations(
+        recommendations = generate_recommendations(
             messages=[
                 {
                     "role": "system",
@@ -310,8 +304,6 @@ def get_recommendations(
     except Exception:
         logger.exception("Error generating recommendations")
         raise HTTPException(status_code=500, detail="Error generating recommendations")
-
-    recommendations = RecommendationsOutput.model_validate(llm_output)
 
     patient = patient_repository.get_patient(patient_serial)
     if patient:
@@ -425,7 +417,7 @@ def get_medications(
     """
 
     try:
-        llm_output = generate_medications(
+        medications = generate_medications(
             messages=[
                 {
                     "role": "system",
@@ -441,8 +433,6 @@ def get_medications(
     except Exception:
         logger.exception("Error generating medications")
         raise HTTPException(status_code=500, detail="Error generating medications")
-
-    medications = MedicationsOutput.model_validate(llm_output)
 
     medications, allergy_withheld = apply_allergy_gate(medications, patient.allergies or [])
 
@@ -461,7 +451,6 @@ def get_medications(
         logger.warning("Medications for patient %s leaked name parts: %s", patient_serial, leaks)
 
     llm_output = medications.model_dump()
-    llm_output["withheld"] = [w.model_dump() for w in withheld]
 
     cache.set(cache_key, llm_output)
 

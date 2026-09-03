@@ -89,28 +89,28 @@ def generate_validated(
     raise GuardrailViolation(context, "exhausted attempts")
 
 
-def generate_overview(*, messages: list[dict[str, Any]], patient_serial: str) -> dict:
+def generate_overview(*, messages: list[dict[str, Any]], patient_serial: str) -> OverviewOutput:
     return generate_validated(
         messages=messages,
         model_cls=OverviewOutput,
         context=f"overview for patient {patient_serial}",
         **_JSON_KWARGS,
-    ).model_dump()
+    )
 
 
-def generate_recommendations(*, messages: list[dict[str, Any]], patient_serial: str) -> dict:
+def generate_recommendations(*, messages: list[dict[str, Any]], patient_serial: str) -> RecommendationsOutput:
     return generate_validated(
         messages=messages,
         model_cls=RecommendationsOutput,
         context=f"recommendations for patient {patient_serial}",
         **_JSON_KWARGS,
-    ).model_dump()
+    )
 
 
-def generate_medications(*, messages: list[dict[str, Any]], patient_serial: str) -> dict:
+def generate_medications(*, messages: list[dict[str, Any]], patient_serial: str) -> MedicationsOutput:
     return generate_validated(
         messages=messages,
         model_cls=MedicationsOutput,
         context=f"medications for patient {patient_serial}",
         **_JSON_KWARGS,
-    ).model_dump()
+    )

@@ -2,15 +2,15 @@ import type { BreakdownPoint } from '../../store/api/dashboardApi';
 import type { VisitType } from '../../types/enums';
 
 const TYPE_COLORS: Record<string, string> = {
-	checkup: '#2a78d6',
-	followup: '#1baf7a',
-	specialist: '#eda100',
-	vaccination: '#008300',
-	urgent_care: '#4a3aa7',
-	emergency: '#e34948',
-	surgical: '#e87ba4',
-	telehealth: '#eb6834',
-	routine: '#0f766e',
+	checkup: 'var(--vt-checkup)',
+	followup: 'var(--vt-followup)',
+	specialist: 'var(--vt-specialist)',
+	vaccination: 'var(--vt-vaccination)',
+	urgent_care: 'var(--vt-urgent)',
+	emergency: 'var(--vt-emergency)',
+	surgical: 'var(--vt-surgical)',
+	telehealth: 'var(--vt-telehealth)',
+	routine: 'var(--vt-routine)',
 } satisfies Record<VisitType, string>;
 
 interface Props {
@@ -33,9 +33,15 @@ export const VisitTypeBar = ({ data, isLoading }: Props) => {
 	const segments = toSegments(data);
 
 	return (
-		<div className='kpi-card kpi-card--wide'>
-			<span className='kpi-value'>{isLoading ? '—' : total}</span>
-			<span className='kpi-label'>Visits (last 90 days)</span>
+		<div className='card visit-mix-card'>
+			<div className='visit-mix-head'>
+				<span className='visit-mix-total u-mono'>
+					{isLoading ? '—' : total}
+				</span>
+				<span className='visit-mix-desc'>
+					{total === 1 ? 'Visit' : 'Visits'} last 90 days
+				</span>
+			</div>
 			{!isLoading && total > 0 && (
 				<>
 					<div className='visit-type-bar'>

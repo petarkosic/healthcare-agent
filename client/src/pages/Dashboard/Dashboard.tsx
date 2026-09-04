@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppSelector } from '../../store/hooks';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import {
 	useGetDashboardStatsQuery,
 	useGetDashboardScheduleQuery,
@@ -8,11 +9,11 @@ import {
 	useGetDashboardTopDiagnosesQuery,
 	dayBounds,
 } from '../../store/api/dashboardApi';
-import { KpiCards } from './KpiCards';
-import { ScheduleCalendar } from './ScheduleCalendar';
-import { VisitTypeBar } from './VisitTypeBar';
-import { LabAlertsPanel } from './LabAlertsPanel';
-import { TopDiagnosesChart } from './TopDiagnosesChart';
+import { KpiCards } from '../../components/dashboard/KpiCards';
+import { ScheduleCalendar } from '../../components/dashboard/ScheduleCalendar';
+import { VisitTypeBar } from '../../components/dashboard/VisitTypeBar';
+import { LabAlertsPanel } from '../../components/dashboard/LabAlertsPanel';
+import { TopDiagnosesChart } from '../../components/dashboard/TopDiagnosesChart';
 import './Dashboard.css';
 
 function greeting(): string {
@@ -23,6 +24,8 @@ function greeting(): string {
 }
 
 const Dashboard = () => {
+	useDocumentTitle('Dashboard');
+
 	const doctorName = useAppSelector((s) => s.auth.doctorName);
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
@@ -39,14 +42,13 @@ const Dashboard = () => {
 		useGetDashboardTopDiagnosesQuery();
 
 	return (
-		<div className='dashboard'>
-			<h1 className='dashboard-greeting'>
+		<div className="dashboard">
+			<h1 className="dashboard-greeting">
 				{greeting()}, Dr. {doctorName}
 			</h1>
-			<KpiCards stats={stats} isLoading={statsLoading}>
-				<VisitTypeBar data={breakdown} isLoading={breakdownLoading} />
-			</KpiCards>
-			<div className='bottom-row'>
+			<KpiCards stats={stats} isLoading={statsLoading} />
+			<VisitTypeBar data={breakdown} isLoading={breakdownLoading} />
+			<div className="bottom-row">
 				<LabAlertsPanel alerts={labAlerts} isLoading={alertsLoading} />
 				<TopDiagnosesChart data={topDiagnoses} isLoading={diagnosesLoading} />
 			</div>

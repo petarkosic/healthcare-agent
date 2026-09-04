@@ -1,50 +1,81 @@
 .dashboard {
 	width: 100%;
-	padding: 2rem;
-	max-width: 1440px;
+	max-width: var(--content-max);
 	margin: 0 auto;
+	padding: var(--space-6);
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-5);
 }
 
 .dashboard-greeting {
-	font-size: 1.5rem;
-	font-weight: 600;
-	margin-bottom: 1.5rem;
+	font-size: var(--fs-xl);
+	font-weight: var(--fw-semibold);
+	letter-spacing: -0.02em;
 	color: var(--text);
+	margin: 0;
 }
 
-/* KPI Cards */
+/* ── KPI cards ─────────────────────────────────────────── */
 .kpi-cards {
-	display: flex;
-	gap: 1rem;
-	margin-bottom: 2rem;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: var(--space-4);
 }
 
 .kpi-card {
-	flex: 1;
-	min-width: 140px;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	padding: 1.25rem 1rem;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	gap: 0.25rem;
+	gap: var(--space-1);
 }
 
-.kpi-card--wide {
-	flex: 2;
-	min-width: 220px;
+.kpi-card--alert .kpi-value {
+	color: var(--danger);
+}
+
+.kpi-value {
+	font-family: var(--font-mono);
+	font-size: var(--fs-2xl);
+	font-weight: var(--fw-medium);
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+	color: var(--text);
+}
+
+.kpi-label {
+	font-size: var(--fs-sm);
+	color: var(--text-muted);
+}
+
+.visit-mix-head {
+	display: flex;
+	align-items: baseline;
+	gap: var(--space-3);
+	margin-bottom: var(--space-3);
+}
+
+.visit-mix-total {
+	font-size: var(--fs-2xl);
+	font-weight: var(--fw-semibold);
+	letter-spacing: -0.02em;
+	color: var(--text);
+	line-height: 1;
+}
+
+.visit-mix-desc {
+	font-size: var(--fs-sm);
+	color: var(--text-muted);
+	padding-left: var(--space-3);
 }
 
 .visit-type-bar {
 	display: flex;
 	width: 100%;
-	height: 10px;
+	height: 12px;
+	border-radius: var(--radius-pill);
+	overflow: hidden;
 	gap: 2px;
-	margin-top: 0.5rem;
 }
 
 .visit-type-segment {
@@ -52,188 +83,46 @@
 	min-width: 3px;
 }
 
-.visit-type-segment:first-child {
-	border-top-left-radius: 4px;
-	border-bottom-left-radius: 4px;
-}
-
-.visit-type-segment:last-child {
-	border-top-right-radius: 4px;
-	border-bottom-right-radius: 4px;
-}
-
 .visit-type-legend {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.5rem 0.75rem;
-	margin-top: 0.5rem;
-	justify-content: center;
+	gap: var(--space-2) var(--space-4);
+	margin-top: var(--space-2);
 }
 
 .legend-item {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.3rem;
-	font-size: 0.7rem;
+	gap: 7px;
+	font-size: var(--fs-xs);
 	color: var(--text-muted);
+	text-transform: capitalize;
 }
 
 .legend-item i {
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
+	width: 9px;
+	height: 9px;
+	border-radius: 3px;
 	display: inline-block;
 }
 
-.kpi-value {
-	font-size: 2rem;
-	font-weight: 700;
-	color: var(--text);
-	line-height: 1;
+/* ── bottom row: lab alerts + top diagnoses ───────────────── */
+.bottom-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--space-5);
 }
 
-.kpi-label {
-	font-size: 0.75rem;
-	font-weight: 500;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	color: var(--text-muted);
-}
-
-/* Schedule section */
-.schedule-section {
-	display: flex;
-	gap: 2rem;
-	align-items: flex-start;
-}
-
-.calendar-wrapper {
-	flex-shrink: 0;
-}
-
-/* react-calendar overrides */
-.react-calendar {
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	font-family: inherit;
-	width: 320px;
-}
-
-.react-calendar__tile--active {
-	background: var(--accent) !important;
-	color: #fff !important;
-}
-
-.react-calendar__tile--now {
-	background: var(--accent-wash);
-}
-
-/* Day detail panel */
-.day-detail {
-	flex: 1;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	padding: 1.5rem;
-	min-height: 320px;
-}
-
-.day-detail-title {
-	font-size: 1rem;
-	font-weight: 600;
-	margin-bottom: 1rem;
-	color: var(--text);
-}
-
-.day-detail-empty {
-	color: var(--text-muted);
-	font-size: 0.875rem;
-}
-
-/* Visit list */
-.visit-list {
-	list-style: none;
-	padding: 0;
-	margin: 0;
+.alerts-panel,
+.diagnoses-panel {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
-}
-
-.visit-item {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	padding: 0.75rem;
-	border: 1px solid var(--border);
-	border-radius: 0.375rem;
-	flex-wrap: wrap;
-}
-
-.visit-time {
-	font-weight: 600;
-	font-size: 0.875rem;
-	color: var(--text);
-	min-width: 52px;
-}
-
-.visit-type-badge {
-	color: #fff;
-	font-size: 0.7rem;
-	font-weight: 600;
-	text-transform: capitalize;
-	padding: 0.2rem 0.6rem;
-	border-radius: 999px;
-}
-
-.visit-meta {
-	font-size: 0.8rem;
-	color: var(--text-muted);
-	flex: 1;
-}
-
-.visit-status {
-	font-size: 0.75rem;
-	font-weight: 500;
-	text-transform: capitalize;
-}
-
-.visit-reason {
-	flex-basis: 100%;
-	font-size: 0.8rem;
-	font-style: italic;
-	color: var(--text-muted);
-}
-
-/* Chart / panel shared titles */
-.chart-title {
-	font-size: 1rem;
-	font-weight: 600;
-	margin: 0 0 1rem;
-	color: var(--text);
 }
 
 .chart-empty {
 	color: var(--text-muted);
-	font-size: 0.875rem;
-}
-
-/* Bottom row */
-.bottom-row {
-	display: flex;
-	gap: 1.5rem;
-	margin-bottom: 2rem;
-	flex-wrap: wrap;
-}
-
-.alerts-panel {
-	flex: 1;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	padding: 1.25rem 1.5rem;
-	display: flex;
-	flex-direction: column;
+	font-size: var(--fs-sm);
+	margin: 0;
 }
 
 .alerts-list {
@@ -242,7 +131,6 @@
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
 	max-height: 320px;
 	overflow-y: auto;
 	scrollbar-width: thin;
@@ -252,56 +140,40 @@
 .alert-item {
 	display: flex;
 	align-items: center;
-	gap: 0.75rem;
-	padding: 0.6rem 0.75rem;
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	background: var(--surface-2);
+	gap: var(--space-3);
+	padding: 11px 0;
+	border-top: 1px solid var(--border);
 	flex-wrap: wrap;
 }
 
-.alert-badge {
-	font-size: 0.65rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	padding: 0.15rem 0.5rem;
-	border-radius: 999px;
-	white-space: nowrap;
+.alert-item:first-child {
+	border-top: 0;
 }
 
 .alert-test {
-	font-size: 0.8rem;
-	font-weight: 600;
+	font-size: var(--fs-sm);
+	font-weight: var(--fw-medium);
 	color: var(--text);
 	min-width: 120px;
 }
 
 .alert-value {
-	font-size: 0.8rem;
+	font-size: var(--fs-sm);
 	color: var(--text-muted);
 	flex: 1;
 }
 
 .alert-patient {
-	font-size: 0.75rem;
+	font-size: var(--fs-xs);
 	color: var(--text);
-	font-weight: 500;
+	font-weight: var(--fw-medium);
 }
 
 .alert-date {
-	font-size: 0.7rem;
-	color: var(--text-muted);
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--text-faint);
 	white-space: nowrap;
-}
-
-.diagnoses-panel {
-	flex: 1;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	padding: 1.25rem 1.5rem;
-	display: flex;
-	flex-direction: column;
 }
 
 .diagnosis-list {
@@ -310,7 +182,7 @@
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.65rem;
+	gap: var(--space-3);
 	max-height: 340px;
 	overflow-y: auto;
 	scrollbar-width: thin;
@@ -318,78 +190,254 @@
 }
 
 .diagnosis-row {
+	padding-top: 10px;
+	border-top: 1px solid var(--border);
+}
+
+.diagnosis-row:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.diagnosis-row__top {
 	display: flex;
-	align-items: center;
+	align-items: baseline;
 	justify-content: space-between;
-	gap: 0.75rem;
-	padding: 0.55rem 0.75rem;
-	border: 1px solid var(--border);
-	border-radius: 0.5rem;
-	background: var(--surface-2);
+	gap: var(--space-3);
+	margin-bottom: 6px;
 }
 
 .diagnosis-name {
-	font-size: 0.8rem;
-	font-weight: 500;
+	font-size: var(--fs-sm);
 	color: var(--text);
 }
 
 .diagnosis-count {
-	font-size: 0.7rem;
-	font-weight: 600;
+	font-size: 11px;
+	font-weight: var(--fw-semibold);
 	color: var(--accent-ink);
 	background: var(--accent-wash);
-	padding: 0.2rem 0.6rem;
-	border-radius: 999px;
+	padding: 2px 9px;
+	border-radius: var(--radius-pill);
 	white-space: nowrap;
+}
+
+.diagnosis-track {
+	height: 5px;
+	background: var(--surface-2);
+	border-radius: var(--radius-pill);
+	overflow: hidden;
+}
+
+.diagnosis-track i {
+	display: block;
+	height: 100%;
+	background: var(--accent);
+	opacity: 0.75;
+	border-radius: var(--radius-pill);
+}
+
+/* ── schedule ──────────────────────────────────────────── */
+.schedule-section {
+	display: flex;
+	gap: var(--space-6);
+	align-items: flex-start;
+}
+
+.calendar-wrapper {
+	flex-shrink: 0;
+}
+
+.react-calendar {
+	background: var(--surface);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	font-family: var(--font-sans);
+	width: 320px;
+	line-height: 1.4;
+}
+
+.react-calendar__navigation button {
+	color: var(--text);
+	background: none;
+	font-size: var(--fs-md);
+	font-weight: var(--fw-medium);
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+	background: var(--surface-2);
+}
+
+.react-calendar__navigation button:disabled {
+	background: none;
+	color: var(--text-faint);
+}
+
+.react-calendar__month-view__weekdays__weekday {
+	color: var(--text-muted);
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+	text-decoration: none;
+}
+
+.react-calendar__month-view__days__day {
+	color: var(--text);
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+	color: var(--text-faint);
+}
+
+.react-calendar__tile {
+	color: var(--text);
+	background: none;
+	border-radius: var(--radius-xs);
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+	background: var(--surface-2);
+}
+
+.react-calendar__tile:disabled {
+	background: none;
+	color: var(--text-faint);
+}
+
+.react-calendar__tile--now {
+	background: var(--accent-wash);
+}
+
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+	background: var(--accent-wash);
+}
+
+.react-calendar__tile--active {
+	background: var(--accent) !important;
+	color: #fff !important;
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+	background: var(--accent) !important;
+}
+
+.day-detail {
+	flex: 1;
+	min-width: 0;
+}
+
+.day-detail-title {
+	font-size: var(--fs-md);
+	font-weight: var(--fw-semibold);
+	color: var(--text);
+	margin: 0 0 var(--space-3);
+}
+
+.day-detail-empty {
+	color: var(--text-muted);
+	font-size: var(--fs-sm);
+	margin: 0;
+}
+
+.visit-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.visit-item {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	padding: var(--space-3);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	flex-wrap: wrap;
+}
+
+.visit-time {
+	font-weight: var(--fw-semibold);
+	font-size: var(--fs-sm);
+	color: var(--text);
+	min-width: 52px;
+}
+
+.visit-type-badge {
+	color: #fff;
+	font-size: 11px;
+	font-weight: var(--fw-semibold);
+	text-transform: capitalize;
+	padding: 3px 10px;
+	border-radius: var(--radius-pill);
+}
+
+.visit-meta {
+	font-size: var(--fs-xs);
+	color: var(--text-muted);
+	flex: 1;
+}
+
+.visit-status {
+	font-size: var(--fs-xs);
+	font-weight: var(--fw-medium);
+	text-transform: capitalize;
+}
+
+.visit-reason {
+	flex-basis: 100%;
+	font-size: var(--fs-xs);
+	font-style: italic;
+	color: var(--text-muted);
+}
+
+/* ── responsive ────────────────────────────────────────── */
+@media (max-width: 1024px) {
+	.bottom-row {
+		grid-template-columns: 1fr;
+	}
 }
 
 @media (max-width: 768px) {
 	.dashboard {
-		padding: 1rem;
+		padding: var(--space-4);
 	}
 
 	.schedule-section {
 		flex-direction: column;
 	}
 
-	.calendar-wrapper {
-		width: 100%;
-	}
-
+	.calendar-wrapper,
 	.react-calendar {
 		width: 100%;
-	}
-
-	.day-detail {
-		width: 100%;
-		box-sizing: border-box;
 	}
 }
 
 @media (max-width: 480px) {
 	.kpi-cards {
-		gap: 0.5rem;
-	}
-
-	.kpi-card {
-		min-width: 100px;
-		padding: 1rem 0.75rem;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-2);
 	}
 
 	.kpi-value {
-		font-size: 1.5rem;
+		font-size: var(--fs-xl);
 	}
 
 	.visit-item {
 		display: grid;
 		grid-auto-flow: column;
 		grid-template-rows: repeat(3, auto);
-		column-gap: 1rem;
-		row-gap: 0.35rem;
+		column-gap: var(--space-4);
+		row-gap: 6px;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem;
+		padding: var(--space-2);
 	}
 
 	.visit-time {

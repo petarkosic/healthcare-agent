@@ -11,23 +11,23 @@ interface ScheduleCalendarProps {
 }
 
 const VISIT_TYPE_COLORS: Record<string, string> = {
-	checkup: '#6366f1',
-	followup: '#22c55e',
-	emergency: '#ef4444',
-	specialist: '#f97316',
-	vaccination: '#0ea5e9',
-	routine: '#8b5cf6',
-	urgent_care: '#f43f5e',
-	surgical: '#78716c',
-	telehealth: '#14b8a6',
+	checkup: 'var(--vt-checkup)',
+	followup: 'var(--vt-followup)',
+	emergency: 'var(--vt-emergency)',
+	specialist: 'var(--vt-specialist)',
+	vaccination: 'var(--vt-vaccination)',
+	routine: 'var(--vt-routine)',
+	urgent_care: 'var(--vt-urgent)',
+	surgical: 'var(--vt-surgical)',
+	telehealth: 'var(--vt-telehealth)',
 } satisfies Record<VisitType, string>;
 
 const STATUS_COLORS: Record<string, string> = {
-	scheduled: '#6366f1',
-	'in-progress': '#f59e0b',
-	completed: '#22c55e',
-	cancelled: '#ef4444',
-	'no-show': '#f97316',
+	scheduled: 'var(--accent)',
+	'in-progress': 'var(--warn)',
+	completed: 'var(--ok)',
+	cancelled: 'var(--danger)',
+	'no-show': 'var(--warn)',
 } satisfies Record<VisitStatus, string>;
 
 function formatTime(isoDate: string): string {
@@ -50,7 +50,7 @@ export const ScheduleCalendar = ({
 	});
 
 	return (
-		<div className='schedule-section'>
+		<div className='card schedule-section'>
 			<div className='calendar-wrapper'>
 				<Calendar
 					onChange={(val) => onDateChange(val as Date)}
@@ -69,12 +69,14 @@ export const ScheduleCalendar = ({
 					<ul className='visit-list'>
 						{visits.map((v) => (
 							<li key={v.visit_id} className='visit-item'>
-								<span className='visit-time'>{formatTime(v.visit_date)}</span>
+								<span className='visit-time u-mono'>
+									{formatTime(v.visit_date)}
+								</span>
 								<span
 									className='visit-type-badge'
 									style={{
 										backgroundColor:
-											VISIT_TYPE_COLORS[v.visit_type] ?? '#64748b',
+											VISIT_TYPE_COLORS[v.visit_type] ?? 'var(--text-faint)',
 									}}
 								>
 									{v.visit_type.replace(/_/g, ' ')}
@@ -84,7 +86,9 @@ export const ScheduleCalendar = ({
 								</span>
 								<span
 									className='visit-status'
-									style={{ color: STATUS_COLORS[v.status] ?? '#64748b' }}
+									style={{
+										color: STATUS_COLORS[v.status] ?? 'var(--text-faint)',
+									}}
 								>
 									{v.status}
 								</span>

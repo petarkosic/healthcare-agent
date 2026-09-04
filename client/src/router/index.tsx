@@ -1,92 +1,46 @@
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Outlet } from 'react-router';
+import { lazy, Suspense, type ReactNode } from 'react';
+import { createBrowserRouter } from 'react-router';
 import App from '../App';
-import { Navbar } from '../components/Navbar/Navbar';
-import './layout.css';
+import AppShell from '../components/AppShell/AppShell';
 import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
+import { PageLoader } from '../components/Spinner/PageLoader';
 
+const Dashboard = lazy(() => import('../pages/Dashboard/Dashboard'));
 const Patients = lazy(() =>
-	import('../components/Patients/Patients').then((m) => ({
-		default: m.Patients,
-	})),
+	import('../pages/Patients/Patients').then((m) => ({ default: m.Patients })),
 );
 const AddPatient = lazy(() =>
-	import('../components/AddPatient/AddPatient').then((m) => ({
+	import('../pages/AddPatient/AddPatient').then((m) => ({
 		default: m.AddPatient,
 	})),
 );
 const PatientProfile = lazy(
-	() => import('../components/PatientProfile/PatientProfile'),
+	() => import('../pages/PatientProfile/PatientProfile'),
 );
-const Dashboard = lazy(() => import('../components/Dashboard/Dashboard'));
+const NotFound = lazy(() => import('../pages/NotFound/NotFound'));
 
-const RouteLoader = (
-	<div className='route-loader'>
-		<div className='route-loader-spinner' />
-	</div>
+const withSuspense = (node: ReactNode) => (
+	<Suspense fallback={<PageLoader />}>{node}</Suspense>
 );
 
 const router = createBrowserRouter([
+	{ path: '/', element: <App /> },
 	{
 		path: '/',
 		element: (
-			<>
-				<Navbar />
-				<App />
-			</>
-		),
-	},
-	{
-		path: '/',
-		element: (
-			<div className='app-layout'>
-				<Navbar />
-				<Outlet />
-			</div>
+			<ProtectedRoute>
+				<AppShell />
+			</ProtectedRoute>
 		),
 		children: [
-			{
-				path: '/dashboard',
-				element: (
-					<ProtectedRoute>
-						<Suspense fallback={RouteLoader}>
-							<Dashboard />
-						</Suspense>
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: '/patients',
-				element: (
-					<ProtectedRoute>
-						<Suspense fallback={RouteLoader}>
-							<Patients />
-						</Suspense>
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: '/patients/new',
-				element: (
-					<ProtectedRoute>
-						<Suspense fallback={RouteLoader}>
-							<AddPatient />
-						</Suspense>
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: '/patients/:id',
-				element: (
-					<ProtectedRoute>
-						<Suspense fallback={RouteLoader}>
-							<PatientProfile />
-						</Suspense>
-					</ProtectedRoute>
-				),
-			},
+			{ path: 'dashboard', element: withSuspense(<Dashboard />) },
+			{ path: 'patients', element: withSuspense(<Patients />) },
+			{ path: 'patients/new', element: withSuspense(<AddPatient />) },
+			{ path: 'patients/:id', element: withSuspense(<PatientProfile />) },
+			{ path: '*', element: withSuspense(<NotFound />) },
 		],
 	},
+	{ path: '*', element: withSuspense(<NotFound />) },
 ]);
 
 export default router;

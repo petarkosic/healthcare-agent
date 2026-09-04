@@ -1,24 +1,3 @@
-#root {
-	--primary: #0284c7;
-	--primary-light: #e0f2fe;
-	--secondary: #64748b;
-	--bg-body: #f8fafc;
-	--bg-card: #ffffff;
-	--text-main: #0f172a;
-	--text-muted: #94a3b8;
-	--border: #e2e8f0;
-
-	--danger-bg: #fef2f2;
-	--danger-text: #ef4444;
-	--neutral-badge: #f1f5f9;
-	--neutral-text: #475569;
-
-	--radius-md: 12px;
-	--radius-sm: 6px;
-	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
 /* ===== LAYOUT ===== */
 .landing-page {
 	width: 100%;

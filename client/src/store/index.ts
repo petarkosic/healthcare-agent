@@ -5,6 +5,7 @@ import googleCalendarReducer, {
 	checkGoogleCalendarStatus,
 } from './googleCalendarSlice';
 import aiReducer from './aiSlice';
+import uiReducer from './uiSlice';
 import { baseApi } from './api/baseApi';
 
 const STORAGE_KEY = 'healthcare_active_session';
@@ -15,6 +16,7 @@ export const store = configureStore({
 		session: sessionReducer,
 		googleCalendar: googleCalendarReducer,
 		ai: aiReducer,
+		ui: uiReducer,
 		[baseApi.reducerPath]: baseApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>

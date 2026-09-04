@@ -1,0 +1,96 @@
+:root {
+	color-scheme: light;
+
+	--bg: #f6f7f9;
+	--surface: #ffffff;
+	--surface-2: #fafbfc;
+	--border: #e6e8ec;
+	--border-strong: #d9dce1;
+	--text: #1f2733;
+	--text-muted: #68707c;
+	--text-faint: #98a0aa;
+	--ink: #171e28;
+	--accent: #2f6f9f;
+	--accent-ink: #255a80;
+	--accent-wash: #eef4f8;
+	--ok: #3c7a54;
+	--ok-wash: #e9f1ec;
+	--warn: #8f6317;
+	--warn-wash: #f6f0e3;
+	--danger: #b23b32;
+	--danger-wash: #f8ecea;
+
+	/* visit-type dots */
+	--vt-checkup: #3b6fb0;
+	--vt-followup: #3f8f6e;
+	--vt-specialist: #b07d2a;
+	--vt-routine: #2f7d78;
+	--vt-urgent: #6558a8;
+	--vt-telehealth: #c56a3a;
+	--vt-vaccination: #4a8a3f;
+	--vt-emergency: #b23b32;
+	--vt-surgical: #8a6d86;
+
+	/* type */
+	--font-sans:
+		'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+	--fs-xs: 11.5px;
+	--fs-sm: 13px;
+	--fs-base: 15px;
+	--fs-md: 16px;
+	--fs-lg: 19px;
+	--fs-xl: 24px;
+	--fs-2xl: 26px;
+	--fw-regular: 400;
+	--fw-medium: 500;
+	--fw-semibold: 600;
+	--lh: 1.55;
+
+	/* space / shape */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 20px;
+	--space-6: 24px;
+	--space-8: 32px;
+	--space-12: 48px;
+	--radius-xs: 5px;
+	--radius-sm: 7px;
+	--radius-md: 10px;
+	--radius-pill: 999px;
+	--shadow-sm:
+		0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.05);
+	--shadow-lg:
+		0 24px 60px -20px rgba(23, 30, 40, 0.24),
+		0 8px 24px -12px rgba(23, 30, 40, 0.12);
+
+	/* layout — breakpoints for reference: 380 / 640 / 1024 / 1440 / 1920 */
+	--sidebar-w: 240px;
+	--sidebar-w-collapsed: 64px;
+	--header-h: 58px;
+	--content-max: 1640px;
+}
+
+:root[data-theme='dark'] {
+	color-scheme: dark;
+	--bg: #14171c;
+	--surface: #1b1f26;
+	--surface-2: #21262e;
+	--border: #2b313a;
+	--border-strong: #3a414c;
+	--text: #e7ebef;
+	--text-muted: #9aa2ad;
+	--text-faint: #6b7480;
+	--ink: #e7ebef;
+	--accent: #6ba9cf;
+	--accent-ink: #cfe3f0;
+	--accent-wash: #1e2b35;
+	--ok: #6fae86;
+	--ok-wash: #1d2a22;
+	--warn: #c79a4f;
+	--warn-wash: #2b2418;
+	--danger: #d07b73;
+	--danger-wash: #2c1c1a;
+}

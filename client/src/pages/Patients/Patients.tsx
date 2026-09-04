@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { formatDateOnly, getInitials } from '../../utils/utils';
-import { Search } from '../Search/Search';
+import { Search } from '../../components/Search/Search';
 import './Patients.css';
 import { useAppSelector } from '../../store/hooks';
 import { useGetPatientsQuery } from '../../store/api/patientsApi';

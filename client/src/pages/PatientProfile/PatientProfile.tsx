@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import './PatientProfile.css';
 import { useParams } from 'react-router';
-import { ProfileHeader } from '../ProfileHeader/ProfileHeader';
-import { Allergies } from '../Allergies/Allergies';
-import { Vitals } from '../Vitals/Vitals';
-import { Medications } from '../Medications/Medications';
-import { Notes } from '../Notes/Notes';
-import { Labs } from '../Labs/Labs';
-import { Diagnoses } from '../Diagnoses/Diagnoses';
-import { Visits } from '../Visits/Visits';
-import { Sidebar } from '../Sidebar/Sidebar';
+import { ProfileHeader } from '../../components/ProfileHeader/ProfileHeader';
+import { Allergies } from '../../components/Allergies/Allergies';
+import { Vitals } from '../../components/Vitals/Vitals';
+import { Medications } from '../../components/Medications/Medications';
+import { Notes } from '../../components/Notes/Notes';
+import { Labs } from '../../components/Labs/Labs';
+import { Diagnoses } from '../../components/Diagnoses/Diagnoses';
+import { Visits } from '../../components/Visits/Visits';
+import { Sidebar } from '../../components/Sidebar/Sidebar';
 import { useAppSelector } from '../../store/hooks';
 import { useGetPatientQuery } from '../../store/api/patientsApi';
 

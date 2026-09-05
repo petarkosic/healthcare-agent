@@ -3,10 +3,10 @@ import type {
 	MedicationChange,
 	MedicationsResponse,
 	ResponseData,
-} from '../../types/types';
-import './SidebarMedications.css';
+} from '../../../types/types';
+import './AIAssistant.css';
 
-type SidebarMedicationsProps = {
+type AIMedicationsProps = {
 	data: ResponseData | null;
 };
 
@@ -16,7 +16,7 @@ const isMedicationsResponse = (
 	return 'medications' in data && 'current_medications' in data.medications;
 };
 
-export const SidebarMedications = ({ data }: SidebarMedicationsProps) => {
+export const AIMedications = ({ data }: AIMedicationsProps) => {
 	if (!data || !isMedicationsResponse(data)) return null;
 
 	const { current_medications, prescribed_changes } = data.medications;

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import {
 	useGetPatientQuery,
 	useAddVitalMutation,
-} from '../../store/api/patientsApi';
-import { Modal } from '../Modal/Modal';
+} from '../../../store/api/patientsApi';
+import { Modal } from '../../Modal/Modal';
 import './Vitals.css';
 
 export const Vitals = () => {
@@ -96,7 +96,7 @@ export const Vitals = () => {
 			{localError && <div className='error'>{localError}</div>}
 			<div className='card card-vitals'>
 				<div className='card-header-row'>
-					<h3>Latest Vitals</h3>
+					<h3>Vitals</h3>
 					{doctorSerialNumber && (
 						<span
 							className={!session ? 'btn-tooltip-wrap' : undefined}
@@ -105,11 +105,11 @@ export const Vitals = () => {
 							}
 						>
 							<button
-								className='btn-primary'
+								className='btn btn--ghost btn--sm'
 								onClick={() => setIsModalOpen(true)}
 								disabled={!session}
 							>
-								Add Vitals
+								+ Add
 							</button>
 						</span>
 					)}
@@ -169,10 +169,13 @@ export const Vitals = () => {
 							<span className='label' data-tooltip='Weight/Height'>
 								Weight/Height
 							</span>
-							<span className='value'>
-								{latestVitals.weight_kg} <small>kg</small>
-								<small>/</small>
-								{latestVitals.height_cm} <small>cm</small>
+							<span className='value vital-box__stack'>
+								<span>
+									{latestVitals.weight_kg} <small>kg</small>
+								</span>
+								<span>
+									{latestVitals.height_cm} <small>cm</small>
+								</span>
 							</span>
 						</div>
 						<div className='vital-box'>
@@ -194,141 +197,139 @@ export const Vitals = () => {
 					disabled={isSubmitting}
 				>
 					<form onSubmit={handleSubmit}>
-							<div className='form-group'>
-								<label>Systolic BP (mmHg)</label>
-								<input
-									type='number'
-									name='blood_pressure_systolic'
-									value={form.blood_pressure_systolic}
-									onChange={handleChange}
-									min={50}
-									max={250}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Diastolic BP (mmHg)</label>
-								<input
-									type='number'
-									name='blood_pressure_diastolic'
-									value={form.blood_pressure_diastolic}
-									onChange={handleChange}
-									min={30}
-									max={200}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Heart Rate (bpm)</label>
-								<input
-									type='number'
-									name='heart_rate'
-									value={form.heart_rate}
-									onChange={handleChange}
-									min={30}
-									max={250}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Temperature (°C)</label>
-								<input
-									type='number'
-									step='0.1'
-									name='temperature'
-									value={form.temperature}
-									onChange={handleChange}
-									min={30}
-									max={45}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Respiratory Rate</label>
-								<input
-									type='number'
-									name='respiratory_rate'
-									value={form.respiratory_rate}
-									onChange={handleChange}
-									min={5}
-									max={60}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Oxygen Saturation (%)</label>
-								<input
-									type='number'
-									step='0.1'
-									name='oxygen_saturation'
-									value={form.oxygen_saturation}
-									onChange={handleChange}
-									min={70}
-									max={100}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Weight (kg)</label>
-								<input
-									type='number'
-									step='0.1'
-									name='weight_kg'
-									value={form.weight_kg}
-									onChange={handleChange}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Height (cm)</label>
-								<input
-									type='number'
-									step='0.1'
-									name='height_cm'
-									value={form.height_cm}
-									onChange={handleChange}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Pain Level (0–10)</label>
-								<input
-									type='number'
-									name='pain_level'
-									value={form.pain_level}
-									onChange={handleChange}
-									min={0}
-									max={10}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='form-group'>
-								<label>Notes (optional)</label>
-								<textarea
-									name='notes'
-									value={form.notes}
-									onChange={handleChange}
-									rows={2}
-									disabled={isSubmitting}
-								/>
-							</div>
-							<div className='modal-actions'>
-								<button
-									type='button'
-									className='btn-secondary'
-									onClick={
-										isSubmitting ? undefined : () => setIsModalOpen(false)
-									}
-									disabled={isSubmitting}
-								>
-									Cancel
-								</button>
-								<button
-									type='submit'
-									className='btn-primary'
-									disabled={isSubmitting}
-								>
-									{isSubmitting ? 'Saving...' : 'Save Vitals'}
+						<div className='form-group'>
+							<label>Systolic BP (mmHg)</label>
+							<input
+								type='number'
+								name='blood_pressure_systolic'
+								value={form.blood_pressure_systolic}
+								onChange={handleChange}
+								min={50}
+								max={250}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Diastolic BP (mmHg)</label>
+							<input
+								type='number'
+								name='blood_pressure_diastolic'
+								value={form.blood_pressure_diastolic}
+								onChange={handleChange}
+								min={30}
+								max={200}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Heart Rate (bpm)</label>
+							<input
+								type='number'
+								name='heart_rate'
+								value={form.heart_rate}
+								onChange={handleChange}
+								min={30}
+								max={250}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Temperature (°C)</label>
+							<input
+								type='number'
+								step='0.1'
+								name='temperature'
+								value={form.temperature}
+								onChange={handleChange}
+								min={30}
+								max={45}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Respiratory Rate</label>
+							<input
+								type='number'
+								name='respiratory_rate'
+								value={form.respiratory_rate}
+								onChange={handleChange}
+								min={5}
+								max={60}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Oxygen Saturation (%)</label>
+							<input
+								type='number'
+								step='0.1'
+								name='oxygen_saturation'
+								value={form.oxygen_saturation}
+								onChange={handleChange}
+								min={70}
+								max={100}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Weight (kg)</label>
+							<input
+								type='number'
+								step='0.1'
+								name='weight_kg'
+								value={form.weight_kg}
+								onChange={handleChange}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Height (cm)</label>
+							<input
+								type='number'
+								step='0.1'
+								name='height_cm'
+								value={form.height_cm}
+								onChange={handleChange}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Pain Level (0–10)</label>
+							<input
+								type='number'
+								name='pain_level'
+								value={form.pain_level}
+								onChange={handleChange}
+								min={0}
+								max={10}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='form-group'>
+							<label>Notes (optional)</label>
+							<textarea
+								name='notes'
+								value={form.notes}
+								onChange={handleChange}
+								rows={2}
+								disabled={isSubmitting}
+							/>
+						</div>
+						<div className='modal-actions'>
+							<button
+								type='button'
+								className='btn-secondary'
+								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
+								disabled={isSubmitting}
+							>
+								Cancel
+							</button>
+							<button
+								type='submit'
+								className='btn-primary'
+								disabled={isSubmitting}
+							>
+								{isSubmitting ? 'Saving...' : 'Save Vitals'}
 							</button>
 						</div>
 					</form>

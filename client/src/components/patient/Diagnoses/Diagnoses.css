@@ -1,35 +1,31 @@
-.card-diagnoses {
-	grid-column: span 12;
-}
-
 .diagnoses-list {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
+	gap: var(--space-3);
 }
 
 .diagnoses-list li {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background: #f8fafc;
-	padding: 0.75rem;
-	border-radius: 6px;
+	background: var(--surface-2);
+	padding: var(--space-3);
+	border-radius: var(--radius-sm);
 }
 
 .diag-header {
 	display: flex;
 	align-items: center;
-	gap: 0.5rem;
+	gap: var(--space-2);
 }
 
 .diag-meta {
 	display: flex;
-	gap: 1rem;
-	font-size: 0.85rem;
+	gap: var(--space-4);
+	font-size: var(--fs-base);
 	align-items: center;
 }
 
@@ -37,7 +33,7 @@
 	.diagnoses-list li {
 		flex-direction: column;
 		align-items: flex-start;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.diag-header {

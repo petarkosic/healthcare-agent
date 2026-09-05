@@ -3,16 +3,20 @@ import type {
 	Recommendation,
 	RecommendationsResponse,
 	ResponseData,
-} from '../../types/types';
-import './SidebarRecommendations.css';
-import { formatDateTimeLocal } from '../../utils/utils';
+} from '../../../types/types';
+import './AIAssistant.css';
+import { formatDateTimeLocal } from '../../../utils/utils';
 import { useLocation } from 'react-router';
-import { useAppDispatch } from '../../store/hooks';
-import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
-import { useScheduleFollowupMutation } from '../../store/api/agentsApi';
+import { useAppDispatch } from '../../../store/hooks';
+import { ensureGoogleConnected } from '../../../store/googleCalendarSlice';
+import { useScheduleFollowupMutation } from '../../../store/api/agentsApi';
 
-type SidebarRecommendationsProps = {
+type ViewMode = 'card' | 'schedule' | 'success';
+
+type AIRecommendationsProps = {
 	data: ResponseData | null;
+	viewMode: ViewMode;
+	setViewMode: (mode: ViewMode) => void;
 };
 
 const isRecommendationsResponse = (
@@ -21,12 +25,11 @@ const isRecommendationsResponse = (
 	return 'recommendations' in data;
 };
 
-export const SidebarRecommendations = ({
+export const AIRecommendations = ({
 	data,
-}: SidebarRecommendationsProps) => {
-	const [viewMode, setViewMode] = useState<'card' | 'schedule' | 'success'>(
-		'card',
-	);
+	viewMode,
+	setViewMode,
+}: AIRecommendationsProps) => {
 	const [selectedDate, setSelectedDate] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [scheduleError, setScheduleError] = useState<string | null>(null);
@@ -111,36 +114,62 @@ export const SidebarRecommendations = ({
 		<div className='recommendations-container'>
 			<h4>Recommendations</h4>
 
-			{viewMode == 'card' &&
-				data?.recommendations?.map((item: Recommendation, index: number) => (
-					<div className='recommendation-item' key={index}>
-						<div className='recommendation-priority'>
-							<div>
-								Priority:{' '}
-								<span className={`priority ${item.priority}`}>
-									{item.priority}
-								</span>
-							</div>
-
-							{item.follow_up && (
-								<div className='follow-up'>
-									<button onClick={() => handleViewModeChange(item)}>
-										&#128197;
-									</button>
+			{viewMode == 'card' && (
+				<div key='card' className='ai-assistant__tab-content'>
+					{data?.recommendations?.map((item: Recommendation, index: number) => (
+						<div className='recommendation-item' key={index}>
+							<div className='recommendation-priority'>
+								<div>
+									Priority:{' '}
+									<span className={`priority ${item.priority}`}>
+										{item.priority}
+									</span>
 								</div>
-							)}
+
+								{item.follow_up && (
+									<button
+										type='button'
+										className='follow-up-btn'
+										onClick={() => handleViewModeChange(item)}
+										title='Schedule this follow-up'
+									>
+										<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
+											<rect
+												x='3.5'
+												y='5'
+												width='17'
+												height='16'
+												rx='2.5'
+												stroke='currentColor'
+												strokeWidth='1.6'
+											/>
+											<path
+												d='M3.5 9.5h17M8 3v3.5M16 3v3.5'
+												stroke='currentColor'
+												strokeWidth='1.6'
+												strokeLinecap='round'
+											/>
+										</svg>
+										Schedule
+									</button>
+								)}
+							</div>
+							<div className='recommendation-text'>
+								<strong>{item.recommendation}</strong>
+							</div>
+							<div className='recommendation-reason'>
+								<em>Reason: {item.reason}</em>
+							</div>
 						</div>
-						<div className='recommendation-text'>
-							<strong>{item.recommendation}</strong>
-						</div>
-						<div className='recommendation-reason'>
-							<em>Reason: {item.reason}</em>
-						</div>
-					</div>
-				))}
+					))}
+				</div>
+			)}
 
 			{viewMode === 'schedule' && data && (
-				<div className='recommendation-item schedule-mode'>
+				<div
+					key='schedule'
+					className='recommendation-item schedule-mode ai-assistant__tab-content'
+				>
 					<div className='schedule-header'>
 						<h5 className='schedule-title'>Confirm Follow-up Visit</h5>
 					</div>
@@ -187,7 +216,10 @@ export const SidebarRecommendations = ({
 			)}
 
 			{viewMode === 'success' && (
-				<div className='recommendation-item success-mode'>
+				<div
+					key='success'
+					className='recommendation-item success-mode ai-assistant__tab-content'
+				>
 					<div className='success-content'>
 						<span className='success-icon'>✓</span>
 						<div className='success-text'>

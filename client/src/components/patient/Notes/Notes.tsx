@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import type { ClinicalNote } from '../../types/types';
-import { formatDate } from '../../utils/utils';
+import type { ClinicalNote } from '../../../types/types';
+import { formatDate } from '../../../utils/utils';
 import { useParams } from 'react-router';
-import { Modal } from '../Modal/Modal';
+import { Modal } from '../../Modal/Modal';
 import './Notes.css';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import {
 	useGetPatientQuery,
 	useAddNoteMutation,
-} from '../../store/api/patientsApi';
-import type { NoteType } from '../../types/enums';
+} from '../../../store/api/patientsApi';
+import type { NoteType } from '../../../types/enums';
 
 export const Notes = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,11 +65,11 @@ export const Notes = () => {
 							}
 						>
 							<button
-								className='btn-primary'
+								className='btn btn--ghost btn--sm'
 								onClick={() => setIsModalOpen(true)}
 								disabled={!session}
 							>
-								Add Note
+								+ Add
 							</button>
 						</span>
 					)}

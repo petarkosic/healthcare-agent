@@ -1,6 +1,6 @@
-import { Link } from 'react-router';
-import type { PatientFullResponse } from '../../types/types';
-import { calculateAge } from '../../utils/utils';
+import type { PatientFullResponse } from '../../../types/types';
+import { calculateAge } from '../../../utils/utils';
+import './ProfileHeader.css';
 
 type ProfileHeaderProps = {
 	data: PatientFullResponse;
@@ -9,9 +9,6 @@ type ProfileHeaderProps = {
 export const ProfileHeader = ({ data }: ProfileHeaderProps) => {
 	return (
 		<>
-			<Link to='/patients' className='back-link'>
-				← Back to Patients
-			</Link>
 			<div className='profile-header'>
 				<div className='header-identity'>
 					<h1>

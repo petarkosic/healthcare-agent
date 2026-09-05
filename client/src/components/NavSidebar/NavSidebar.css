@@ -53,7 +53,7 @@
 	gap: 9px;
 	color: var(--text);
 	font-weight: var(--fw-semibold);
-	font-size: var(--fs-md);
+	font-size: var(--fs-lg);
 	letter-spacing: -0.01em;
 }
 
@@ -117,7 +117,7 @@
 	padding: 0 10px;
 	border-radius: var(--radius-sm);
 	color: var(--text-muted);
-	font-size: var(--fs-base);
+	font-size: var(--fs-md);
 	font-weight: var(--fw-medium);
 	white-space: nowrap;
 }
@@ -233,7 +233,7 @@
 
 .nav-sidebar__who b {
 	display: block;
-	font-size: var(--fs-sm);
+	font-size: var(--fs-base);
 	font-weight: var(--fw-semibold);
 	white-space: nowrap;
 	overflow: hidden;
@@ -295,7 +295,7 @@
 	border: 0;
 	background: none;
 	font: inherit;
-	font-size: var(--fs-sm);
+	font-size: var(--fs-base);
 	color: var(--text);
 	border-radius: var(--radius-xs);
 	cursor: pointer;

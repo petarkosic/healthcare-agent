@@ -31,7 +31,7 @@ export const useModalA11y = <T extends HTMLElement = HTMLDivElement>(
 		const previouslyFocused = document.activeElement as HTMLElement | null;
 
 		const originalOverflow = document.body.style.overflow;
-		document.body.style.overflow = 'hidden';
+		document.body.style.overflow = 'clip';
 
 		const node = ref.current;
 		const focusables = node?.querySelectorAll<HTMLElement>(FOCUSABLE);

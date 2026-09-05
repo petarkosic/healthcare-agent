@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import {
 	useGetPatientQuery,
 	useUpdateAllergiesMutation,
-} from '../../store/api/patientsApi';
-import { Modal } from '../Modal/Modal';
+} from '../../../store/api/patientsApi';
+import { Modal } from '../../Modal/Modal';
 import './Allergies.css';
 
 export const Allergies = () => {

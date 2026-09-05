@@ -12,12 +12,14 @@
 }
 
 .app-header {
-	height: var(--header-h);
+	min-height: var(--header-h);
 	flex: none;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 var(--space-6);
+	flex-wrap: wrap;
+	gap: var(--space-2) var(--space-4);
+	padding: var(--space-2) var(--space-6);
 	border-bottom: 1px solid var(--border);
 	background: var(--surface);
 	position: sticky;
@@ -28,7 +30,8 @@
 .app-header__right {
 	display: flex;
 	align-items: center;
-	gap: var(--space-3);
+	flex-wrap: wrap;
+	gap: var(--space-2) var(--space-3);
 	margin-left: auto;
 }
 
@@ -74,7 +77,7 @@
 	padding: 6px 6px 6px 13px;
 	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-pill);
-	font-size: var(--fs-sm);
+	font-size: var(--fs-base);
 }
 
 .app-header__session-live {
@@ -92,7 +95,7 @@
 .app-header__session .session-timer {
 	font-family: var(--font-mono);
 	color: var(--text-muted);
-	font-size: var(--fs-sm);
+	font-size: var(--fs-base);
 }
 
 .app-header__start-select,
@@ -129,7 +132,7 @@
 .nav-drawer {
 	position: fixed;
 	inset: 0;
-	z-index: 100;
+	z-index: 400;
 	display: flex;
 }
 

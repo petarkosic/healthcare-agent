@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import {
 	useGetPatientQuery,
 	useAddLabMutation,
-} from '../../store/api/patientsApi';
-import type { PatientFullResponse } from '../../types/types';
-import type { ResultStatus } from '../../types/enums';
-import { formatDate } from '../../utils/utils';
-import { Modal } from '../Modal/Modal';
+} from '../../../store/api/patientsApi';
+import type { PatientFullResponse } from '../../../types/types';
+import type { ResultStatus } from '../../../types/enums';
+import { formatDate } from '../../../utils/utils';
+import { Modal } from '../../Modal/Modal';
 import './Labs.css';
 
 type LabRow = PatientFullResponse['lab_results'][number];
@@ -95,11 +95,11 @@ export const Labs = () => {
 							}
 						>
 							<button
-								className='btn-primary'
+								className='btn btn--ghost btn--sm'
 								onClick={() => setIsModalOpen(true)}
 								disabled={!session}
 							>
-								Add Lab Result
+								+ Add
 							</button>
 						</span>
 					)}

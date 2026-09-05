@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import type { Visit } from '../../types/types';
-import { formatDateOnly } from '../../utils/utils';
+import type { Visit } from '../../../types/types';
+import { formatDateOnly } from '../../../utils/utils';
 import { useParams } from 'react-router';
-import { useAppSelector } from '../../store/hooks';
-import { useGetPatientQuery } from '../../store/api/patientsApi';
-import { VisitModal } from '../VisitModal/VisitModal';
-import { ScheduleVisitModal } from '../ScheduleVisitModal/ScheduleVisitModal';
-import { apiFetch, API_BASE } from '../../lib/api';
+import { useAppSelector } from '../../../store/hooks';
+import { useGetPatientQuery } from '../../../store/api/patientsApi';
+import { VisitModal } from '../../VisitModal/VisitModal';
+import { ScheduleVisitModal } from '../../ScheduleVisitModal/ScheduleVisitModal';
+import { apiFetch, API_BASE } from '../../../lib/api';
 import './Visits.css';
 
 export const Visits = () => {
@@ -83,11 +83,11 @@ export const Visits = () => {
 						}
 					>
 						<button
-							className='btn-schedule-visit'
+							className='btn btn--outline btn--sm'
 							onClick={() => setShowScheduleModal(true)}
 							disabled={!session}
 						>
-							Schedule Visit
+							+ Schedule visit
 						</button>
 					</span>
 				</div>

@@ -45,7 +45,7 @@
 }
 
 .page-loader p {
-	font-size: var(--fs-sm);
+	font-size: var(--fs-base);
 	color: var(--text-muted);
 	margin: 0;
 }

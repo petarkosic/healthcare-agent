@@ -1,22 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import './PatientProfile.css';
-import { useParams } from 'react-router';
-import { ProfileHeader } from '../../components/ProfileHeader/ProfileHeader';
-import { Allergies } from '../../components/Allergies/Allergies';
-import { Vitals } from '../../components/Vitals/Vitals';
-import { Medications } from '../../components/Medications/Medications';
-import { Notes } from '../../components/Notes/Notes';
-import { Labs } from '../../components/Labs/Labs';
-import { Diagnoses } from '../../components/Diagnoses/Diagnoses';
-import { Visits } from '../../components/Visits/Visits';
-import { Sidebar } from '../../components/Sidebar/Sidebar';
+import { Link, useParams } from 'react-router';
+import { ProfileHeader } from '../../components/patient/ProfileHeader/ProfileHeader';
+import { Allergies } from '../../components/patient/Allergies/Allergies';
+import { Vitals } from '../../components/patient/Vitals/Vitals';
+import { Medications } from '../../components/patient/Medications/Medications';
+import { Notes } from '../../components/patient/Notes/Notes';
+import { Labs } from '../../components/patient/Labs/Labs';
+import { Diagnoses } from '../../components/patient/Diagnoses/Diagnoses';
+import { Visits } from '../../components/patient/Visits/Visits';
+import { AIAssistant } from '../../components/patient/AIAssistant/AIAssistant';
+import { PageLoader } from '../../components/Spinner/PageLoader';
 import { useAppSelector } from '../../store/hooks';
 import { useGetPatientQuery } from '../../store/api/patientsApi';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 function PatientProfile() {
-	const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false);
-	const [sidebarError, setSidebarError] = useState<string | null>(null);
-
 	const { id: patient_serial } = useParams();
 	const session = useAppSelector((state) => state.session.session);
 
@@ -41,8 +40,13 @@ function PatientProfile() {
 		}
 	}, [session?.visitId, refetch]);
 
-	if (isLoading)
-		return <div className='loading-state'>Loading Patient Profile...</div>;
+	const patientName = data
+		? `${data.patient.first_name} ${data.patient.last_name}`
+		: 'Patient';
+
+	useDocumentTitle(patientName);
+
+	if (isLoading) return <PageLoader label='Loading patient profile…' />;
 
 	if (error)
 		return (
@@ -56,68 +60,40 @@ function PatientProfile() {
 
 	if (!data) return <div className='error-state'>Patient not found.</div>;
 
-	const sidebarOpen = !!session && isAiSidebarOpen;
-
 	return (
-		<div className={`app-wrapper ${sidebarOpen ? 'sidebar-open' : ''}`}>
-			<div className='profile-container'>
-				{!sidebarOpen && (
-					<button
-						className='ai-toggle-btn'
-						onClick={() => setIsAiSidebarOpen(!isAiSidebarOpen)}
-						disabled={!session}
-						data-tooltip={
-							!session ? 'Start a session to use AI Assistant' : undefined
-						}
-					>
-						<svg
-							width='24'
-							height='24'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						>
-							<path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'></path>
-						</svg>
-						<span>AI Assistant</span>
-					</button>
-				)}
-
-				<ProfileHeader data={data} />
-
-				<Allergies />
-
-				<div className='profile-grid'>
-					<Vitals />
-
-					<Medications />
-
-					<Notes />
-
-					<Labs />
-
-					<Diagnoses />
-
-					<Visits />
-				</div>
+		<div className='patient-profile'>
+			<div className='breadcrumb'>
+				<Link to='/patients'>Patients</Link>
+				<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
+					<path
+						d='M9 6l6 6-6 6'
+						stroke='currentColor'
+						strokeWidth='1.8'
+						strokeLinecap='round'
+						strokeLinejoin='round'
+					/>
+				</svg>
+				<span className='breadcrumb__here'>{patientName}</span>
 			</div>
 
-			<Sidebar
-				isAiSidebarOpen={sidebarOpen}
-				setIsAiSidebarOpen={setIsAiSidebarOpen}
-				setError={setSidebarError}
-			/>
-			{sidebarError && (
-				<div
-					className='error-state'
-					style={{ position: 'fixed', bottom: '1rem', right: '1rem' }}
-				>
-					{sidebarError}
+			<ProfileHeader data={data} />
+
+			<Allergies />
+
+			<div className='patient-profile__layout'>
+				<div className='patient-profile__grid'>
+					<Vitals />
+					<Medications />
+					<Notes />
+					<Labs />
+					<Diagnoses />
+					<Visits />
 				</div>
-			)}
+
+				<div className='patient-profile__side'>
+					<AIAssistant />
+				</div>
+			</div>
 		</div>
 	);
 }

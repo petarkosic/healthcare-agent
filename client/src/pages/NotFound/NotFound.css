@@ -28,7 +28,7 @@
 }
 
 .not-found__code {
-	font-size: var(--fs-md);
+	font-size: var(--fs-lg);
 	font-weight: var(--fw-medium);
 	letter-spacing: 0.14em;
 	color: var(--text-faint);
@@ -43,7 +43,7 @@
 }
 
 .not-found__body {
-	font-size: var(--fs-md);
+	font-size: var(--fs-lg);
 	color: var(--text-muted);
 	margin: 0 0 var(--space-6);
 	max-width: 42ch;

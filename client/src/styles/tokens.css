@@ -36,15 +36,16 @@
 		'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
 	--fs-xs: 11.5px;
-	--fs-sm: 13px;
-	--fs-base: 15px;
+	--fs-sm: 12.5px;
+	--fs-base: 14px;
 	--fs-md: 16px;
-	--fs-lg: 19px;
+	--fs-lg: 20px;
 	--fs-xl: 24px;
-	--fs-2xl: 26px;
+	--fs-2xl: 32px;
 	--fw-regular: 400;
 	--fw-medium: 500;
 	--fw-semibold: 600;
+	--fw-bold: 700;
 	--lh: 1.55;
 
 	/* space / shape */

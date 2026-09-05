@@ -50,7 +50,9 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 	const [createVisit] = useCreateVisitMutation();
 	const [updateVisit] = useUpdateVisitMutation();
 
-	const isPatientProfile = /^\/patients\/(?!new$)[^/]+$/.test(location.pathname);
+	const isPatientProfile = /^\/patients\/(?!new$)[^/]+$/.test(
+		location.pathname,
+	);
 
 	const [showTypeSelect, setShowTypeSelect] = useState(false);
 	const [selectedType, setSelectedType] = useState('checkup');
@@ -70,7 +72,8 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 			setSettingsOpen(true);
 		};
 		document.addEventListener('mediflow:open-settings', handler);
-		return () => document.removeEventListener('mediflow:open-settings', handler);
+		return () =>
+			document.removeEventListener('mediflow:open-settings', handler);
 	}, []);
 
 	useKeyboardShortcuts({
@@ -176,68 +179,66 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 	};
 
 	return (
-		<header className="app-header">
+		<header className='app-header'>
 			{isMobile ? (
 				<button
-					type="button"
-					className="app-header__icon-btn"
+					type='button'
+					className='app-header__icon-btn'
 					onClick={onOpenDrawer}
-					aria-label="Open navigation"
+					aria-label='Open navigation'
 				>
-					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+					<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
 						<path
-							d="M4 7h16M4 12h16M4 17h16"
-							stroke="currentColor"
-							strokeWidth="1.8"
-							strokeLinecap="round"
+							d='M4 7h16M4 12h16M4 17h16'
+							stroke='currentColor'
+							strokeWidth='1.8'
+							strokeLinecap='round'
 						/>
 					</svg>
 				</button>
 			) : (
 				<button
-					type="button"
-					className="app-header__icon-btn"
+					type='button'
+					className='app-header__icon-btn'
 					onClick={() => dispatch(toggleSidebar())}
-					aria-label={
-						sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-					}
+					aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 					title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 				>
-					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+					<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
 						<rect
-							x="3"
-							y="4.5"
-							width="18"
-							height="15"
-							rx="2.5"
-							stroke="currentColor"
-							strokeWidth="1.7"
+							x='3'
+							y='4.5'
+							width='18'
+							height='15'
+							rx='2.5'
+							stroke='currentColor'
+							strokeWidth='1.7'
 						/>
-						<path d="M9 4.5v15" stroke="currentColor" strokeWidth="1.7" />
+						<path d='M9 4.5v15' stroke='currentColor' strokeWidth='1.7' />
 						<path
 							d={
 								sidebarCollapsed
 									? 'M13 9.5l2.5 2.5L13 14.5'
 									: 'M16 9.5l-2.5 2.5 2.5 2.5'
 							}
-							stroke="currentColor"
-							strokeWidth="1.7"
-							strokeLinecap="round"
-							strokeLinejoin="round"
+							stroke='currentColor'
+							strokeWidth='1.7'
+							strokeLinecap='round'
+							strokeLinejoin='round'
 						/>
 					</svg>
 				</button>
 			)}
 
-			<div className="app-header__right">
+			<div className='app-header__right'>
 				{session ? (
 					showEndForm ? (
-						<div className="app-header__end-form">
-							<div className="app-header__end-input">
+						<div className='app-header__end-form'>
+							<div className='app-header__end-input'>
 								<input
-									type="text"
-									className="field"
-									placeholder="Main complaint…"
+									type='text'
+									className='field'
+									placeholder='Main complaint…'
 									value={chiefComplaint}
 									onChange={(e) => {
 										setChiefComplaint(e.target.value);
@@ -246,31 +247,31 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 									autoFocus
 								/>
 								{error && (
-									<span className="app-header__end-error">{error}</span>
+									<span className='app-header__end-error'>{error}</span>
 								)}
 							</div>
 							<button
-								className="btn btn--outline btn--sm"
+								className='btn btn--outline btn--sm'
 								onClick={handleCancelEnd}
 							>
 								Cancel
 							</button>
 							<button
-								className="btn btn--primary btn--sm"
+								className='btn btn--primary btn--sm'
 								onClick={handleConfirmEnd}
 							>
 								Save and end
 							</button>
 						</div>
 					) : (
-						<div className="app-header__session">
-							<span className="app-header__session-live" />
-							<span className="app-header__session-type">
+						<div className='app-header__session'>
+							<span className='app-header__session-live' />
+							<span className='app-header__session-type'>
 								{session.type} · {session.location}
 							</span>
 							<SessionTimer startTime={session.startTime} />
 							<button
-								className="btn btn--danger-outline btn--sm"
+								className='btn btn--danger-outline btn--sm'
 								onClick={() => setShowEndForm(true)}
 							>
 								End session
@@ -280,9 +281,9 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 				) : (
 					isPatientProfile &&
 					(showTypeSelect ? (
-						<div className="app-header__start-select">
+						<div className='app-header__start-select'>
 							<select
-								className="field"
+								className='field'
 								value={selectedType}
 								onChange={(e) => setSelectedType(e.target.value)}
 							>
@@ -293,7 +294,7 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 								))}
 							</select>
 							<select
-								className="field"
+								className='field'
 								value={selectedLocation}
 								onChange={(e) => setSelectedLocation(e.target.value)}
 							>
@@ -304,13 +305,13 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 								))}
 							</select>
 							<button
-								className="btn btn--outline btn--sm"
+								className='btn btn--outline btn--sm'
 								onClick={handleCancelSelect}
 							>
 								Cancel
 							</button>
 							<button
-								className="btn btn--primary btn--sm"
+								className='btn btn--primary btn--sm'
 								onClick={handleStartSession}
 							>
 								Start timer
@@ -318,33 +319,13 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 						</div>
 					) : (
 						<button
-							className="btn btn--primary btn--sm"
+							className='btn btn--primary btn--sm'
 							onClick={() => setShowTypeSelect(true)}
 						>
 							Start session
 						</button>
 					))
 				)}
-
-				<button
-					type="button"
-					className="app-header__bell"
-					aria-label="Notifications"
-				>
-					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-						<path
-							d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2.5H4.4z"
-							stroke="currentColor"
-							strokeWidth="1.6"
-							strokeLinejoin="round"
-						/>
-						<path
-							d="M10 19.5a2 2 0 0 0 4 0"
-							stroke="currentColor"
-							strokeWidth="1.6"
-						/>
-					</svg>
-				</button>
 			</div>
 
 			<SettingsModal

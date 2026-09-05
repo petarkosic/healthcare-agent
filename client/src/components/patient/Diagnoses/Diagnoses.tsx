@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
-import type { Diagnosis } from '../../types/types';
-import { useAppSelector } from '../../store/hooks';
-import { formatDate } from '../../utils/utils';
+import type { Diagnosis } from '../../../types/types';
+import { useAppSelector } from '../../../store/hooks';
+import { formatDate } from '../../../utils/utils';
 import {
 	useGetPatientQuery,
 	useAddDiagnosisMutation,
-} from '../../store/api/patientsApi';
-import type { DiagnosisType, DiagnosisStatus } from '../../types/enums';
-import { Modal } from '../Modal/Modal';
+} from '../../../store/api/patientsApi';
+import type { DiagnosisType, DiagnosisStatus } from '../../../types/enums';
+import { Modal } from '../../Modal/Modal';
 import './Diagnoses.css';
 
 export const Diagnoses = () => {
@@ -80,7 +80,7 @@ export const Diagnoses = () => {
 	return (
 		<>
 			{localError && <div className='error'>{localError}</div>}
-			<div className='card card-diagnoses'>
+			<div className='card card-diagnoses full-width'>
 				<div className='card-header-row'>
 					<h3>Diagnoses History</h3>
 					{doctorSerialNumber && (
@@ -91,11 +91,11 @@ export const Diagnoses = () => {
 							}
 						>
 							<button
-								className='btn-primary'
+								className='btn btn--ghost btn--sm'
 								onClick={() => setIsModalOpen(true)}
 								disabled={!session}
 							>
-								Add Diagnosis
+								+ Add
 							</button>
 						</span>
 					)}

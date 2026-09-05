@@ -1,0 +1,66 @@
+.vitals-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: var(--space-5);
+}
+
+.vital-box {
+	display: flex;
+	flex-direction: column;
+	border-bottom: 1px solid var(--border);
+	padding-bottom: var(--space-2);
+}
+
+.vital-box .label {
+	font-size: var(--fs-sm);
+	color: var(--text-muted);
+	letter-spacing: 0.05em;
+	position: relative;
+	cursor: default;
+}
+
+.vital-box .label:hover::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: calc(100% + 6px);
+	left: 0;
+	background: var(--surface);
+	color: var(--text);
+	border: 1px solid var(--border-strong);
+	padding: 0.35rem 0.6rem;
+	border-radius: var(--radius-sm);
+	font-size: var(--fs-sm);
+	white-space: nowrap;
+	z-index: 50;
+	box-shadow: var(--shadow-sm);
+}
+
+.vital-box .value {
+	font-size: var(--fs-2xl);
+	font-weight: var(--fw-semibold);
+	color: var(--text);
+}
+
+.vital-box .value small {
+	font-size: var(--fs-base);
+	color: var(--text-muted);
+	font-weight: var(--fw-regular);
+}
+
+.vital-box__stack {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+}
+
+@media (max-width: 480px) {
+	.vitals-grid {
+		grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+		gap: var(--space-4);
+	}
+
+	.vital-box__stack {
+		flex-direction: column;
+		gap: 2px;
+	}
+}

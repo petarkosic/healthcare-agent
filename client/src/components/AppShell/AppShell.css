@@ -73,11 +73,32 @@
 .app-header__session {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 6px 6px 6px 13px;
+	gap: 6px;
+	padding: 5px 5px 5px 6px;
 	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-pill);
 	font-size: var(--fs-base);
+}
+
+.app-header__session-open {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 3px 10px 3px 8px;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: var(--text);
+	border-radius: var(--radius-pill);
+	cursor: pointer;
+}
+
+.app-header__session-open:hover:not(:disabled) {
+	background: var(--surface-2);
+}
+
+.app-header__session-open:disabled {
+	cursor: default;
 }
 
 .app-header__session-live {

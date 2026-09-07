@@ -271,11 +271,22 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 						</div>
 					) : (
 						<div className='app-header__session'>
-							<span className='app-header__session-live' />
-							<span className='app-header__session-type'>
-								{session.type} · {session.location}
-							</span>
-							<SessionTimer startTime={session.startTime} />
+							<button
+								type='button'
+								className='app-header__session-open'
+								onClick={() =>
+									session.patientSerialNumber &&
+									navigate(`/patients/${session.patientSerialNumber}`)
+								}
+								disabled={!session.patientSerialNumber}
+								title='Open the active patient chart'
+							>
+								<span className='app-header__session-live' />
+								<span className='app-header__session-type'>
+									{session.type} · {session.location}
+								</span>
+								<SessionTimer startTime={session.startTime} />
+							</button>
 							<button
 								className='btn btn--danger-outline btn--sm app-header__end-btn'
 								onClick={() => setShowEndForm(true)}

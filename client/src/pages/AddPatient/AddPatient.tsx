@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { useAppDispatch } from '../../store/hooks';
 import { startSession } from '../../store/sessionSlice';
 import { useCreatePatientMutation } from '../../store/api/patientsApi';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import type { Gender, BloodType } from '../../types/enums';
 import './AddPatient.css';
 
@@ -26,6 +27,8 @@ export const AddPatient = () => {
 		emergency_contact_phone: '',
 	});
 	const [error, setError] = useState<string | null>(null);
+
+	useDocumentTitle('Add patient');
 
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
@@ -82,57 +85,79 @@ export const AddPatient = () => {
 
 	return (
 		<div className='add-patient-page'>
-			<div className='add-patient-header'>
-				<Link to='/patients' className='back-link'>
-					← Back to Patients
-				</Link>
-				<h2>Add New Patient</h2>
+			<div className='breadcrumb'>
+				<Link to='/patients'>Patients</Link>
+				<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
+					<path
+						d='M9 6l6 6-6 6'
+						stroke='currentColor'
+						strokeWidth='1.8'
+						strokeLinecap='round'
+						strokeLinejoin='round'
+					/>
+				</svg>
+				<span className='breadcrumb__here'>Add patient</span>
 			</div>
 
+			<h1 className='add-patient-title'>Add new patient</h1>
+			<p className='add-patient-sub'>
+				A visit is started automatically once the patient is created.
+			</p>
+
 			<form className='add-patient-form' onSubmit={handleSubmit}>
-				<fieldset className='form-section'>
-					<legend>Personal Information</legend>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='first_name'>First Name</label>
+				<fieldset className='card add-patient-section'>
+					<legend>Personal information</legend>
+					<div className='add-patient-grid'>
+						<div className='field-group'>
+							<label className='label' htmlFor='first_name'>
+								First name
+							</label>
 							<input
 								id='first_name'
 								name='first_name'
 								type='text'
+								className='field'
 								value={form.first_name}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='last_name'>Last Name</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='last_name'>
+								Last name
+							</label>
 							<input
 								id='last_name'
 								name='last_name'
 								type='text'
+								className='field'
 								value={form.last_name}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-					</div>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='date_of_birth'>Date of Birth</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='date_of_birth'>
+								Date of birth
+							</label>
 							<input
 								id='date_of_birth'
 								name='date_of_birth'
 								type='date'
+								className='field'
 								value={form.date_of_birth}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='gender'>Gender</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='gender'>
+								Gender
+							</label>
 							<select
 								id='gender'
 								name='gender'
+								className='field'
 								value={form.gender}
 								onChange={handleChange}
 								required
@@ -142,13 +167,14 @@ export const AddPatient = () => {
 								<option value='Female'>Female</option>
 							</select>
 						</div>
-					</div>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='blood_type'>Blood Type</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='blood_type'>
+								Blood type
+							</label>
 							<select
 								id='blood_type'
 								name='blood_type'
+								className='field'
 								value={form.blood_type}
 								onChange={handleChange}
 								required
@@ -161,12 +187,16 @@ export const AddPatient = () => {
 								))}
 							</select>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='known_allergies'>Known Allergies</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='known_allergies'>
+								Known allergies
+							</label>
 							<input
 								id='known_allergies'
 								name='known_allergies'
 								type='text'
+								className='field'
+								placeholder='Comma separated'
 								value={form.known_allergies}
 								onChange={handleChange}
 							/>
@@ -174,50 +204,60 @@ export const AddPatient = () => {
 					</div>
 				</fieldset>
 
-				<fieldset className='form-section'>
+				<fieldset className='card add-patient-section'>
 					<legend>Address</legend>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='street_number'>Street Number</label>
+					<div className='add-patient-grid'>
+						<div className='field-group'>
+							<label className='label' htmlFor='street_number'>
+								Street number
+							</label>
 							<input
 								id='street_number'
 								name='street_number'
 								type='text'
+								className='field'
 								value={form.street_number}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='street'>Street</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='street'>
+								Street
+							</label>
 							<input
 								id='street'
 								name='street'
 								type='text'
+								className='field'
 								value={form.street}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-					</div>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='city'>City</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='city'>
+								City
+							</label>
 							<input
 								id='city'
 								name='city'
 								type='text'
+								className='field'
 								value={form.city}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='country'>Country</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='country'>
+								Country
+							</label>
 							<input
 								id='country'
 								name='country'
 								type='text'
+								className='field'
 								value={form.country}
 								onChange={handleChange}
 								required
@@ -226,26 +266,32 @@ export const AddPatient = () => {
 					</div>
 				</fieldset>
 
-				<fieldset className='form-section'>
-					<legend>Contact Information</legend>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='email'>Email</label>
+				<fieldset className='card add-patient-section'>
+					<legend>Contact information</legend>
+					<div className='add-patient-grid'>
+						<div className='field-group'>
+							<label className='label' htmlFor='email'>
+								Email
+							</label>
 							<input
 								id='email'
 								name='email'
 								type='email'
+								className='field'
 								value={form.email}
 								onChange={handleChange}
 								required
 							/>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='phone'>Phone</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='phone'>
+								Phone
+							</label>
 							<input
 								id='phone'
 								name='phone'
 								type='tel'
+								className='field'
 								value={form.phone}
 								onChange={handleChange}
 								required
@@ -254,25 +300,31 @@ export const AddPatient = () => {
 					</div>
 				</fieldset>
 
-				<fieldset className='form-section'>
-					<legend>Emergency Contact</legend>
-					<div className='form-row'>
-						<div className='form-field'>
-							<label htmlFor='emergency_contact_name'>Name</label>
+				<fieldset className='card add-patient-section'>
+					<legend>Emergency contact</legend>
+					<div className='add-patient-grid'>
+						<div className='field-group'>
+							<label className='label' htmlFor='emergency_contact_name'>
+								Name
+							</label>
 							<input
 								id='emergency_contact_name'
 								name='emergency_contact_name'
 								type='text'
+								className='field'
 								value={form.emergency_contact_name}
 								onChange={handleChange}
 							/>
 						</div>
-						<div className='form-field'>
-							<label htmlFor='emergency_contact_phone'>Phone</label>
+						<div className='field-group'>
+							<label className='label' htmlFor='emergency_contact_phone'>
+								Phone
+							</label>
 							<input
 								id='emergency_contact_phone'
 								name='emergency_contact_phone'
 								type='tel'
+								className='field'
 								value={form.emergency_contact_phone}
 								onChange={handleChange}
 							/>
@@ -280,18 +332,18 @@ export const AddPatient = () => {
 					</div>
 				</fieldset>
 
-				{error && <div className='form-error'>{error}</div>}
+				{error && <div className='add-patient-error'>{error}</div>}
 
-				<div className='form-actions'>
-					<Link to='/patients' className='ap-btn-secondary'>
+				<div className='add-patient-actions'>
+					<Link to='/patients' className='btn btn--outline'>
 						Cancel
 					</Link>
 					<button
 						type='submit'
-						className='ap-btn-primary'
+						className='btn btn--primary'
 						disabled={submitting}
 					>
-						{submitting ? 'Adding...' : 'Add Patient'}
+						{submitting ? 'Adding…' : 'Add patient'}
 					</button>
 				</div>
 			</form>

@@ -86,11 +86,11 @@ export const Allergies = () => {
 						}
 					>
 						<button
-							className='allergy-edit-btn'
+							className='btn btn--ghost btn--sm'
 							onClick={openModal}
 							disabled={!session}
 						>
-							Edit
+							+ Add
 						</button>
 					</span>
 				)}

@@ -230,7 +230,13 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 				</button>
 			)}
 
-			<div className='app-header__right'>
+			<div
+				className={`app-header__right${
+					showEndForm || showTypeSelect
+						? ' app-header__right--expanded'
+						: ''
+				}`}
+			>
 				{session ? (
 					showEndForm ? (
 						<div className='app-header__end-form'>
@@ -271,7 +277,7 @@ export const AppHeader = ({ onOpenDrawer, isMobile }: AppHeaderProps) => {
 							</span>
 							<SessionTimer startTime={session.startTime} />
 							<button
-								className='btn btn--danger-outline btn--sm'
+								className='btn btn--danger-outline btn--sm app-header__end-btn'
 								onClick={() => setShowEndForm(true)}
 							>
 								End session

@@ -4,7 +4,7 @@
 }
 
 .lab-row-clickable:hover {
-	background: var(--surface-2);
+	background: var(--accent-wash);
 }
 
 .lab-readonly {

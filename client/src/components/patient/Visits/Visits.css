@@ -11,7 +11,7 @@
 }
 
 .visit-row-clickable:hover {
-	background: var(--surface-2);
+	background: var(--accent-wash);
 }
 
 .chief-complaint-tooltip {

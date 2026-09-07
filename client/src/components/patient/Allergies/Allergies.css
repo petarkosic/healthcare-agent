@@ -25,22 +25,6 @@
 	margin-right: var(--space-2);
 }
 
-.allergy-edit-btn {
-	background: var(--surface);
-	border: 1px solid var(--border-strong);
-	color: var(--text);
-	border-radius: var(--radius-sm);
-	padding: 0.3rem 0.75rem;
-	font-size: var(--fs-sm);
-	font-weight: var(--fw-medium);
-	cursor: pointer;
-	white-space: nowrap;
-}
-
-.allergy-edit-btn:hover {
-	background: var(--surface-2);
-}
-
 .allergy-chips {
 	display: flex;
 	flex-wrap: wrap;
@@ -96,12 +80,10 @@
 
 @media (max-width: 480px) {
 	.allergy-banner {
-		flex-direction: column;
-		align-items: flex-start;
 		gap: var(--space-3);
 	}
 
-	.allergy-edit-btn {
+	.allergy-banner .btn {
 		align-self: flex-start;
 	}
 }

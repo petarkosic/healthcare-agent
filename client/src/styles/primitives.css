@@ -25,12 +25,23 @@
 
 .btn--primary {
 	background: var(--ink);
-	color: #fff;
+	color: var(--surface);
+}
+
+.btn--primary:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--ink) 88%, var(--text-muted));
+	color: var(--surface);
 }
 
 .btn--outline {
 	background: var(--surface);
 	border-color: var(--border-strong);
+	color: var(--text);
+}
+
+.btn--outline:hover:not(:disabled) {
+	background: var(--surface-2);
+	border-color: var(--text-faint);
 	color: var(--text);
 }
 
@@ -40,9 +51,19 @@
 	padding: 0 var(--space-2);
 }
 
+.btn--ghost:hover:not(:disabled) {
+	background: var(--accent-wash);
+	color: var(--accent-ink);
+}
+
 .btn--danger-outline {
 	background: var(--surface);
 	border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
+	color: var(--danger);
+}
+
+.btn--danger-outline:hover:not(:disabled) {
+	background: var(--danger-wash);
 	color: var(--danger);
 }
 

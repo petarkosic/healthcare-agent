@@ -48,7 +48,7 @@ a {
 	text-decoration: none;
 }
 
-a:hover {
+a:not(.btn):hover {
 	color: var(--accent-ink);
 }
 

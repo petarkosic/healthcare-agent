@@ -22,7 +22,7 @@
 }
 
 .note-entry:hover {
-	background: color-mix(in srgb, var(--surface-2) 60%, var(--border));
+	background: var(--accent-wash);
 }
 
 .note-header {

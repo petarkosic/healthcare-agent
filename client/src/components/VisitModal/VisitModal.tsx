@@ -27,10 +27,7 @@ type VisitModalProps = {
 
 type View = 'details' | 'reschedule';
 
-export const VisitModal = ({
-	visit,
-	onClose,
-}: VisitModalProps) => {
+export const VisitModal = ({ visit, onClose }: VisitModalProps) => {
 	const minDate = (() => {
 		const d = new Date();
 

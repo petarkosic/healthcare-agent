@@ -198,8 +198,11 @@ export const Vitals = () => {
 				>
 					<form onSubmit={handleSubmit}>
 						<div className='form-group'>
-							<label>Systolic BP (mmHg)</label>
+							<label htmlFor='blood_pressure_systolic'>
+								Systolic BP (mmHg)
+							</label>
 							<input
+								id='blood_pressure_systolic'
 								type='number'
 								name='blood_pressure_systolic'
 								value={form.blood_pressure_systolic}
@@ -210,8 +213,11 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Diastolic BP (mmHg)</label>
+							<label htmlFor='blood_pressure_diastolic'>
+								Diastolic BP (mmHg)
+							</label>
 							<input
+								id='blood_pressure_diastolic'
 								type='number'
 								name='blood_pressure_diastolic'
 								value={form.blood_pressure_diastolic}
@@ -222,8 +228,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Heart Rate (bpm)</label>
+							<label htmlFor='heart_rate'>Heart Rate (bpm)</label>
 							<input
+								id='heart_rate'
 								type='number'
 								name='heart_rate'
 								value={form.heart_rate}
@@ -234,8 +241,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Temperature (°C)</label>
+							<label htmlFor='temperature'>Temperature (°C)</label>
 							<input
+								id='temperature'
 								type='number'
 								step='0.1'
 								name='temperature'
@@ -247,8 +255,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Respiratory Rate</label>
+							<label htmlFor='respiratory_rate'>Respiratory Rate</label>
 							<input
+								id='respiratory_rate'
 								type='number'
 								name='respiratory_rate'
 								value={form.respiratory_rate}
@@ -259,8 +268,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Oxygen Saturation (%)</label>
+							<label htmlFor='oxygen_saturation'>Oxygen Saturation (%)</label>
 							<input
+								id='oxygen_saturation'
 								type='number'
 								step='0.1'
 								name='oxygen_saturation'
@@ -272,8 +282,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Weight (kg)</label>
+							<label htmlFor='weight_kg'>Weight (kg)</label>
 							<input
+								id='weight_kg'
 								type='number'
 								step='0.1'
 								name='weight_kg'
@@ -283,8 +294,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Height (cm)</label>
+							<label htmlFor='height_cm'>Height (cm)</label>
 							<input
+								id='height_cm'
 								type='number'
 								step='0.1'
 								name='height_cm'
@@ -294,8 +306,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Pain Level (0–10)</label>
+							<label htmlFor='pain_level'>Pain Level (0–10)</label>
 							<input
+								id='pain_level'
 								type='number'
 								name='pain_level'
 								value={form.pain_level}
@@ -306,8 +319,9 @@ export const Vitals = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Notes (optional)</label>
+							<label htmlFor='notes'>Notes (optional)</label>
 							<textarea
+								id='notes'
 								name='notes'
 								value={form.notes}
 								onChange={handleChange}

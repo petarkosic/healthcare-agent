@@ -230,8 +230,9 @@ export const Medications = () => {
 					{session ? (
 						<form onSubmit={handleEditSubmit}>
 							<div className='form-group'>
-								<label>Dosage</label>
+								<label htmlFor='edit-dosage'>Dosage</label>
 								<input
+									id='edit-dosage'
 									name='dosage'
 									value={editForm.dosage}
 									onChange={handleEditChange}
@@ -241,8 +242,9 @@ export const Medications = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Frequency</label>
+								<label htmlFor='edit-frequency'>Frequency</label>
 								<input
+									id='edit-frequency'
 									name='frequency'
 									value={editForm.frequency}
 									onChange={handleEditChange}
@@ -252,8 +254,9 @@ export const Medications = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Status</label>
+								<label htmlFor='edit-status'>Status</label>
 								<select
+									id='edit-status'
 									name='status'
 									value={editForm.status}
 									onChange={handleEditChange}
@@ -266,8 +269,9 @@ export const Medications = () => {
 								</select>
 							</div>
 							<div className='form-group'>
-								<label>End Date (optional)</label>
+								<label htmlFor='edit-end_date'>End Date (optional)</label>
 								<input
+									id='edit-end_date'
 									type='date'
 									name='end_date'
 									value={editForm.end_date}
@@ -276,8 +280,9 @@ export const Medications = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Prescribed For</label>
+								<label htmlFor='edit-prescribed_for'>Prescribed For</label>
 								<input
+									id='edit-prescribed_for'
 									name='prescribed_for'
 									value={editForm.prescribed_for}
 									onChange={handleEditChange}
@@ -286,8 +291,9 @@ export const Medications = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Instructions</label>
+								<label htmlFor='edit-instructions'>Instructions</label>
 								<textarea
+									id='edit-instructions'
 									name='instructions'
 									value={editForm.instructions}
 									onChange={handleEditChange}
@@ -393,8 +399,9 @@ export const Medications = () => {
 				>
 					<form onSubmit={handleAddSubmit}>
 						<div className='form-group'>
-							<label>Medication Name</label>
+							<label htmlFor='add-medication_name'>Medication Name</label>
 							<input
+								id='add-medication_name'
 								name='medication_name'
 								value={addForm.medication_name}
 								onChange={handleAddChange}
@@ -403,8 +410,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Generic Name</label>
+							<label htmlFor='add-generic_name'>Generic Name</label>
 							<input
+								id='add-generic_name'
 								name='generic_name'
 								value={addForm.generic_name}
 								onChange={handleAddChange}
@@ -413,8 +421,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Dosage</label>
+							<label htmlFor='add-dosage'>Dosage</label>
 							<input
+								id='add-dosage'
 								name='dosage'
 								value={addForm.dosage}
 								onChange={handleAddChange}
@@ -424,8 +433,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Frequency</label>
+							<label htmlFor='add-frequency'>Frequency</label>
 							<input
+								id='add-frequency'
 								name='frequency'
 								value={addForm.frequency}
 								onChange={handleAddChange}
@@ -435,8 +445,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Start Date</label>
+							<label htmlFor='add-start_date'>Start Date</label>
 							<input
+								id='add-start_date'
 								type='date'
 								name='start_date'
 								value={addForm.start_date}
@@ -446,8 +457,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>End Date (optional)</label>
+							<label htmlFor='add-end_date'>End Date (optional)</label>
 							<input
+								id='add-end_date'
 								type='date'
 								name='end_date'
 								value={addForm.end_date}
@@ -456,8 +468,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Prescribed For</label>
+							<label htmlFor='add-prescribed_for'>Prescribed For</label>
 							<input
+								id='add-prescribed_for'
 								name='prescribed_for'
 								value={addForm.prescribed_for}
 								onChange={handleAddChange}
@@ -466,8 +479,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Instructions</label>
+							<label htmlFor='add-instructions'>Instructions</label>
 							<textarea
+								id='add-instructions'
 								name='instructions'
 								value={addForm.instructions}
 								onChange={handleAddChange}
@@ -477,8 +491,9 @@ export const Medications = () => {
 							/>
 						</div>
 						<div className='form-group'>
-							<label>Status</label>
+							<label htmlFor='add-status'>Status</label>
 							<select
+								id='add-status'
 								name='status'
 								value={addForm.status}
 								onChange={handleAddChange}

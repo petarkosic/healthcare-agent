@@ -148,8 +148,9 @@ export const Labs = () => {
 				>
 					<form onSubmit={handleSubmit}>
 							<div className='form-group'>
-								<label>Test Name</label>
+								<label htmlFor='test_name'>Test Name</label>
 								<input
+									id='test_name'
 									name='test_name'
 									value={form.test_name}
 									onChange={handleChange}
@@ -158,8 +159,9 @@ export const Labs = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Result Value</label>
+								<label htmlFor='result_value'>Result Value</label>
 								<input
+									id='result_value'
 									name='result_value'
 									value={form.result_value}
 									onChange={handleChange}
@@ -168,8 +170,9 @@ export const Labs = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Unit (optional)</label>
+								<label htmlFor='unit'>Unit (optional)</label>
 								<input
+									id='unit'
 									name='unit'
 									value={form.unit}
 									onChange={handleChange}
@@ -178,8 +181,9 @@ export const Labs = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Reference Range</label>
+								<label htmlFor='reference_range'>Reference Range</label>
 								<input
+									id='reference_range'
 									name='reference_range'
 									value={form.reference_range}
 									onChange={handleChange}
@@ -189,8 +193,9 @@ export const Labs = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Status</label>
+								<label htmlFor='result_status'>Status</label>
 								<select
+									id='result_status'
 									name='result_status'
 									value={form.result_status}
 									onChange={handleChange}
@@ -203,8 +208,9 @@ export const Labs = () => {
 								</select>
 							</div>
 							<div className='form-group'>
-								<label>Test Date &amp; Time</label>
+								<label htmlFor='tested_date'>Test Date &amp; Time</label>
 								<input
+									id='tested_date'
 									type='datetime-local'
 									name='tested_date'
 									value={form.tested_date}
@@ -214,8 +220,9 @@ export const Labs = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Received Date &amp; Time</label>
+								<label htmlFor='received_date'>Received Date &amp; Time</label>
 								<input
+									id='received_date'
 									type='datetime-local'
 									name='received_date'
 									value={form.received_date}

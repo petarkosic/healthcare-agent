@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useModalA11y } from '../../hooks/useModalA11y';
+import './Modal.css';
 
 type ModalProps = {
 	title: string;

@@ -138,7 +138,7 @@ export const AuthModal = () => {
 
 	return (
 		<div
-			className='modal-overlay'
+			className='auth-overlay'
 			ref={overlayRef}
 			onClick={handleOverlayClick}
 		>

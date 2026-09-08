@@ -125,9 +125,10 @@ export const Allergies = () => {
 								</div>
 							</div>
 							<div className='form-group'>
-								<label>Add Allergy</label>
+								<label htmlFor='allergy_entry'>Add Allergy</label>
 								<div className='allergy-input-row'>
 									<input
+										id='allergy_entry'
 										value={newEntry}
 										onChange={(e) => setNewEntry(e.target.value)}
 										onKeyDown={handleKeyDown}

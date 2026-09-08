@@ -113,8 +113,9 @@ export const Notes = () => {
 				>
 					<form onSubmit={handleAddNote}>
 						<div className='form-group'>
-							<label>Note Type</label>
+							<label htmlFor='note_type'>Note Type</label>
 							<select
+								id='note_type'
 								value={newNoteType}
 								onChange={(e) => setNewNoteType(e.target.value)}
 								disabled={isSubmitting}
@@ -128,8 +129,9 @@ export const Notes = () => {
 							</select>
 						</div>
 						<div className='form-group'>
-							<label>Note Details</label>
+							<label htmlFor='note_text'>Note Details</label>
 							<textarea
+								id='note_text'
 								rows={6}
 								value={newNoteText}
 								onChange={(e) => setNewNoteText(e.target.value)}

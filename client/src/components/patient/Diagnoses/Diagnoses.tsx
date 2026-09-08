@@ -132,8 +132,9 @@ export const Diagnoses = () => {
 				>
 					<form onSubmit={handleSubmit}>
 							<div className='form-group'>
-								<label>ICD-10 Code</label>
+								<label htmlFor='diagnosis_code'>ICD-10 Code</label>
 								<input
+									id='diagnosis_code'
 									name='diagnosis_code'
 									value={form.diagnosis_code}
 									onChange={handleChange}
@@ -143,8 +144,9 @@ export const Diagnoses = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Diagnosis Name</label>
+								<label htmlFor='diagnosis_name'>Diagnosis Name</label>
 								<input
+									id='diagnosis_name'
 									name='diagnosis_name'
 									value={form.diagnosis_name}
 									onChange={handleChange}
@@ -153,8 +155,9 @@ export const Diagnoses = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Type</label>
+								<label htmlFor='diagnosis_type'>Type</label>
 								<select
+									id='diagnosis_type'
 									name='diagnosis_type'
 									value={form.diagnosis_type}
 									onChange={handleChange}
@@ -167,8 +170,9 @@ export const Diagnoses = () => {
 								</select>
 							</div>
 							<div className='form-group'>
-								<label>Status</label>
+								<label htmlFor='status'>Status</label>
 								<select
+									id='status'
 									name='status'
 									value={form.status}
 									onChange={handleChange}
@@ -180,8 +184,9 @@ export const Diagnoses = () => {
 								</select>
 							</div>
 							<div className='form-group'>
-								<label>Diagnosed Date &amp; Time</label>
+								<label htmlFor='diagnosed_date'>Diagnosed Date &amp; Time</label>
 								<input
+									id='diagnosed_date'
 									type='datetime-local'
 									name='diagnosed_date'
 									value={form.diagnosed_date}
@@ -191,8 +196,11 @@ export const Diagnoses = () => {
 								/>
 							</div>
 							<div className='form-group'>
-								<label>Resolved Date &amp; Time (optional)</label>
+								<label htmlFor='resolved_date'>
+									Resolved Date &amp; Time (optional)
+								</label>
 								<input
+									id='resolved_date'
 									type='datetime-local'
 									name='resolved_date'
 									value={form.resolved_date}

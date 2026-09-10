@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink as RouterNavLink, useNavigate } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { toggleTheme } from '../../store/uiSlice';
 import { logoutUser } from '../../store/authSlice';
 import { getInitials } from '../../utils/utils';
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 import { NAV_LINKS } from './navLinks';
 import './NavSidebar.css';
 
@@ -46,7 +46,6 @@ export const NavSidebar = ({
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
 	const collapsed = useAppSelector((s) => s.ui.sidebarCollapsed) && !asDrawer;
-	const theme = useAppSelector((s) => s.ui.theme);
 	const doctorName = useAppSelector((s) => s.auth.doctorName);
 	const doctorSerial = useAppSelector((s) => s.auth.doctorSerialNumber);
 
@@ -154,46 +153,7 @@ export const NavSidebar = ({
 							</span>
 						)}
 					</button>
-					{!collapsed && (
-						<button
-							type='button'
-							className='nav-sidebar__cog'
-							onClick={() => dispatch(toggleTheme())}
-							aria-label={
-								theme === 'dark'
-									? 'Switch to light mode'
-									: 'Switch to dark mode'
-							}
-							title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
-						>
-							{theme === 'dark' ? (
-								<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
-									<circle
-										cx='12'
-										cy='12'
-										r='4.2'
-										stroke='currentColor'
-										strokeWidth='1.6'
-									/>
-									<path
-										d='M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7'
-										stroke='currentColor'
-										strokeWidth='1.6'
-										strokeLinecap='round'
-									/>
-								</svg>
-							) : (
-								<svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
-									<path
-										d='M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z'
-										stroke='currentColor'
-										strokeWidth='1.6'
-										strokeLinejoin='round'
-									/>
-								</svg>
-							)}
-						</button>
-					)}
+					{!collapsed && <ThemeToggle className='nav-sidebar__cog' />}
 				</div>
 
 				{menuOpen && (

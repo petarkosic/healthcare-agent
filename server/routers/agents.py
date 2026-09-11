@@ -19,10 +19,11 @@ from guardrails import (
     generate_overview,
     generate_recommendations,
 )
-from models.agents import FollowUpRequest
+from models.agents import CreateCalendarEventArgs, FollowUpRequest, ScheduleVisitDbArgs
 from utils.auth import CurrentDoctor, get_current_doctor
 from utils.authz import verify_patient_access
 from utils.openai_client import openai_client, LLM_MODEL_NAME
+from pydantic import ValidationError
 from rag.rag_service import rag_service as rag
 from models.agents import AIOverviewResponse, OverviewPromptResponse
 from utils.cache import cache
@@ -526,26 +527,40 @@ def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: Current
         if tool_calls:
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
-                arguments = json.loads(tool_call.function.arguments)
+
+                try:
+                    raw_arguments = json.loads(tool_call.function.arguments)
+                except json.JSONDecodeError as exc:
+                    raise HTTPException(status_code=422, detail=f"Invalid tool arguments from model: {exc}")
 
                 if function_name == "schedule_visit_db":
+                    try:
+                        args = ScheduleVisitDbArgs.model_validate(raw_arguments)
+                    except ValidationError as exc:
+                        raise HTTPException(status_code=422, detail=f"Invalid schedule_visit_db arguments: {exc}")
+
                     result = schedule_visit_db(
                         patient_serial_number=follow_up.patient_serial_number,
                         doctor_serial_number=doctor.serial,
                         visit_date=follow_up.visit_date,
                         visit_type=follow_up.visit_type,
-                        chief_complaint=arguments.get("chief_complaint"),
-                        duration_minutes=arguments.get("duration_minutes", 30),
+                        chief_complaint=args.chief_complaint,
+                        duration_minutes=args.duration_minutes,
                     )
                     results.append({"tool": "schedule_visit_db", "result": result})
 
                 elif function_name == "create_calendar_event":
+                    try:
+                        args = CreateCalendarEventArgs.model_validate(raw_arguments)
+                    except ValidationError as exc:
+                        raise HTTPException(status_code=422, detail=f"Invalid create_calendar_event arguments: {exc}")
+
                     result = create_calendar_event_for_doctor(
                         doctor_serial=doctor.serial,
-                        summary=arguments.get("summary"),
-                        start_time=arguments.get("start_time"),
-                        end_time=arguments.get("end_time"),
-                        description=arguments.get("description") or "",
+                        summary=args.summary,
+                        start_time=follow_up.start_time,
+                        end_time=follow_up.end_time,
+                        description=follow_up.description or args.description,
                     )
                     results.append({"tool": "create_calendar_event", "result": result})
 
@@ -555,6 +570,8 @@ def schedule_visit(request: Request, follow_up: FollowUpRequest, doctor: Current
             "tools_executed": results,
         }
 
+    except HTTPException:
+        raise
     except Exception:
         logger.exception("Error scheduling follow-up visit")
         raise HTTPException(status_code=500, detail="Error scheduling visit")

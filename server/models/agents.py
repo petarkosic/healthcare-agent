@@ -91,3 +91,14 @@ class FollowUpRequest(BaseModel):
 	start_time: str = Field(description='Start time in ISO 8601 format')
 	end_time: str = Field(description='End time in ISO 8601 format')
 	description: str = Field(default='', description='Visit description')
+
+class ScheduleVisitDbArgs(BaseModel):
+    """(patient/doctor serials, visit_date, visit_type) is forced from the
+    already-validated FollowUpRequest, never read from the model's output."""
+    chief_complaint: str = Field(max_length=500)
+    duration_minutes: int = Field(default=30, ge=5, le=240)
+
+class CreateCalendarEventArgs(BaseModel):
+    """start_time/end_time are forced from FollowUpRequest, never read from the model's output."""
+    summary: str = Field(max_length=200)
+    description: str = Field(default='', max_length=2000)

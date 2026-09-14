@@ -181,6 +181,12 @@ def get_or_generate_overview(patient_serial: str) -> dict:
 
     ai_overview = apply_alert_floor(ai_overview, patient_data)
 
+    patient_full_name = patient_data.get("full_name")
+    if patient_full_name:
+        leaks = check_name_leak(ai_overview, patient_full_name)
+        if leaks:
+            logger.warning("Overview for patient %s leaked name parts: %s", patient_serial, leaks)
+
     result = {
         "patient_serial": patient_serial,
         "ai_overview": ai_overview.model_dump(),
@@ -624,4 +630,6 @@ def build_prompt(pg_data: dict, chroma_context: list) -> OverviewPromptResponse:
             - Overview must be a summary of the patient's last visit, previous visit notes, any relevant medications and any critical alerts.
             - Critical alerts must be a list of alerts that require immediate attention, such as pain, fever, or blood pressure.
             - Suggested questions must be a list of questions that the doctor could ask the patient to better understand the patient's condition.
+            - Do NOT include the patient's name or other identifiers (address, phone, email) anywhere in your response — refer to the patient generically (e.g. "the patient").
+            - When characterizing a vital sign or lab result (e.g. "elevated", "stable", "above reference range"), always cite the specific value alongside the characterization (e.g. "blood pressure 145/91 is elevated", "HbA1c 7.8% is above the reference range"). Never make an uncited blanket judgment like "vitals were stable" — name every value that judgment is based on.
             """

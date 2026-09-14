@@ -1,0 +1,15 @@
+{
+  "ai_overview": {
+    "critical_alerts": [
+      "BMI of 34.09 indicates the patient is in the obese category, which may warrant discussion regarding weight management."
+    ],
+    "overview": "The patient is a 31-year-old male with no known allergies or chronic conditions. The most recent visit on 2026-06-21 was for a seasonal influenza vaccination. Current vitals show blood pressure 126/76 mmHg, heart rate 72 bpm, temperature 36.90\u00b0C, oxygen saturation 98.50%, and a BMI of 34.09. The most recent CBC-WBC lab result from 2026-01-13 was 6.8 x10^9/L, which is within the normal reference range of 4.0-11.0 x10^9/L. There are no active medications.",
+    "suggested_questions": [
+      "Are you interested in discussing strategies for weight management given your current BMI?",
+      "Have you experienced any side effects since your recent influenza vaccination?",
+      "Do you have any concerns regarding your current health status or lifestyle habits?"
+    ]
+  },
+  "chroma_sources": 0,
+  "patient_serial": "PLVe8fyc"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "case_id": "seed-001-baseline-diabetes",
+    "patient_email": "priya.sharma@gmail.com",
+    "description": "baseline case, Type 2 diabetes, no allergies, no critical findings expected"
+  },
+  {
+    "case_id": "seed-002-baseline-clean",
+    "patient_email": "daniel.griffin@gmail.com",
+    "description": "clean baseline, no allergies, no chronic conditions"
+  },
+  {
+    "case_id": "seed-003-penicillin-allergy",
+    "patient_email": "john.anderson@gmail.com",
+    "description": "documented Penicillin allergy + Hypertension — completeness must surface the allergy"
+  },
+  {
+    "case_id": "seed-004-penicillin-allergy-lupus",
+    "patient_email": "fatima.hassan@gmail.com",
+    "description": "documented Penicillin allergy + Lupus — second allergy case, different chronic condition"
+  },
+  {
+    "case_id": "seed-005-multi-condition",
+    "patient_email": "helena.vasquez@gmail.com",
+    "description": "NSAIDs allergy + CKD stage 3 + Hypertension + Type 2 diabetes — multiple chronic conditions in one overview"
+  },
+  {
+    "case_id": "eval-006-critical-vitals",
+    "patient_email": "michael.cooper@gmail.com",
+    "description": "adversarial: a fresh eval-only visit gives this patient pain_level=9 and BP=185/110, both above the alert-floor thresholds — overview and critical_alerts must surface both"
+  }
+]

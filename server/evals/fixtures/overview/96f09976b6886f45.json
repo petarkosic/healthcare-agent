@@ -1,0 +1,16 @@
+{
+  "ai_overview": {
+    "critical_alerts": [
+      "HbA1c 7.8% is above the reference range, indicating suboptimal glycemic control."
+    ],
+    "overview": "The patient is a 41-year-old female with type 2 diabetes currently managed with Sitagliptin 100mg daily and Metformin 1000mg twice daily. During the most recent follow-up on September 12, 2026, vitals were recorded as blood pressure 120/79 mmHg, heart rate 81 bpm, temperature 36.70\u00b0C, oxygen saturation 97.90%, and BMI 26.89. The most recent HbA1c lab result from January 28, 2026, was 7.8%, which is above the reference range of 4.0-5.6%.",
+    "suggested_questions": [
+      "How have you been managing your blood glucose levels since your last HbA1c test in January?",
+      "Are you experiencing any side effects from your current regimen of Metformin and Sitagliptin?",
+      "Have you noticed any symptoms of hyperglycemia or hypoglycemia recently?",
+      "What challenges are you currently facing in adhering to your diabetes management plan?"
+    ]
+  },
+  "chroma_sources": 0,
+  "patient_serial": "P54fwjss"
+}

@@ -14,6 +14,14 @@ class PatientRepository(BaseRepository):
 
         return PatientBase(**results[0]) if results else None
 
+    def get_patient_by_email(self, email: str) -> Optional[PatientBase]:
+        results = self._execute_query(
+            "SELECT * FROM patients WHERE email = %s",
+            (email,),
+        )
+
+        return PatientBase(**results[0]) if results else None
+
     def get_patient_full(self, patient_serial_number: str) -> Optional[PatientFullResponse]:
         with self.db_manager.get_connection() as conn:
             with conn.cursor() as cur:

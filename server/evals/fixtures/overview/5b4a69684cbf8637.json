@@ -1,0 +1,18 @@
+{
+  "ai_overview": {
+    "critical_alerts": [
+      "Blood pressure 185/110 mmHg is severely elevated (hypertensive crisis range).",
+      "Pain level 9 indicates severe distress.",
+      "HbA1c 8.1% is above the reference range, indicating suboptimal glycemic control."
+    ],
+    "overview": "The patient is a 45-year-old male with type 2 diabetes managed by insulin glargine (10 units daily) and metformin (500mg twice daily). During the most recent checkup on September 12, 2026, the patient reported a pain level of 9. Clinical findings include a significantly elevated blood pressure of 185/110 mmHg and a heart rate of 98 bpm. Previous laboratory results from January 2026 indicate an HbA1c of 8.1%, which is above the reference range of 4.0-5.6%.",
+    "suggested_questions": [
+      "Are you currently experiencing any symptoms such as chest pain, shortness of breath, severe headache, or vision changes?",
+      "What is the primary source and nature of your current pain level of 9?",
+      "Have you been consistently adhering to your prescribed insulin and metformin regimen?",
+      "Have you noticed any recent changes in your blood glucose readings at home?"
+    ]
+  },
+  "chroma_sources": 0,
+  "patient_serial": "PMtD9i51"
+}

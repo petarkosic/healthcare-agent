@@ -1,0 +1,17 @@
+{
+  "ai_overview": {
+    "critical_alerts": [
+      "ANA titer 1:320 is abnormal and above the reference range of <1:40",
+      "Known allergy to Penicillin"
+    ],
+    "overview": "The patient is a 48-year-old female with a history of lupus, currently managed with Prednisone 10mg daily and Hydroxychloroquine 200mg twice daily. During the most recent follow-up on July 9, 2026, the patient's vitals were blood pressure 123/69, heart rate 84 bpm, temperature 37.10\u00b0C, oxygen saturation 98.30%, and BMI 27.13. The patient reported a pain level of 1. A previous ANA titer test from February 2026 showed an abnormal result of 1:320, which is above the reference range of <1:40.",
+    "suggested_questions": [
+      "How have you been feeling since starting the steroid taper?",
+      "Are you experiencing any new joint pain, skin rashes, or increased fatigue?",
+      "Have you noticed any side effects from your current dosage of Prednisone or Hydroxychloroquine?",
+      "Are you experiencing any symptoms that you believe might be related to your lupus?"
+    ]
+  },
+  "chroma_sources": 0,
+  "patient_serial": "PyZEdn27"
+}

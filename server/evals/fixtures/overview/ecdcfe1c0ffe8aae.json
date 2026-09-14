@@ -1,0 +1,17 @@
+{
+  "ai_overview": {
+    "critical_alerts": [
+      "Blood pressure 145/91 is elevated despite the recent Amlodipine dose increase.",
+      "LDL cholesterol 152 mg/dL is above the reference range of <100 mg/dL."
+    ],
+    "overview": "The patient is a 47-year-old male with hypertension currently managed with Lisinopril 10mg and Amlodipine 5mg daily. During the most recent checkup on 2026-09-12, the patient presented for a blood pressure recheck following an Amlodipine dose increase. Current vitals show blood pressure 145/91 is elevated, heart rate 75 is within normal limits, temperature 37.30\u00b0C is normal, oxygen saturation 97.50% is normal, and BMI 28.20 is in the overweight range. A previous lipid panel from 2025-12-26 showed LDL 152 mg/dL, which is above the reference range of <100 mg/dL. The patient has a known allergy to Penicillin.",
+    "suggested_questions": [
+      "Are you experiencing any side effects from the increased dose of Amlodipine, such as dizziness or ankle swelling?",
+      "How consistently have you been taking your Lisinopril and Amlodipine as prescribed?",
+      "Have you made any recent changes to your diet or exercise routine to address the elevated LDL cholesterol levels?",
+      "Do you monitor your blood pressure at home, and if so, what are your typical readings?"
+    ]
+  },
+  "chroma_sources": 0,
+  "patient_serial": "P5Ai5d6y"
+}

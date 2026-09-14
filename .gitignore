@@ -2,6 +2,7 @@
 .env
 /postgres-data
 /**/*__pycache__
+/**/*.pytest_cache
 /**/*chroma_db
 /**/*credentials.json
 /**/*token.json

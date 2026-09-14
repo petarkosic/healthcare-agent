@@ -1,0 +1,16 @@
+{
+  "ai_overview": {
+    "critical_alerts": [
+      "Potassium level of 5.4 mEq/L is above the reference range of 3.5-5.0 mEq/L."
+    ],
+    "overview": "The patient is a 70-year-old female with chronic kidney disease stage 3, hypertension, and type 2 diabetes. During the recent follow-up visit, the patient's blood pressure was 136/89 mmHg, heart rate was 86 bpm, temperature was 37.10\u00b0C, oxygen saturation was 97.60%, and BMI was 36.89. Current medications include Furosemide 40mg, Lisinopril 20mg, and Insulin Glargine 15 units daily. The patient has a known allergy to NSAIDs.",
+    "suggested_questions": [
+      "Are you experiencing any muscle weakness, palpitations, or tingling sensations?",
+      "Have you noticed any changes in your urine output or swelling in your legs?",
+      "Are you strictly adhering to a low-potassium diet as previously discussed?",
+      "Have you taken any over-the-counter medications or supplements recently?"
+    ]
+  },
+  "chroma_sources": 0,
+  "patient_serial": "PY2U5PoF"
+}

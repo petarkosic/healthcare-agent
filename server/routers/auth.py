@@ -6,9 +6,15 @@ from fastapi.responses import JSONResponse
 
 from db.database import db_manager
 from models.auth import AuthResponse, LoginRequest, MeResponse, SignUpRequest
-from utils.auth import CurrentDoctor, create_token, get_current_doctor, hash_password, verify_password
-from utils.csrf import generate_csrf_token
-from utils.limiter import limiter
+from utils import (
+    CurrentDoctor,
+    create_token,
+    generate_csrf_token,
+    get_current_doctor,
+    hash_password,
+    limiter,
+    verify_password,
+)
 
 logger = logging.getLogger(__name__)
 

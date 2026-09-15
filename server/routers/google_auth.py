@@ -12,8 +12,7 @@ from jose import JWTError, jwt
 from google_auth_oauthlib.flow import Flow
 
 from db.database import db_manager
-from utils.auth import CurrentDoctor, get_current_doctor
-from utils.crypto import encrypt_token
+from utils import CurrentDoctor, encrypt_token, get_current_doctor
 
 logger = logging.getLogger(__name__)
 

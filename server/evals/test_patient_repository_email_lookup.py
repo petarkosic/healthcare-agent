@@ -1,4 +1,4 @@
-from repositories.patient_repository import patient_repository
+from repositories import patient_repository
 
 
 def test_get_patient_by_email_returns_seeded_patient():

@@ -3,16 +3,10 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
-from repositories.patient_repository import patient_repository
-from services.agent_service import agent_service
-from rag.rag_service import rag_service as rag
-from routers.agents import (
-    build_medications_prompt,
-    build_prompt,
-    generate_medications_for_patient,
-    get_or_generate_overview,
-)
-from utils.cache import cache
+from repositories import patient_repository
+from services import agent_service
+from rag import rag_service as rag
+from utils import cache
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -62,7 +56,7 @@ def generate_overview_case(case: dict, force_live: bool = False) -> dict:
     patient_serial (regenerated on reseed)."""
     def _generate():
         patient_serial = resolve_patient_serial(case["patient_email"])
-        return get_or_generate_overview(patient_serial)
+        return agent_service.get_or_generate_overview(patient_serial)
 
     return cache_or_generate(
         namespace="overview",
@@ -81,7 +75,7 @@ def build_case_source_text(case: dict) -> str:
     patient_data = agent_service.get_patient_overview_data(patient_serial)
     docs = rag.get_patient_overview(patient_serial=patient_serial)
 
-    return build_prompt(patient_data, docs)
+    return agent_service.build_prompt(patient_data, docs)
 
 
 def expected_critical_findings(case: dict) -> list[str]:
@@ -124,8 +118,8 @@ def generate_medications_case(case: dict, force_live: bool = False) -> dict:
     def _generate():
         patient_serial = resolve_patient_serial(case["patient_email"])
         cache.set(f"overview:{patient_serial}", generate_overview_case(case))
-        
-        return generate_medications_for_patient(patient_serial)
+
+        return agent_service.generate_medications_for_patient(patient_serial)
 
     return cache_or_generate(
         namespace="medications",
@@ -142,4 +136,4 @@ def build_medications_case_source_text(case: dict) -> str:
     patient_serial = resolve_patient_serial(case["patient_email"])
     overview_text = generate_overview_case(case)["ai_overview"]["overview"]
 
-    return build_medications_prompt(patient_serial, overview_text)
+    return agent_service.build_medications_prompt(patient_serial, overview_text)

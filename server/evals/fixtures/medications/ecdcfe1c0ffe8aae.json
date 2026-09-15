@@ -1,0 +1,39 @@
+{
+  "medications": {
+    "current_medications": [
+      {
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Lisinopril"
+      },
+      {
+        "dosage": "5mg",
+        "frequency": "daily",
+        "name": "Amlodipine"
+      }
+    ],
+    "prescribed_changes": [
+      {
+        "action": "continue",
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Lisinopril",
+        "reason": "Maintain blood pressure control"
+      },
+      {
+        "action": "increase",
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Amlodipine",
+        "reason": "Blood pressure 145/91 mmHg (above target range) indicates need for intensified antihypertensive therapy"
+      },
+      {
+        "action": "add",
+        "dosage": "20mg",
+        "frequency": "daily",
+        "name": "Atorvastatin",
+        "reason": "LDL 152 mg/dL (above 100 mg/dL reference range) indicates need for lipid-lowering therapy"
+      }
+    ]
+  }
+}

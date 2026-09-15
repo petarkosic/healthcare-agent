@@ -1,9 +1,7 @@
 import pytest
 
 from db.database import db_manager
-from repositories.patient_repository import patient_repository
-from repositories.visit_repository import visit_repository
-from repositories.vital_signs_repository import vital_signs_repository
+from repositories import patient_repository, visit_repository, vital_signs_repository
 
 CRITICAL_CASE_EMAIL = "michael.cooper@gmail.com"
 CRITICAL_CASE_MARKER = "EVAL FIXTURE - do not delete - critical vitals case"

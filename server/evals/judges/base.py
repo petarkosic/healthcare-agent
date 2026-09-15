@@ -5,7 +5,7 @@ from typing import Type, TypeVar
 from langfuse import observe
 from pydantic import BaseModel, ValidationError
 
-from utils.openai_client import openai_client, LLM_MODEL_NAME
+from utils import openai_client, LLM_MODEL_NAME
 
 JUDGE_MODEL = os.getenv("JUDGE_MODEL", LLM_MODEL_NAME)
 

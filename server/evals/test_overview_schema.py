@@ -4,7 +4,7 @@ from evals.datasets import load_cases
 from evals.harness import generate_overview_case, resolve_patient_serial
 from guardrails.clinical import check_name_leak
 from guardrails.schemas import OverviewOutput
-from repositories.patient_repository import patient_repository
+from repositories import patient_repository
 
 CASES = load_cases("overview_cases.json")
 

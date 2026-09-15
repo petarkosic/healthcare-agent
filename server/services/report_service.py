@@ -7,13 +7,15 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 
-from repositories.clinical_notes_repository import clinical_note_repository
-from repositories.diagnosis_repository import diagnosis_repository
-from repositories.lab_result_repository import lab_result_repository
-from repositories.medication_repository import medication_repository
-from repositories.patient_repository import patient_repository
-from repositories.visit_repository import visit_repository
-from repositories.vital_signs_repository import vital_signs_repository
+from repositories import (
+    clinical_note_repository,
+    diagnosis_repository,
+    lab_result_repository,
+    medication_repository,
+    patient_repository,
+    visit_repository,
+    vital_signs_repository,
+)
 
 logger = logging.getLogger(__name__)
 

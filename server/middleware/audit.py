@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from db.database import db_manager
-from utils.auth import decode_token
+from utils import decode_token
 
 logger = logging.getLogger(__name__)
 

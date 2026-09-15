@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from langfuse import observe, propagate_attributes
 
-from rag.queue import enqueue_note_upsert
+from rag import enqueue_note_upsert
 from models.notes import Note
 from models.patients import (
     AddDiagnosis,
@@ -20,17 +20,18 @@ from models.patients import (
     UpdateMedication,
     UpdateAllergies,
 )
-from utils.auth import CurrentDoctor, get_current_doctor
-from utils.authz import (
+from utils import (
+    CurrentDoctor,
+    LLM_MODEL_NAME,
+    cache,
+    get_current_doctor,
+    openai_client,
     verify_patient_access,
     verify_visit_belongs_to_doctor,
     verify_visit_ownership,
 )
-from utils.cache import cache
-from utils.openai_client import openai_client, LLM_MODEL_NAME
-from services.patient_service import patient_service
-from repositories.visit_repository import visit_repository
-from services.report_service import report_service
+from repositories import visit_repository
+from services import patient_service, report_service
 
 logger = logging.getLogger(__name__)
 

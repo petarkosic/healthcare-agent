@@ -2,8 +2,8 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends
 
-from repositories.dashboard_repository import dashboard_repository
-from utils.auth import CurrentDoctor, get_current_doctor
+from repositories import dashboard_repository
+from utils import CurrentDoctor, get_current_doctor
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 

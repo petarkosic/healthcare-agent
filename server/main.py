@@ -12,10 +12,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from db.database import db_manager
 from middleware.audit import AuditLoggingMiddleware, audit_lifespan
-from rag.queue import rag_upsert_lifespan
+from rag import rag_upsert_lifespan
 from routers import agents, auth, patients, google_auth, dashboard
-from utils.langfuse_client import langfuse
-from utils.limiter import limiter
+from utils import langfuse, limiter
 
 logging.basicConfig(
     level=logging.INFO,

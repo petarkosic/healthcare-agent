@@ -10,7 +10,7 @@ from guardrails.schemas import (
     OverviewOutput,
     RecommendationsOutput,
 )
-from utils.openai_client import openai_client, LLM_MODEL_NAME
+from utils import openai_client, LLM_MODEL_NAME
 
 logger = logging.getLogger(__name__)
 

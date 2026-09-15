@@ -325,34 +325,8 @@ def get_recommendations(
     return llm_output
 
 
-@router.post("/medications/{patient_serial}")
-@observe()
-@limiter.limit("2/minute")
-def get_medications(
-    request: Request,
-    patient_serial: str,
-    doctor: CurrentDoctor = Depends(get_current_doctor),
-    _: None = Depends(verify_patient_access),
-):
-    with propagate_attributes(
-        user_id=doctor.serial,
-        metadata={"patient_serial": patient_serial},
-        tags=["medications"],
-    ):
-        pass
-
-    cache_key = f"medications:{patient_serial}"
-    cached = cache.get(cache_key)
-
-    if cached:
-        return cached
-
-    overview_text = get_or_generate_overview(patient_serial)["ai_overview"]["overview"]
-
+def build_medications_prompt(patient_serial: str, overview_text: str) -> str:
     patient = patient_repository.get_patient(patient_serial)
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
-
     active_medications = medication_repository.get_patient_medications(patient_serial, status="active")
     current_medications = [
         m for m in active_medications
@@ -363,9 +337,9 @@ def get_medications(
         f"- {m['medication_name']}: {m['dosage']}, {m['frequency']}" for m in current_medications
     ) or "None provided"
 
-    allergies_list = "\n".join(f"- {a}" for a in (patient.allergies or [])) or "None recorded"
+    allergies_list = "\n".join(f"- {a}" for a in ((patient.allergies if patient else None) or [])) or "None recorded"
 
-    prompt = f"""
+    return f"""
         Based on this overview, provide patient medications alternatives.
 
         <untrusted_overview>
@@ -412,6 +386,11 @@ def get_medications(
         - Dosage format: "1000mg", "20mg", "500mg/5ml", "1 capsule", "10 units", etc.
         - Frequency format: "daily", "twice daily", "weekly", "as needed", etc.
         - For reasons, summarize briefly from the note
+        - When a reason characterizes a lab or vital as needing attention or improvement (e.g.
+          "indicated for improved glycemic control", "maintain disease control"), always cite the
+          specific value that characterization is based on (e.g. "HbA1c 8.1% (above 4.0-5.6%
+          reference range) indicates need for improved glycemic control"). Never state a need for
+          treatment or control without naming the value behind it.
         - Every prescribed change MUST have a concrete "dosage" and "frequency". Never return
           "unknown", "n/a", "TBD", or an empty string.
             - "continue" / "discontinue": copy the exact dosage and frequency from the
@@ -422,6 +401,29 @@ def get_medications(
               that drug and for this patient's conditions, age, and other medications as
               described in the overview.
     """
+
+
+@observe(as_type="span")
+def generate_medications_for_patient(patient_serial: str) -> dict:
+    cache_key = f"medications:{patient_serial}"
+    cached = cache.get(cache_key)
+
+    if cached:
+        return cached
+
+    overview_text = get_or_generate_overview(patient_serial)["ai_overview"]["overview"]
+
+    patient = patient_repository.get_patient(patient_serial)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    active_medications = medication_repository.get_patient_medications(patient_serial, status="active")
+    current_medications = [
+        m for m in active_medications
+        if not m["end_date"] or m["end_date"] >= date.today()
+    ]
+
+    prompt = build_medications_prompt(patient_serial, overview_text)
 
     try:
         medications = generate_medications(
@@ -462,6 +464,25 @@ def get_medications(
     cache.set(cache_key, llm_output)
 
     return llm_output
+
+
+@router.post("/medications/{patient_serial}")
+@observe()
+@limiter.limit("2/minute")
+def get_medications(
+    request: Request,
+    patient_serial: str,
+    doctor: CurrentDoctor = Depends(get_current_doctor),
+    _: None = Depends(verify_patient_access),
+):
+    with propagate_attributes(
+        user_id=doctor.serial,
+        metadata={"patient_serial": patient_serial},
+        tags=["medications"],
+    ):
+        pass
+
+    return generate_medications_for_patient(patient_serial)
 
 
 @router.post("/schedule-followup")

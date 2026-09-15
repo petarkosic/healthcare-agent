@@ -1,0 +1,14 @@
+{
+  "medications": {
+    "current_medications": [],
+    "prescribed_changes": [
+      {
+        "action": "add",
+        "dosage": "60mg",
+        "frequency": "three times daily",
+        "name": "Orlistat",
+        "reason": "BMI of 34.09 (above 18.5-24.9 reference range) indicates need for weight management support."
+      }
+    ]
+  }
+}

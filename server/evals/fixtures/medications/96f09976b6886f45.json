@@ -1,0 +1,39 @@
+{
+  "medications": {
+    "current_medications": [
+      {
+        "dosage": "100mg",
+        "frequency": "daily",
+        "name": "Sitagliptin"
+      },
+      {
+        "dosage": "1000mg",
+        "frequency": "twice daily",
+        "name": "Metformin"
+      }
+    ],
+    "prescribed_changes": [
+      {
+        "action": "continue",
+        "dosage": "100mg",
+        "frequency": "daily",
+        "name": "Sitagliptin",
+        "reason": "Maintain current regimen while evaluating glycemic control."
+      },
+      {
+        "action": "continue",
+        "dosage": "1000mg",
+        "frequency": "twice daily",
+        "name": "Metformin",
+        "reason": "Maintain current regimen while evaluating glycemic control."
+      },
+      {
+        "action": "add",
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Empagliflozin",
+        "reason": "HbA1c 7.8% (above 4.0-5.6% reference range) indicates need for improved glycemic control."
+      }
+    ]
+  }
+}

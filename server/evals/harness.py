@@ -6,7 +6,13 @@ from typing import Any, Callable
 from repositories.patient_repository import patient_repository
 from services.agent_service import agent_service
 from rag.rag_service import rag_service as rag
-from routers.agents import build_prompt, get_or_generate_overview
+from routers.agents import (
+    build_medications_prompt,
+    build_prompt,
+    generate_medications_for_patient,
+    get_or_generate_overview,
+)
+from utils.cache import cache
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -109,3 +115,31 @@ def expected_critical_findings(case: dict) -> list[str]:
         findings.append(f"critical lab result: {lab.get('test_name')} = {lab.get('result')}")
 
     return findings
+
+
+def generate_medications_case(case: dict, force_live: bool = False) -> dict:
+    """Return the medications generation for a dataset case, from a cached
+    fixture unless force_live. Cache key is the case_id, same pattern as
+    generate_overview_case."""
+    def _generate():
+        patient_serial = resolve_patient_serial(case["patient_email"])
+        cache.set(f"overview:{patient_serial}", generate_overview_case(case))
+        
+        return generate_medications_for_patient(patient_serial)
+
+    return cache_or_generate(
+        namespace="medications",
+        key_payload={"case_id": case["case_id"]},
+        generate=_generate,
+        force_live=force_live,
+    )
+
+
+def build_medications_case_source_text(case: dict) -> str:
+    """Reproduce exactly what production sent as the medications prompt
+    (overview text + current meds + allergies + instructions), for judging
+    against. Resolved live - always reflects current DB state."""
+    patient_serial = resolve_patient_serial(case["patient_email"])
+    overview_text = generate_overview_case(case)["ai_overview"]["overview"]
+
+    return build_medications_prompt(patient_serial, overview_text)

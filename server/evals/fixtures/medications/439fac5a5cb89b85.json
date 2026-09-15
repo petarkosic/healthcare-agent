@@ -1,0 +1,32 @@
+{
+  "medications": {
+    "current_medications": [
+      {
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Prednisone"
+      },
+      {
+        "dosage": "200mg",
+        "frequency": "twice daily",
+        "name": "Hydroxychloroquine"
+      }
+    ],
+    "prescribed_changes": [
+      {
+        "action": "continue",
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Prednisone",
+        "reason": "Maintain disease control given ANA titer 1:320 (above <1:40 reference range)."
+      },
+      {
+        "action": "continue",
+        "dosage": "200mg",
+        "frequency": "twice daily",
+        "name": "Hydroxychloroquine",
+        "reason": "Maintain disease control given ANA titer 1:320 (above <1:40 reference range)."
+      }
+    ]
+  }
+}

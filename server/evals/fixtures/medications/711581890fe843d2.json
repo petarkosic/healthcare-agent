@@ -1,0 +1,44 @@
+{
+  "medications": {
+    "current_medications": [
+      {
+        "dosage": "40mg",
+        "frequency": "daily",
+        "name": "Furosemide"
+      },
+      {
+        "dosage": "20mg",
+        "frequency": "daily",
+        "name": "Lisinopril"
+      },
+      {
+        "dosage": "15 units",
+        "frequency": "daily",
+        "name": "Insulin Glargine"
+      }
+    ],
+    "prescribed_changes": [
+      {
+        "action": "continue",
+        "dosage": "40mg",
+        "frequency": "daily",
+        "name": "Furosemide",
+        "reason": "Maintain fluid balance in the context of chronic kidney disease stage 3."
+      },
+      {
+        "action": "continue",
+        "dosage": "20mg",
+        "frequency": "daily",
+        "name": "Lisinopril",
+        "reason": "Maintain blood pressure control, noting current reading of 136/89 mmHg (above target <130/80 mmHg for CKD/diabetes)."
+      },
+      {
+        "action": "continue",
+        "dosage": "15 units",
+        "frequency": "daily",
+        "name": "Insulin Glargine",
+        "reason": "Maintain glycemic control for type 2 diabetes."
+      }
+    ]
+  }
+}

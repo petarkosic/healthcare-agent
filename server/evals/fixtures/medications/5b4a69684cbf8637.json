@@ -1,0 +1,39 @@
+{
+  "medications": {
+    "current_medications": [
+      {
+        "dosage": "10 units",
+        "frequency": "daily",
+        "name": "Insulin Glargine"
+      },
+      {
+        "dosage": "500mg",
+        "frequency": "twice daily",
+        "name": "Metformin"
+      }
+    ],
+    "prescribed_changes": [
+      {
+        "action": "continue",
+        "dosage": "10 units",
+        "frequency": "daily",
+        "name": "Insulin Glargine",
+        "reason": "HbA1c 8.1% (above 4.0-5.6% reference range) indicates need for continued glycemic control."
+      },
+      {
+        "action": "increase",
+        "dosage": "1000mg",
+        "frequency": "twice daily",
+        "name": "Metformin",
+        "reason": "HbA1c 8.1% (above 4.0-5.6% reference range) indicates need for improved glycemic control."
+      },
+      {
+        "action": "add",
+        "dosage": "10mg",
+        "frequency": "daily",
+        "name": "Lisinopril",
+        "reason": "Blood pressure 185/110 mmHg (above normal range) indicates need for antihypertensive therapy."
+      }
+    ]
+  }
+}

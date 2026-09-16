@@ -17,3 +17,14 @@ def test_case_ids_are_unique():
     ids = [c["case_id"] for c in cases]
 
     assert len(ids) == len(set(ids))
+
+
+def test_load_note_summary_cases_returns_list_of_dicts():
+    cases = load_cases("note_summary_cases.json")
+
+    assert isinstance(cases, list)
+    assert len(cases) >= 5
+    for case in cases:
+        assert "case_id" in case
+        assert "note_text" in case
+        assert "required_fact" in case

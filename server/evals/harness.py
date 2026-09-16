@@ -186,3 +186,22 @@ def build_recommendations_case_source_text(case: dict) -> str:
             ]
         }}
     """
+
+
+def generate_note_summary_case(case: dict, force_live: bool = False) -> str:
+    """Return the note-summary generation for a dataset case, from a cached
+    fixture unless force_live. Unlike every other *_case function, this one
+    has no DB dependency at all - note_text is supplied directly by the
+    dataset, not looked up via a patient_serial."""
+    def _generate():
+        return {"summary": agent_service.generate_note_summary(case["note_text"])}
+
+    result = cache_or_generate(
+        namespace="note_summary",
+        key_payload={"case_id": case["case_id"]},
+        generate=_generate,
+        force_live=force_live,
+    )
+
+    return result["summary"]
+

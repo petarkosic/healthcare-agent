@@ -1,0 +1,32 @@
+[
+  {
+    "case_id": "note-001-clean-followup",
+    "note_text": "Patient presents for routine follow-up of hypertension. Blood pressure 128/82, well controlled on lisinopril 10mg daily. No new complaints. Continue current regimen, follow up in 3 months.",
+    "required_fact": "blood pressure well controlled / 128/82"
+  },
+  {
+    "case_id": "note-002-shorthand",
+    "note_text": "pt c/o cp x2hrs, radiating to L arm. r/o MI. EKG wnl, troponin pending. given ASA 325mg, NTG sl x1, some relief. admit for obs.",
+    "required_fact": "chest pain, ruling out MI, given aspirin and nitroglycerin"
+  },
+  {
+    "case_id": "note-003-allergic-reaction",
+    "note_text": "Pt developed hives and facial swelling approx 20 min after amoxicillin dose. Given IM epinephrine 0.3mg, diphenhydramine 50mg IV. Symptoms resolving. Amoxicillin allergy to be added to chart.",
+    "required_fact": "allergic reaction to amoxicillin treated with epinephrine"
+  },
+  {
+    "case_id": "note-004-rambling-multitopic",
+    "note_text": "Saw pt today, she's doing okay overall but mentioned her knee has been bothering her since the gardening incident last month, also wanted to talk about her sleep which hasn't been great, and by the way her A1c came back at 8.9 which is up from last time so we need to address that, also refilled her metformin.",
+    "required_fact": "A1c 8.9, up from previous"
+  },
+  {
+    "case_id": "note-005-terse",
+    "note_text": "Wellness check. No complaints. Vitals stable. RTC 1yr.",
+    "required_fact": "no complaints, stable, return in 1 year"
+  },
+  {
+    "case_id": "note-006-typo-drugname",
+    "note_text": "Started pt on lisinipril 20mg daily for BP control, BP was 158/96 today. Will recheck in 2 weeks.",
+    "required_fact": "BP 158/96, started on lisinopril 20mg"
+  }
+]

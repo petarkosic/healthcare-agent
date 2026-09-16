@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    {
+      "follow_up": {
+        "offset_days": 14,
+        "reason": "Re-evaluate blood pressure control and assess the need for further medication adjustment."
+      },
+      "priority": "high",
+      "reason": "The patient's blood pressure remains elevated at 145/91 mmHg despite current medication management.",
+      "recommendation": "Schedule a follow-up appointment for blood pressure monitoring"
+    },
+    {
+      "follow_up": null,
+      "priority": "routine",
+      "reason": "The patient has a BMI of 28.20, which is in the overweight range and contributes to hypertension risk.",
+      "recommendation": "Initiate lifestyle modifications for weight management"
+    },
+    {
+      "follow_up": {
+        "offset_days": 30,
+        "reason": "Review updated lipid profile to determine if pharmacological intervention for hyperlipidemia is necessary."
+      },
+      "priority": "routine",
+      "reason": "The most recent lipid panel from 2025-12-26 showed an elevated LDL of 152 mg/dL, which requires updated assessment.",
+      "recommendation": "Order a repeat lipid panel"
+    }
+  ]
+}

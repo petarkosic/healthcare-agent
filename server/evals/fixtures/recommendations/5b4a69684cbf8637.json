@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    {
+      "follow_up": {
+        "offset_days": 1,
+        "reason": "Ensure stabilization of blood pressure and pain management."
+      },
+      "priority": "urgent",
+      "reason": "The patient presents with a hypertensive crisis (BP 185/110 mmHg) and a reported pain level of 9, which requires urgent clinical assessment.",
+      "recommendation": "Seek immediate medical evaluation at an emergency department or urgent care facility"
+    },
+    {
+      "follow_up": {
+        "offset_days": 14,
+        "reason": "Evaluate glycemic control and adjust medication dosages as necessary."
+      },
+      "priority": "high",
+      "reason": "The patient's HbA1c of 8.1% indicates suboptimal glycemic control, requiring a review of the current insulin and metformin regimen.",
+      "recommendation": "Schedule an appointment with a primary care provider to review diabetes management"
+    },
+    {
+      "follow_up": null,
+      "priority": "high",
+      "reason": "Consistent tracking is necessary to assess the efficacy of current treatments and identify trends in hypertension and hyperglycemia.",
+      "recommendation": "Monitor and record blood pressure and blood glucose levels daily"
+    }
+  ]
+}

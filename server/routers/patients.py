@@ -22,16 +22,14 @@ from models.patients import (
 )
 from utils import (
     CurrentDoctor,
-    LLM_MODEL_NAME,
     cache,
     get_current_doctor,
-    openai_client,
     verify_patient_access,
     verify_visit_belongs_to_doctor,
     verify_visit_ownership,
 )
 from repositories import visit_repository
-from services import patient_service, report_service
+from services import agent_service, patient_service, report_service
 
 logger = logging.getLogger(__name__)
 
@@ -134,23 +132,8 @@ def set_note(
 
     verify_visit_ownership(str(note.visit_id), patient_serial, doctor.serial)
 
-    prompt = f"""
-    Generate a concise medical summary of this clinical note:
-
-    {note.note_text}
-
-    Keep it brief and professional, focusing on key findings and recommendations.
-    """
-
     try:
-        resp = openai_client.chat.completions.create(
-            model=LLM_MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
-        )
-
-        summary = resp.choices[0].message.content.strip()
-
+        summary = agent_service.generate_note_summary(note.note_text)
     except Exception:
         logger.exception("Error generating note summary for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error generating summary")

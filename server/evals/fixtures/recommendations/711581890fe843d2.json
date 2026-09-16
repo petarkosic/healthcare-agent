@@ -1,0 +1,37 @@
+{
+  "recommendations": [
+    {
+      "follow_up": {
+        "offset_days": 90,
+        "reason": "Monitor weight progress and metabolic markers."
+      },
+      "priority": "routine",
+      "reason": "The patient has a BMI of 36.89, indicating obesity, which complicates hypertension and type 2 diabetes management.",
+      "recommendation": "Implement a weight management program and dietary counseling"
+    },
+    {
+      "follow_up": {
+        "offset_days": 28,
+        "reason": "Review blood pressure logs to determine if medication adjustment is necessary."
+      },
+      "priority": "high",
+      "reason": "The patient's current blood pressure is 136/89 mmHg, which is above the target for a patient with chronic kidney disease and diabetes.",
+      "recommendation": "Monitor blood pressure at home daily and maintain a log"
+    },
+    {
+      "follow_up": null,
+      "priority": "high",
+      "reason": "The patient has a documented allergy to NSAIDs and existing chronic kidney disease stage 3, which can be exacerbated by these drugs.",
+      "recommendation": "Avoid all NSAID medications"
+    },
+    {
+      "follow_up": {
+        "offset_days": 28,
+        "reason": "Assess renal function and electrolyte stability."
+      },
+      "priority": "high",
+      "reason": "The patient has chronic kidney disease stage 3 and is currently taking Lisinopril and Furosemide, which require monitoring of renal function and electrolytes.",
+      "recommendation": "Schedule a follow-up laboratory panel including serum creatinine, eGFR, and potassium"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    {
+      "follow_up": {
+        "offset_days": 90,
+        "reason": "Monitor disease activity and medication side effects given the history of lupus and abnormal ANA titer."
+      },
+      "priority": "routine",
+      "reason": "The patient is currently stable with a pain level of 1 and normal vitals, suggesting the current lupus management plan is effective.",
+      "recommendation": "Continue current regimen of Prednisone 10mg daily and Hydroxychloroquine 200mg twice daily."
+    },
+    {
+      "follow_up": null,
+      "priority": "routine",
+      "reason": "The patient's BMI is in the overweight category, which can exacerbate systemic inflammation associated with lupus.",
+      "recommendation": "Implement lifestyle modifications to address BMI of 27.13."
+    },
+    {
+      "follow_up": {
+        "offset_days": 90,
+        "reason": "Review ANA titer trends and assess for potential disease progression."
+      },
+      "priority": "high",
+      "reason": "The ANA titer remains significantly elevated above the reference range of <1:40, requiring ongoing clinical correlation.",
+      "recommendation": "Schedule a follow-up rheumatology consultation to review the abnormal ANA titer of 1:320."
+    }
+  ]
+}

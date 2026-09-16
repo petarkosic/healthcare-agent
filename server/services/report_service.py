@@ -5,7 +5,6 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader
-from weasyprint import HTML
 
 from repositories import (
     clinical_note_repository,
@@ -95,10 +94,12 @@ class ReportService:
         }
 
     def render_pdf(self, report_data: dict) -> bytes:
+        from weasyprint import HTML
+
         template = _jinja_env.get_template("visit_report.html")
         html_str = template.render(**report_data)
         pdf_bytes = HTML(string=html_str).write_pdf()
-        
+
         return pdf_bytes
 
 

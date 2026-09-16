@@ -1,0 +1,22 @@
+{
+  "recommendations": [
+    {
+      "follow_up": {
+        "offset_days": 90,
+        "reason": "Monitor progress on weight management goals and assess BMI."
+      },
+      "priority": "routine",
+      "reason": "The patient has a BMI of 34.09, which falls into the obese category and warrants lifestyle intervention.",
+      "recommendation": "Initiate a weight management program focusing on diet and physical activity"
+    },
+    {
+      "follow_up": {
+        "offset_days": 180,
+        "reason": "Re-evaluate blood pressure to ensure it remains within a healthy range."
+      },
+      "priority": "routine",
+      "reason": "Current blood pressure is 126/76 mmHg, which is in the elevated range and requires periodic tracking.",
+      "recommendation": "Schedule a follow-up appointment for routine blood pressure monitoring"
+    }
+  ]
+}

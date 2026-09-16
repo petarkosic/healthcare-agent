@@ -1,0 +1,25 @@
+{
+  "recommendations": [
+    {
+      "follow_up": {
+        "offset_days": 90,
+        "reason": "Assess glycemic control and evaluate the need for medication adjustment."
+      },
+      "priority": "high",
+      "reason": "The most recent HbA1c of 7.8% is above the target range, indicating suboptimal glycemic control on current therapy.",
+      "recommendation": "Schedule a follow-up appointment for HbA1c testing and medication review"
+    },
+    {
+      "follow_up": null,
+      "priority": "routine",
+      "reason": "The patient has a BMI of 26.89, which is in the overweight category and may contribute to improved insulin sensitivity.",
+      "recommendation": "Implement a structured diet and exercise plan to support weight management"
+    },
+    {
+      "follow_up": null,
+      "priority": "routine",
+      "reason": "Current medications are being used to manage type 2 diabetes; adherence is necessary until clinical review.",
+      "recommendation": "Continue current medication regimen of Sitagliptin 100mg daily and Metformin 1000mg twice daily"
+    }
+  ]
+}

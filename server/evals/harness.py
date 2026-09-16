@@ -137,3 +137,52 @@ def build_medications_case_source_text(case: dict) -> str:
     overview_text = generate_overview_case(case)["ai_overview"]["overview"]
 
     return agent_service.build_medications_prompt(patient_serial, overview_text)
+
+
+def generate_recommendations_case(case: dict, force_live: bool = False) -> dict:
+    """Return the recommendations generation for a dataset case, from a cached
+    fixture unless force_live. Same pattern as generate_medications_case,
+    including the production-cache pre-seed to avoid a redundant overview call."""
+    def _generate():
+        patient_serial = resolve_patient_serial(case["patient_email"])
+        cache.set(f"overview:{patient_serial}", generate_overview_case(case))
+        return agent_service.generate_recommendations_for_patient(patient_serial)
+
+    return cache_or_generate(
+        namespace="recommendations",
+        key_payload={"case_id": case["case_id"]},
+        generate=_generate,
+        force_live=force_live,
+    )
+
+
+def build_recommendations_case_source_text(case: dict) -> str:
+    """Reproduce exactly what production sent as the recommendations prompt
+    (overview text + instructions), for judging against. No DB-dependent
+    formatting here (unlike medications), so this shell is hand-kept in sync
+    with agent_service.generate_recommendations_for_patient's prompt rather
+    than factored into a shared function."""
+    overview_text = generate_overview_case(case)["ai_overview"]["overview"]
+
+    return f"""
+        Based on this overview, provide patient recommendations.
+
+        <untrusted_overview>
+        {overview_text}
+        </untrusted_overview>
+
+        Return only valid JSON with the following format:
+        {{
+            "recommendations": [
+                {{
+                    "recommendation": "string",
+                    "reason": "string",
+                    "priority": "string",
+                    "follow_up": {{
+                        "offset_days": "int",
+                        "reason": "string"
+                    }}
+                }}
+            ]
+        }}
+    """

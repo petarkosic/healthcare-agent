@@ -26,7 +26,7 @@ from repositories import (
     visit_repository,
     vital_signs_repository,
 )
-from utils import cache
+from utils import cache, openai_client, LLM_MODEL_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -483,6 +483,23 @@ class AgentService:
         cache.set(cache_key, llm_output)
 
         return llm_output
+
+    def generate_note_summary(self, note_text: str) -> str:
+        prompt = f"""
+        Generate a concise medical summary of this clinical note:
+
+        {note_text}
+
+        Keep it brief and professional, focusing on key findings and recommendations.
+        """
+
+        resp = openai_client.chat.completions.create(
+            model=LLM_MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+        )
+
+        return resp.choices[0].message.content.strip()
 
 
 agent_service = AgentService()

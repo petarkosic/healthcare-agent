@@ -491,6 +491,12 @@ class AgentService:
         {note_text}
 
         Keep it brief and professional, focusing on key findings and recommendations.
+
+        Only include information explicitly stated in the note provided. Do not add
+        patient demographics (age, gender, etc.), follow-up plans, timing, or any
+        other detail not present in the note text, even if it would be a
+        reasonable clinical assumption. If the note doesn't mention something,
+        leave it out rather than inferring it.
         """
 
         resp = openai_client.chat.completions.create(

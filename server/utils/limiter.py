@@ -2,8 +2,6 @@ from fastapi import Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from middleware.audit import extract_doctor_from_request
-
 
 def get_client_ip(request: Request) -> str:
     real_ip = request.headers.get("X-Real-IP")
@@ -15,6 +13,8 @@ def get_client_ip(request: Request) -> str:
 
 
 def get_rate_limit_key(request: Request) -> str:
+    from middleware.audit import extract_doctor_from_request
+
     doctor_id, _ = extract_doctor_from_request(request)
 
     if doctor_id:

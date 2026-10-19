@@ -30,15 +30,15 @@ export const useModalA11y = <T extends HTMLElement = HTMLDivElement>(
 
 		const previouslyFocused = document.activeElement as HTMLElement | null;
 
-		const originalOverflow = document.body.style.overflow;
-		document.body.style.overflow = 'clip';
+		const originalOverflow = document.documentElement.style.overflow;
+		document.documentElement.style.overflow = 'clip';
 
 		const node = ref.current;
 		const focusables = node?.querySelectorAll<HTMLElement>(FOCUSABLE);
 		(focusables?.[0] ?? node)?.focus();
 
 		return () => {
-			document.body.style.overflow = originalOverflow;
+			document.documentElement.style.overflow = originalOverflow;
 			previouslyFocused?.focus?.();
 		};
 	}, [active]);

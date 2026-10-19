@@ -1,3 +1,4 @@
+from repositories.chat_repository import chat_repository
 from repositories.clinical_notes_repository import clinical_note_repository
 from repositories.dashboard_repository import dashboard_repository
 from repositories.diagnosis_repository import diagnosis_repository
@@ -8,6 +9,7 @@ from repositories.vital_signs_repository import vital_signs_repository
 from repositories.visit_repository import visit_repository
 
 __all__ = [
+    "chat_repository",
     "clinical_note_repository",
     "dashboard_repository",
     "diagnosis_repository",

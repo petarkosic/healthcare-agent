@@ -2,7 +2,7 @@ from sqlalchemy import (
     CheckConstraint, Column, Date, DateTime, DDL, Index,
     Integer, Numeric, String, Text, ForeignKey, ARRAY, event, text,
 )
-from sqlalchemy.dialects.postgresql import UUID, INET
+from sqlalchemy.dialects.postgresql import UUID, INET, JSONB
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -414,6 +414,105 @@ event.listen(
         CREATE TRIGGER audit_logs_no_delete
             BEFORE DELETE ON audit_logs
             FOR EACH ROW EXECUTE FUNCTION audit_logs_deny_mutation()
+    """),
+)
+
+
+class ChatConversation(Base):
+    __tablename__ = "chat_conversations"
+    __table_args__ = (
+        Index("chat_conversations_patient_idx", "patient_serial", "deleted_at"),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    patient_serial = Column(String(8), ForeignKey("patients.patient_serial_number", ondelete="CASCADE"), nullable=False)
+    doctor_id = Column(String(20), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=text("NOW()"))
+    last_message_at = Column(DateTime(timezone=True))
+    deleted_at = Column(DateTime(timezone=True))
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    __table_args__ = (
+        Index("chat_messages_conversation_idx", "conversation_id", "created_at"),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("chat_conversations.id", ondelete="CASCADE"), nullable=False)
+    role = Column(String(10), nullable=False)
+    content = Column(Text, nullable=False)
+    tool_calls = Column(JSONB, nullable=False, server_default=text("'[]'::jsonb"))
+    chart_data = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=text("NOW()"))
+
+
+event.listen(
+    ChatMessage.__table__, "after_create",
+    DDL("""
+        CREATE OR REPLACE FUNCTION chat_messages_deny_mutation()
+        RETURNS TRIGGER LANGUAGE plpgsql AS $$
+        BEGIN
+            RAISE EXCEPTION 'chat_messages is append-only — UPDATE/DELETE forbidden';
+        END;
+        $$
+    """),
+)
+
+event.listen(
+    ChatMessage.__table__, "after_create",
+    DDL("""
+        CREATE TRIGGER chat_messages_no_update
+            BEFORE UPDATE ON chat_messages
+            FOR EACH ROW EXECUTE FUNCTION chat_messages_deny_mutation()
+    """),
+)
+
+event.listen(
+    ChatMessage.__table__, "after_create",
+    DDL("""
+        CREATE TRIGGER chat_messages_no_delete
+            BEFORE DELETE ON chat_messages
+            FOR EACH ROW EXECUTE FUNCTION chat_messages_deny_mutation()
+    """),
+)
+
+event.listen(
+    ChatConversation.__table__, "after_create",
+    DDL("""
+        CREATE OR REPLACE FUNCTION chat_conversations_guard_mutation()
+        RETURNS TRIGGER LANGUAGE plpgsql AS $$
+        BEGIN
+            IF TG_OP = 'DELETE' THEN
+                RAISE EXCEPTION 'chat_conversations is soft-delete only — hard DELETE forbidden';
+            END IF;
+
+            IF TG_OP = 'UPDATE' THEN
+                IF OLD.id IS DISTINCT FROM NEW.id
+                   OR OLD.patient_serial IS DISTINCT FROM NEW.patient_serial
+                   OR OLD.doctor_id IS DISTINCT FROM NEW.doctor_id
+                   OR OLD.created_at IS DISTINCT FROM NEW.created_at
+                THEN
+                    RAISE EXCEPTION 'chat_conversations UPDATE may only change deleted_at/last_message_at';
+                END IF;
+
+                IF OLD.deleted_at IS NOT NULL AND NEW.deleted_at IS DISTINCT FROM OLD.deleted_at THEN
+                    RAISE EXCEPTION 'chat_conversations — only deleted_at may transition, and only once';
+                END IF;
+            END IF;
+
+            RETURN NEW;
+        END;
+        $$
+    """),
+)
+
+event.listen(
+    ChatConversation.__table__, "after_create",
+    DDL("""
+        CREATE TRIGGER chat_conversations_guard
+            BEFORE UPDATE OR DELETE ON chat_conversations
+            FOR EACH ROW EXECUTE FUNCTION chat_conversations_guard_mutation()
     """),
 )
 

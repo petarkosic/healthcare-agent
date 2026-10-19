@@ -72,4 +72,27 @@ class VitalSignsRepository(BaseRepository):
             ORDER BY measurement_time ASC
         """, (visit_id,))
 
+    def get_vitals_history(
+        self, patient_serial_number: str, start_date: Optional[str] = None, end_date: Optional[str] = None
+    ):
+        """All vitals for a patient, optionally bounded by measurement_time, oldest first."""
+        query = """
+            SELECT vs.*
+            FROM vital_signs vs
+            JOIN visits v ON vs.visit_id = v.visit_id
+            WHERE v.patient_serial_number = %s
+        """
+        params: list = [patient_serial_number]
+
+        if start_date:
+            query += " AND vs.measurement_time >= %s"
+            params.append(start_date)
+        if end_date:
+            query += " AND vs.measurement_time <= %s"
+            params.append(end_date)
+
+        query += " ORDER BY vs.measurement_time ASC"
+
+        return self._execute_query(query, tuple(params))
+
 vital_signs_repository = VitalSignsRepository()

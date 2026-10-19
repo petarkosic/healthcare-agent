@@ -102,3 +102,31 @@ class CreateCalendarEventArgs(BaseModel):
     """start_time/end_time are forced from FollowUpRequest, never read from the model's output."""
     summary: str = Field(max_length=200)
     description: str = Field(default='', max_length=2000)
+
+class ChatToolCall(BaseModel):
+    tool: str
+    args: dict
+
+class ChartSeries(BaseModel):
+    date: str
+    value: float
+
+class ChartData(BaseModel):
+    type: Literal["line"]
+    label: str
+    series: list[ChartSeries]
+
+class ChatMessageOut(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+    tool_calls: list[ChatToolCall] = []
+    chart_data: Optional[ChartData] = None
+    created_at: str
+
+class ChatRequest(BaseModel):
+    message: str = Field(max_length=2000, min_length=1)
+
+class ChatAnswer(BaseModel):
+    """What chat_service's agent loop produces before persistence wraps it."""
+    answer: str
+    chart_data: Optional[ChartData] = None

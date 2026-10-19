@@ -113,4 +113,27 @@ class VisitRepository(BaseRepository):
 
         return results[0] if results else None
 
+    def get_visits_history(
+        self, patient_serial_number: str, start_date: Optional[str] = None, end_date: Optional[str] = None
+    ):
+        """All visits for a patient, optionally bounded by visit_date, oldest first."""
+        query = """
+            SELECT v.*, d.first_name AS doctor_first_name, d.last_name AS doctor_last_name, d.specialty
+            FROM visits v
+            JOIN doctors d ON v.doctor_serial_number = d.doctor_serial_number
+            WHERE v.patient_serial_number = %s
+        """
+        params: list = [patient_serial_number]
+
+        if start_date:
+            query += " AND v.visit_date >= %s"
+            params.append(start_date)
+        if end_date:
+            query += " AND v.visit_date <= %s"
+            params.append(end_date)
+
+        query += " ORDER BY v.visit_date ASC"
+
+        return self._execute_query(query, tuple(params))
+
 visit_repository = VisitRepository()

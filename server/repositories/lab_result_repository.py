@@ -59,4 +59,29 @@ class LabResultRepository(BaseRepository):
             ORDER BY l.tested_date ASC
         """, (visit_id,))
 
+    def get_labs_history(
+        self,
+        patient_serial_number: str,
+        test_name: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ):
+        """All lab results for a patient, optionally filtered by test name / date range, oldest first."""
+        query = "SELECT l.* FROM lab_results l WHERE l.patient_serial_number = %s"
+        params: list = [patient_serial_number]
+
+        if test_name:
+            query += " AND l.test_name ILIKE %s"
+            params.append(f"%{test_name}%")
+        if start_date:
+            query += " AND l.tested_date >= %s"
+            params.append(start_date)
+        if end_date:
+            query += " AND l.tested_date <= %s"
+            params.append(end_date)
+
+        query += " ORDER BY l.tested_date ASC"
+
+        return self._execute_query(query, tuple(params))
+
 lab_result_repository = LabResultRepository()

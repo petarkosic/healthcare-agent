@@ -73,7 +73,7 @@ def build_case_source_text(case: dict) -> str:
     Resolved live (cheap, no LLM call) - always reflects current DB state."""
     patient_serial = resolve_patient_serial(case["patient_email"])
     patient_data = agent_service.get_patient_overview_data(patient_serial)
-    docs = rag.get_patient_overview(patient_serial=patient_serial)
+    docs = rag.get_latest_note_chunks(patient_serial=patient_serial)
 
     return agent_service.build_prompt(patient_data, docs)
 

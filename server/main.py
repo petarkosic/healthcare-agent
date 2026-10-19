@@ -12,8 +12,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from db.database import db_manager
 from middleware.audit import AuditLoggingMiddleware, audit_lifespan
-from rag import rag_upsert_lifespan
-from routers import agents, auth, patients, google_auth, dashboard
+from rag import rag_index_lifespan
+from routers import agents, auth, patients, google_auth, dashboard, chat
 from utils import langfuse, limiter
 
 logging.basicConfig(
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     db_manager.open()
     async with audit_lifespan(app):
-        async with rag_upsert_lifespan(app):
+        async with rag_index_lifespan(app):
             yield
     langfuse.flush()
     db_manager.close()
@@ -109,3 +109,4 @@ app.include_router(agents.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(google_auth.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")

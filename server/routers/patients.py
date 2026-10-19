@@ -1,12 +1,13 @@
 import logging
 import io
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from langfuse import observe, propagate_attributes
 
-from rag import enqueue_note_upsert
+from rag import enqueue_note_index, enqueue_chief_complaint_index
 from models.notes import Note
 from models.patients import (
     AddDiagnosis,
@@ -152,7 +153,10 @@ def set_note(
         logger.exception("Error adding note for patient %s", patient_serial)
         raise HTTPException(status_code=500, detail="Error adding note")
 
-    enqueue_note_upsert(str(patient_serial), note.note_text)
+    visit = visit_repository.get_visit_by_id(str(note.visit_id))
+    record_date = visit["visit_date"].isoformat() if visit and visit["visit_date"] else datetime.now(timezone.utc).isoformat()
+
+    enqueue_note_index(str(patient_serial), result["note_id"], note.note_text, record_date)
     invalidate_ai_cache(patient_serial)
 
     return result
@@ -330,6 +334,10 @@ def set_visit(visit: SetVisit, doctor: CurrentDoctor = Depends(get_current_docto
     try:
         result = patient_service.create_visit(visit, doctor_serial_number=doctor.serial)
         invalidate_ai_cache(visit.patient_serial_number)
+
+        if visit.chief_complaint:
+            record_date = visit.visit_date or datetime.now(timezone.utc).isoformat()
+            enqueue_chief_complaint_index(visit.patient_serial_number, result["visit_id"], visit.chief_complaint, record_date)
 
         return result
     except HTTPException:

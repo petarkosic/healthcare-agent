@@ -205,7 +205,7 @@ class AgentService:
         if cached:
             return cached
 
-        docs_future = _overview_executor.submit(rag.get_patient_overview, patient_serial=patient_serial)
+        docs_future = _overview_executor.submit(rag.get_latest_note_chunks, patient_serial=patient_serial)
         patient_data_future = _overview_executor.submit(self.get_patient_overview_data, patient_serial)
 
         docs = docs_future.result()

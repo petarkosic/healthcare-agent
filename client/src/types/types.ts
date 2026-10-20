@@ -212,3 +212,35 @@ export type MedicationsResponse = {
 };
 
 export type ResponseData = RecommendationsResponse | MedicationsResponse;
+
+export interface ChartSeriesPoint {
+	date: string;
+	value: number;
+}
+
+export interface ChartData {
+	type: 'line';
+	label: string;
+	series: ChartSeriesPoint[];
+}
+
+export interface ChatToolCall {
+	tool: string;
+	args: Record<string, unknown>;
+}
+
+export interface ChatMessage {
+	id?: string;
+	role: 'user' | 'assistant';
+	content: string;
+	tool_calls: ChatToolCall[];
+	chart_data: ChartData | null;
+	created_at: string;
+	failed?: boolean;
+}
+
+export interface ChatConversation {
+	id: string;
+	created_at: string;
+	last_message_at: string | null;
+}

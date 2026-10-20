@@ -103,6 +103,23 @@
 	animation: ai-fade-in 0.18s ease-out;
 }
 
+.ai-assistant--open {
+	height: calc(100vh - var(--header-h) - var(--space-4) * 2);
+}
+
+.ai-assistant--open .ai-assistant__body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.ai-assistant__tab-content--chat {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
 .ai-assistant__body > .btn-tooltip-wrap {
 	position: relative;
 	width: 100px;

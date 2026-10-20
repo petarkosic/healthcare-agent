@@ -5,6 +5,7 @@ import googleCalendarReducer, {
 	checkGoogleCalendarStatus,
 } from './googleCalendarSlice';
 import aiReducer from './aiSlice';
+import chatReducer from './chatSlice';
 import uiReducer from './uiSlice';
 import { baseApi } from './api/baseApi';
 
@@ -16,6 +17,7 @@ export const store = configureStore({
 		session: sessionReducer,
 		googleCalendar: googleCalendarReducer,
 		ai: aiReducer,
+		chat: chatReducer,
 		ui: uiReducer,
 		[baseApi.reducerPath]: baseApi.reducer,
 	},

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router';
 import './AIAssistant.css';
 import { AIRecommendations } from './AIRecommendations';
 import { AIMedications } from './AIMedications';
+import { AIChat } from './AIChat';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import {
@@ -18,16 +19,16 @@ export const AIAssistant = () => {
 	useEffect(() => {
 		if (!isMobile || !open) return;
 
-		const original = document.body.style.overflow;
-		document.body.style.overflow = 'clip';
+		const original = document.documentElement.style.overflow;
+		document.documentElement.style.overflow = 'clip';
 
 		return () => {
-			document.body.style.overflow = original;
+			document.documentElement.style.overflow = original;
 		};
 	}, [isMobile, open]);
 	const [error, setError] = useState<string | null>(null);
 	const [activeView, setActiveView] = useState<
-		'recommendations' | 'medications' | null
+		'recommendations' | 'medications' | 'chat' | null
 	>(null);
 	const [recommendationsView, setRecommendationsView] = useState<
 		'card' | 'schedule' | 'success'
@@ -37,6 +38,15 @@ export const AIAssistant = () => {
 	const { id: patient_serial } = useParams();
 	const dispatch = useAppDispatch();
 	const session = useAppSelector((state) => state.session.session);
+
+	useEffect(() => {
+		if (session) return;
+
+		setOpen(false);
+		setActiveView(null);
+		setRecommendationsView('card');
+		setError(null);
+	}, [session]);
 
 	const aiCache = useAppSelector(
 		(state) => state.ai.byPatient[patient_serial!],
@@ -49,14 +59,29 @@ export const AIAssistant = () => {
 		aiCache?.recommendationsStatus === 'loading' ||
 		aiCache?.medicationsStatus === 'loading';
 
-	useEffect(() => {
-		if (!open) return;
+	const overviewRequestInFlight = useRef(false);
 
-		dispatch(fetchAiOverview(patient_serial!)).then((result) => {
+	const loadOverview = async () => {
+		if (overviewRequestInFlight.current) return;
+
+		overviewRequestInFlight.current = true;
+		setError(null);
+
+		try {
+			const result = await dispatch(fetchAiOverview(patient_serial!));
+
 			if (fetchAiOverview.rejected.match(result) && !result.meta.condition) {
 				setError(result.error.message ?? 'Failed to get AI overview');
 			}
-		});
+		} finally {
+			overviewRequestInFlight.current = false;
+		}
+	};
+
+	useEffect(() => {
+		if (!open) return;
+
+		loadOverview();
 	}, [open, patient_serial]);
 
 	const activeData =
@@ -162,8 +187,8 @@ export const AIAssistant = () => {
 				<p className='ai-assistant__blurb'>
 					Summarizes this patient's chart, flags critical findings, and surfaces
 					suggested questions to ask during the visit. Ask it for follow-up
-					recommendations or a review of current medications whenever you need a
-					second pair of eyes.
+					recommendations, a review of current medications, or chat with it
+					directly whenever you need a second pair of eyes.
 				</p>
 			)}
 
@@ -195,7 +220,7 @@ export const AIAssistant = () => {
 						</div>
 					)}
 
-					{activeView && !activeData && !overviewLoading && (
+					{activeView && activeView !== 'chat' && !activeData && !overviewLoading && (
 						<div className='ai-loading'>
 							<span className='ai-spinner' />
 							<p>Getting {activeView}...</p>
@@ -234,6 +259,13 @@ export const AIAssistant = () => {
 					{!activeView && !overviewLoading && !overview?.ai_overview && (
 						<div className='ai-message ai-assistant__tab-content'>
 							<p>No overview available.</p>
+							<button
+								type='button'
+								className='ai-back-btn'
+								onClick={loadOverview}
+							>
+								Retry
+							</button>
 						</div>
 					)}
 
@@ -253,7 +285,13 @@ export const AIAssistant = () => {
 						</div>
 					)}
 
-					{overview && (
+					{activeView === 'chat' && (
+						<div key='chat' className='ai-assistant__tab-content ai-assistant__tab-content--chat'>
+							<AIChat />
+						</div>
+					)}
+
+					{overview && activeView !== 'chat' && (
 						<div className='ai-quick-action'>
 							<span
 								className={
@@ -291,6 +329,21 @@ export const AIAssistant = () => {
 									onClick={() => handleQuickAction('medications')}
 								>
 									Medications
+								</button>
+							</span>
+						</div>
+					)}
+
+					{activeView !== 'chat' && (
+						<div className='ai-quick-action'>
+							<span className='ai-quick-action-wrap'>
+								<button
+									type='button'
+									className='ai-quick-action-button'
+									disabled={isScheduling}
+									onClick={() => setActiveView('chat')}
+								>
+									Chat
 								</button>
 							</span>
 						</div>

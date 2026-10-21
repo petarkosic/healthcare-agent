@@ -29,6 +29,10 @@ const HINT_POOL = [
 const pickRandomHints = () =>
 	[...HINT_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
 
+// Keep in sync with MAX_MESSAGES_PER_CONVERSATION in server/routers/chat.py.
+const MAX_MESSAGES = 40;
+const CAP_WARNING_THRESHOLD = 5;
+
 const THINKING_MESSAGES = [
 	'Thinking...',
 	'Checking the chart...',
@@ -53,6 +57,11 @@ export const AIChat = () => {
 	const sending = cache?.sendStatus === 'loading';
 	const capReached = cache?.capReached ?? false;
 	const sendError = cache?.sendError ?? null;
+	const messagesRemaining = MAX_MESSAGES - messages.length;
+	const nearCap =
+		!capReached &&
+		messagesRemaining > 0 &&
+		messagesRemaining <= CAP_WARNING_THRESHOLD;
 
 	const messagesRef = useRef<HTMLDivElement>(null);
 
@@ -269,9 +278,17 @@ export const AIChat = () => {
 						</div>
 					)}
 
+					{nearCap && (
+						<p className='ai-chat__cap-notice ai-chat__cap-warning'>
+							{messagesRemaining} message
+							{messagesRemaining === 1 ? '' : 's'} left before this chat hits
+							its limit - consider starting a new one.
+						</p>
+					)}
+
 					{capReached && (
 						<p className='ai-chat__cap-notice'>
-							This chat is getting long — start a new one.
+							This chat is getting long - start a new one.
 						</p>
 					)}
 

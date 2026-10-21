@@ -539,6 +539,11 @@
 	flex-shrink: 0;
 }
 
+.ai-chat__cap-warning {
+	color: var(--warn);
+	opacity: 1;
+}
+
 .ai-chat__send-error {
 	color: var(--danger);
 	opacity: 1;

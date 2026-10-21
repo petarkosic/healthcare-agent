@@ -200,15 +200,107 @@
 	background: var(--surface-2);
 	color: var(--text);
 	font-size: var(--fs-base);
-	cursor: pointer;
 	transition:
 		background 0.15s,
 		border-color 0.15s;
 }
 
+.ai-chat__history-item-clickable {
+	cursor: pointer;
+}
+
 .ai-chat__history-item--active {
 	border-color: var(--ai-accent);
 	background: color-mix(in srgb, var(--ai-accent) 10%, var(--surface));
+}
+
+.ai-chat__history-item--delete-failed {
+	animation: ai-chat-history-delete-flash 2s ease-out;
+}
+
+@keyframes ai-chat-history-delete-flash {
+	from {
+		border-color: var(--danger);
+	}
+	to {
+		border-color: var(--border);
+	}
+}
+
+.ai-chat__history-item-error {
+	margin: var(--space-1) 0 0;
+	color: var(--danger);
+	font-size: var(--fs-sm);
+	animation: ai-chat-history-error-fade 2s ease-out forwards;
+}
+
+@keyframes ai-chat-history-error-fade {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+.ai-chat__history-item--confirm {
+	color: var(--danger);
+	font-size: var(--fs-sm);
+}
+
+.ai-chat__history-item-confirm-actions {
+	display: flex;
+	gap: var(--space-2);
+	flex-shrink: 0;
+}
+
+.ai-chat__history-item-confirm-actions button {
+	padding: var(--space-1) var(--space-3);
+	font-size: var(--fs-sm);
+}
+
+.btn-tooltip-wrap.ai-chat__history-delete-wrap {
+	cursor: pointer;
+}
+
+.ai-chat__history-delete-wrap[data-tooltip]:hover::after {
+	bottom: auto;
+	left: auto;
+	top: 50%;
+	right: calc(100% + 8px);
+	transform: translateY(-50%);
+}
+
+.ai-chat__history-delete-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.ai-chat__history-delete-btn:hover {
+	background: var(--danger-wash);
+	color: var(--danger);
+}
+
+.ai-chat__history-delete-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.ai-chat__history-item-trailing {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	flex-shrink: 0;
 }
 
 .ai-chat__history-item-spinner {

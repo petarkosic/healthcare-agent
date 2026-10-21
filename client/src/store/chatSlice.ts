@@ -16,6 +16,7 @@ interface PatientChatCache {
 	sendStatus: FetchStatus;
 	sendError: string | null;
 	capReached: boolean;
+	deleteConversationError: { conversationId: string; message: string } | null;
 }
 
 interface ChatState {
@@ -32,6 +33,7 @@ const emptyCache = (): PatientChatCache => ({
 	sendStatus: 'idle',
 	sendError: null,
 	capReached: false,
+	deleteConversationError: null,
 });
 
 const initialState: ChatState = { byPatient: {} };
@@ -71,6 +73,25 @@ export const createConversation = createAsyncThunk(
 		const data = (await res.json()) as { conversation_id: string };
 
 		return data.conversation_id;
+	},
+);
+
+export const deleteConversation = createAsyncThunk(
+	'chat/deleteConversation',
+	async ({
+		patientSerial,
+		conversationId,
+	}: {
+		patientSerial: string;
+		conversationId: string;
+	}) => {
+		const res = await apiFetch(
+			`${API_BASE}/api/agents/chat/${patientSerial}/conversations/${conversationId}`,
+			{ method: 'DELETE' },
+		);
+		if (!res.ok) throw new Error('Failed to delete conversation');
+
+		return conversationId;
 	},
 );
 
@@ -185,6 +206,36 @@ const chatSlice = createSlice({
 				state.byPatient[meta.arg].activeConversationId = payload;
 				state.byPatient[meta.arg].messages = [];
 				state.byPatient[meta.arg].capReached = false;
+			})
+
+			.addCase(deleteConversation.pending, (state, { meta }) => {
+				ensure(state, meta.arg.patientSerial);
+				state.byPatient[meta.arg.patientSerial].deleteConversationError = null;
+			})
+			.addCase(deleteConversation.fulfilled, (state, { meta, payload }) => {
+				const cache = state.byPatient[meta.arg.patientSerial];
+				if (!cache) return;
+
+				cache.conversations = cache.conversations.filter(
+					(c) => c.id !== payload,
+				);
+
+				if (cache.activeConversationId === payload) {
+					cache.activeConversationId = null;
+					cache.messages = [];
+					cache.messagesStatus = 'idle';
+					cache.capReached = false;
+					cache.sendError = null;
+				}
+			})
+			.addCase(deleteConversation.rejected, (state, { meta }) => {
+				const cache = state.byPatient[meta.arg.patientSerial];
+				if (!cache) return;
+
+				cache.deleteConversationError = {
+					conversationId: meta.arg.conversationId,
+					message: 'Failed to delete - try again.',
+				};
 			})
 
 			.addCase(fetchChatMessages.pending, (state, { meta }) => {

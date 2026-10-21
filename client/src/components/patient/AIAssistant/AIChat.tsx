@@ -63,9 +63,15 @@ export const AIChat = () => {
 		node.scrollTop = node.scrollHeight;
 	}, [messages, sending]);
 
+	const [prevConversationId, setPrevConversationId] =
+		useState(activeConversationId);
+	if (prevConversationId !== activeConversationId) {
+		setPrevConversationId(activeConversationId);
+		setInput('');
+	}
+
 	const handleNewChat = () => {
 		setShowHistory(false);
-		setInput('');
 		dispatch(startNewChat(patientSerial!));
 	};
 

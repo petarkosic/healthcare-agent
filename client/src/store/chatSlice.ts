@@ -4,9 +4,12 @@ import { API_BASE, apiFetch } from '../lib/api';
 
 type FetchStatus = 'idle' | 'loading' | 'done' | 'error';
 
+const CONVERSATIONS_PAGE_SIZE = 20;
+
 interface PatientChatCache {
 	conversations: ChatConversation[];
 	conversationsStatus: FetchStatus;
+	conversationsHasMore: boolean;
 	activeConversationId: string | null;
 	messages: ChatMessage[];
 	messagesStatus: FetchStatus;
@@ -22,6 +25,7 @@ interface ChatState {
 const emptyCache = (): PatientChatCache => ({
 	conversations: [],
 	conversationsStatus: 'idle',
+	conversationsHasMore: false,
 	activeConversationId: null,
 	messages: [],
 	messagesStatus: 'idle',
@@ -34,13 +38,22 @@ const initialState: ChatState = { byPatient: {} };
 
 export const fetchConversations = createAsyncThunk(
 	'chat/fetchConversations',
-	async (patientSerial: string) => {
+	async ({
+		patientSerial,
+		offset = 0,
+	}: {
+		patientSerial: string;
+		offset?: number;
+	}) => {
 		const res = await apiFetch(
-			`${API_BASE}/api/agents/chat/${patientSerial}/conversations`,
+			`${API_BASE}/api/agents/chat/${patientSerial}/conversations?limit=${CONVERSATIONS_PAGE_SIZE}&offset=${offset}`,
 		);
 		if (!res.ok) throw new Error('Failed to load conversations');
 
-		return (await res.json()) as ChatConversation[];
+		return (await res.json()) as {
+			conversations: ChatConversation[];
+			has_more: boolean;
+		};
 	},
 );
 
@@ -120,6 +133,15 @@ const chatSlice = createSlice({
 			state.byPatient[action.payload.patientSerial].activeConversationId =
 				action.payload.conversationId;
 		},
+		startNewChat(state, action: { payload: string }) {
+			ensure(state, action.payload);
+			const cache = state.byPatient[action.payload];
+			cache.activeConversationId = null;
+			cache.messages = [];
+			cache.messagesStatus = 'idle';
+			cache.capReached = false;
+			cache.sendError = null;
+		},
 		appendOptimisticUserMessage(
 			state,
 			action: { payload: { patientSerial: string; content: string } },
@@ -140,15 +162,22 @@ const chatSlice = createSlice({
 	extraReducers: (builder) => {
 		builder
 			.addCase(fetchConversations.pending, (state, { meta }) => {
-				ensure(state, meta.arg);
-				state.byPatient[meta.arg].conversationsStatus = 'loading';
+				ensure(state, meta.arg.patientSerial);
+				state.byPatient[meta.arg.patientSerial].conversationsStatus = 'loading';
 			})
 			.addCase(fetchConversations.fulfilled, (state, { meta, payload }) => {
-				state.byPatient[meta.arg].conversations = payload;
-				state.byPatient[meta.arg].conversationsStatus = 'done';
+				const cache = state.byPatient[meta.arg.patientSerial];
+				const offset = meta.arg.offset ?? 0;
+
+				cache.conversations =
+					offset === 0
+						? payload.conversations
+						: [...cache.conversations, ...payload.conversations];
+				cache.conversationsHasMore = payload.has_more;
+				cache.conversationsStatus = 'done';
 			})
 			.addCase(fetchConversations.rejected, (state, { meta }) => {
-				state.byPatient[meta.arg].conversationsStatus = 'error';
+				state.byPatient[meta.arg.patientSerial].conversationsStatus = 'error';
 			})
 
 			.addCase(createConversation.fulfilled, (state, { meta, payload }) => {
@@ -212,6 +241,7 @@ const chatSlice = createSlice({
 
 export const {
 	setActiveConversation,
+	startNewChat,
 	appendOptimisticUserMessage,
 	clearPatientChatCache,
 } = chatSlice.actions;

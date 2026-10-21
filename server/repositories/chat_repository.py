@@ -16,13 +16,22 @@ class ChatRepository(BaseRepository):
 
         return str(conversation_id)
 
-    def list_conversations(self, patient_serial: str) -> list[dict[str, Any]]:
-        return self._execute_query(
+    def list_conversations(
+        self, patient_serial: str, limit: int = 20, offset: int = 0
+    ) -> tuple[list[dict[str, Any]], bool]:
+        """Returns (conversations, has_more). Fetches limit+1 rows so "is there
+        another page" is a free side effect of the query, not a second COUNT(*)."""
+        rows = self._execute_query(
             "SELECT id, created_at, last_message_at FROM chat_conversations "
             "WHERE patient_serial = %s AND deleted_at IS NULL "
-            "ORDER BY COALESCE(last_message_at, created_at) DESC",
-            (patient_serial,),
+            "ORDER BY COALESCE(last_message_at, created_at) DESC "
+            "LIMIT %s OFFSET %s",
+            (patient_serial, limit + 1, offset),
         )
+
+        has_more = len(rows) > limit
+
+        return rows[:limit], has_more
 
     def get_conversation(self, patient_serial: str, conversation_id: str) -> Optional[dict[str, Any]]:
         results = self._execute_query(

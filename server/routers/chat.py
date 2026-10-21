@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from langfuse import observe, propagate_attributes
 
 from models.agents import ChatRequest
@@ -18,10 +18,13 @@ MAX_MESSAGES_PER_CONVERSATION = 40
 @observe()
 def list_conversations(
     patient_serial: str,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     doctor: CurrentDoctor = Depends(get_current_doctor),
     _: None = Depends(verify_patient_access),
 ):
-    return chat_repository.list_conversations(patient_serial)
+    conversations, has_more = chat_repository.list_conversations(patient_serial, limit=limit, offset=offset)
+    return {"conversations": conversations, "has_more": has_more}
 
 
 @router.post("/{patient_serial}/conversations")

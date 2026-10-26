@@ -33,8 +33,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      chroma:
-        condition: service_started
     networks:
       - ha-network
 

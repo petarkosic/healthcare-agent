@@ -3,6 +3,7 @@ from typing import List
 
 import chromadb
 from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langfuse import observe
 
@@ -18,16 +19,20 @@ class RAGService:
         collection_name: str = "patient_notes",
         persist_directory: str = VECTOR_DB_PATH,
     ):
+        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
         if CHROMA_HOST:
             chroma_client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
             self.vectorstore = Chroma(
                 client=chroma_client,
                 collection_name=collection_name,
+                embedding_function=embeddings,
             )
         else:
             self.vectorstore = Chroma(
                 collection_name=collection_name,
                 persist_directory=persist_directory,
+                embedding_function=embeddings,
             )
 
         self.splitter = RecursiveCharacterTextSplitter(
@@ -43,7 +48,7 @@ class RAGService:
         on small instances."""
         if self._reranker is None:
             from sentence_transformers import CrossEncoder
-            self._reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+            self._reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
             
         return self._reranker
 

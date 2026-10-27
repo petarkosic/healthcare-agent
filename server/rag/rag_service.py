@@ -118,7 +118,7 @@ class RAGService:
         return [doc for doc, meta in paired if meta["note_id"] == latest_note_id]
 
     @observe(as_type="retriever")
-    def search_notes(self, patient_serial: str, query: str, k: int = 10) -> List[dict]:
+    def search_notes(self, patient_serial: str, query: str, k: int = 20, top_n: int = 4) -> List[dict]:
         docs = self.vectorstore.similarity_search(
             query=query,
             filter={"$and": [{"patient_serial": patient_serial}, {"source_type": {"$in": ["note", "chief_complaint"]}}]},
@@ -132,7 +132,7 @@ class RAGService:
         pairs = [[query, doc.page_content] for doc in docs]
         scores = reranker.predict(pairs)
 
-        ranked = sorted(zip(docs, scores), key=lambda pair: pair[1], reverse=True)[:4]
+        ranked = sorted(zip(docs, scores), key=lambda pair: pair[1], reverse=True)[:top_n]
 
         results = [
             {"content": doc.page_content, "record_date": doc.metadata["record_date"]}

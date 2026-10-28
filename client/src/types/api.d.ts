@@ -245,7 +245,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/agents/recommendations": {
+    "/api/agents/recommendations/{patient_serial}": {
         parameters: {
             query?: never;
             header?: never;
@@ -255,14 +255,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Get Recommendations */
-        post: operations["get_recommendations_api_agents_recommendations_post"];
+        post: operations["get_recommendations_api_agents_recommendations__patient_serial__post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/agents/medications": {
+    "/api/agents/medications/{patient_serial}": {
         parameters: {
             query?: never;
             header?: never;
@@ -272,7 +272,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Get Medications */
-        post: operations["get_medications_api_agents_medications_post"];
+        post: operations["get_medications_api_agents_medications__patient_serial__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -500,6 +500,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/agents/chat/{patient_serial}/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Conversations */
+        get: operations["list_conversations_api_agents_chat__patient_serial__conversations_get"];
+        put?: never;
+        /** Create Conversation */
+        post: operations["create_conversation_api_agents_chat__patient_serial__conversations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/agents/chat/{patient_serial}/conversations/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Conversation */
+        delete: operations["delete_conversation_api_agents_chat__patient_serial__conversations__conversation_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/agents/chat/{patient_serial}/conversations/{conversation_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Messages */
+        get: operations["list_messages_api_agents_chat__patient_serial__conversations__conversation_id__messages_get"];
+        put?: never;
+        /** Send Message */
+        post: operations["send_message_api_agents_chat__patient_serial__conversations__conversation_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -520,17 +573,6 @@ export interface components {
             ai_overview: components["schemas"]["AIOverview"];
             /** Chroma Sources */
             chroma_sources: number;
-        };
-        /** ActiveMedications */
-        ActiveMedications: {
-            /** Name */
-            name: string;
-            /** Dosage */
-            dosage: string;
-            /** Frequency */
-            frequency: string;
-            /** Reason */
-            reason: string;
         };
         /** AddDiagnosis */
         AddDiagnosis: {
@@ -637,6 +679,11 @@ export interface components {
             /** Doctor Name */
             doctor_name: string;
         };
+        /** ChatRequest */
+        ChatRequest: {
+            /** Message */
+            message: string;
+        };
         /** ClinicalNoteResponse */
         ClinicalNoteResponse: {
             /**
@@ -655,7 +702,7 @@ export interface components {
              * Note Type
              * @enum {string}
              */
-            note_type: "soap_subjective" | "soap_objective" | "soap_assessment" | "soap_plan" | "progress_note" | "consult_note" | "discharge_summary" | "procedure_note";
+            note_type: "soap_note" | "progress_note" | "consult_note" | "discharge_summary" | "procedure_note";
             /** Note Text */
             note_text: string;
             /** Summary */
@@ -922,16 +969,6 @@ export interface components {
             /** Prescriber Last Name */
             prescriber_last_name: string;
         };
-        /** MedicationsRequest */
-        MedicationsRequest: {
-            /** Overview */
-            overview: string;
-            /**
-             * Current Medications
-             * @default []
-             */
-            current_medications: components["schemas"]["ActiveMedications"][];
-        };
         /** Note */
         Note: {
             /**
@@ -943,16 +980,11 @@ export interface components {
              * Note Type
              * @enum {string}
              */
-            note_type: "soap_subjective" | "soap_objective" | "soap_assessment" | "soap_plan" | "progress_note" | "consult_note" | "discharge_summary" | "procedure_note";
+            note_type: "soap_note" | "progress_note" | "consult_note" | "discharge_summary" | "procedure_note";
             /** Note Text */
             note_text: string;
             /** Summary */
             summary?: string | null;
-        };
-        /** OverviewRequest */
-        OverviewRequest: {
-            /** Overview */
-            overview: string;
         };
         /** PatientBase */
         PatientBase: {
@@ -1827,22 +1859,20 @@ export interface operations {
             };
         };
     };
-    get_recommendations_api_agents_recommendations_post: {
+    get_recommendations_api_agents_recommendations__patient_serial__post: {
         parameters: {
             query?: never;
             header?: {
                 authorization?: string | null;
             };
-            path?: never;
+            path: {
+                patient_serial: string;
+            };
             cookie?: {
                 ha_token?: string | null;
             };
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OverviewRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -1864,22 +1894,20 @@ export interface operations {
             };
         };
     };
-    get_medications_api_agents_medications_post: {
+    get_medications_api_agents_medications__patient_serial__post: {
         parameters: {
             query?: never;
             header?: {
                 authorization?: string | null;
             };
-            path?: never;
+            path: {
+                patient_serial: string;
+            };
             cookie?: {
                 ha_token?: string | null;
             };
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MedicationsRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -2306,6 +2334,191 @@ export interface operations {
             };
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_conversations_api_agents_chat__patient_serial__conversations_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                patient_serial: string;
+            };
+            cookie?: {
+                ha_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_conversation_api_agents_chat__patient_serial__conversations_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                patient_serial: string;
+            };
+            cookie?: {
+                ha_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_conversation_api_agents_chat__patient_serial__conversations__conversation_id__delete: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                patient_serial: string;
+                conversation_id: string;
+            };
+            cookie?: {
+                ha_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_messages_api_agents_chat__patient_serial__conversations__conversation_id__messages_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                patient_serial: string;
+                conversation_id: string;
+            };
+            cookie?: {
+                ha_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_message_api_agents_chat__patient_serial__conversations__conversation_id__messages_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                patient_serial: string;
+                conversation_id: string;
+            };
+            cookie?: {
+                ha_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

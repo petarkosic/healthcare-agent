@@ -12,8 +12,7 @@ ResultStatus = Literal['normal', 'abnormal', 'critical', 'pending']
 DiagnosisType = Literal['primary', 'secondary', 'chronic', 'acute']
 DiagnosisStatus = Literal['active', 'resolved', 'chronic']
 NoteType = Literal[
-    'soap_subjective', 'soap_objective', 'soap_assessment', 'soap_plan',
-    'progress_note', 'consult_note', 'discharge_summary', 'procedure_note',
+    'soap_note', 'progress_note', 'consult_note', 'discharge_summary', 'procedure_note',
 ]
 Gender = Literal['Male', 'Female']
 BloodType = Literal['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']

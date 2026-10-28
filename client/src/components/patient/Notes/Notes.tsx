@@ -14,8 +14,12 @@ import type { NoteType } from '../../../types/enums';
 export const Notes = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedNote, setSelectedNote] = useState<ClinicalNote | null>(null);
-	const [newNoteType, setNewNoteType] = useState('progress_note');
+	const [newNoteType, setNewNoteType] = useState('soap_note');
 	const [newNoteText, setNewNoteText] = useState('');
+	const [soapSubjective, setSoapSubjective] = useState('');
+	const [soapObjective, setSoapObjective] = useState('');
+	const [soapAssessment, setSoapAssessment] = useState('');
+	const [soapPlan, setSoapPlan] = useState('');
 	const [localError, setLocalError] = useState<string | null>(null);
 
 	const { id: patient_serial } = useParams();
@@ -32,21 +36,54 @@ export const Notes = () => {
 
 		setLocalError(null);
 
+		const note_text =
+			newNoteType === 'soap_note'
+				? `Subjective: ${soapSubjective}\n\nObjective: ${soapObjective}\n\nAssessment: ${soapAssessment}\n\nPlan: ${soapPlan}`
+				: newNoteText;
+
 		try {
 			await addNote({
 				patientId: patient_serial!,
 				body: {
 					visit_id: session!.visitId as string,
 					note_type: newNoteType as NoteType,
-					note_text: newNoteText,
+					note_text,
 				},
 			}).unwrap();
 
 			setNewNoteText('');
+			setSoapSubjective('');
+			setSoapObjective('');
+			setSoapAssessment('');
+			setSoapPlan('');
 			setIsModalOpen(false);
 		} catch {
 			setLocalError('Failed to add note');
 		}
+	};
+
+	const SOAP_SECTION_RE = /(Subjective|Objective|Assessment|Plan):\s*/g;
+
+	const renderNoteText = (text: string) => {
+		const matches = [...text.matchAll(SOAP_SECTION_RE)];
+		if (matches.length < 4) return <span>{text}</span>;
+
+		return (
+			<>
+				{matches.map((match, i) => {
+					const label = match[1];
+					const start = match.index! + match[0].length;
+					const end = matches[i + 1]?.index ?? text.length;
+					const body = text.slice(start, end).trim();
+
+					return (
+						<p key={label} className='soap-section'>
+							<span className='soap-label'>{label}:</span> {body}
+						</p>
+					);
+				})}
+			</>
+		);
 	};
 
 	if (!data) return null;
@@ -85,7 +122,7 @@ export const Notes = () => {
 							>
 								<div className='note-header'>
 									<span
-										className={`note-type-badge type-${note?.note_type?.split('_')[1] || 'generic'}`}
+										className={`note-type-badge type-${note?.note_type?.replace(/_/g, '-') || 'generic'}`}
 									>
 										{note?.note_type?.replace(/_/g, ' ').toUpperCase()}
 									</span>
@@ -120,33 +157,83 @@ export const Notes = () => {
 								onChange={(e) => setNewNoteType(e.target.value)}
 								disabled={isSubmitting}
 							>
+								<option value='soap_note'>SOAP Note</option>
 								<option value='progress_note'>Progress Note</option>
-								<option value='soap_subjective'>SOAP - Subjective</option>
-								<option value='soap_objective'>SOAP - Objective</option>
-								<option value='soap_assessment'>SOAP - Assessment</option>
-								<option value='soap_plan'>SOAP - Plan</option>
 								<option value='consult_note'>Consultation Note</option>
+								<option value='discharge_summary'>Discharge Summary</option>
+								<option value='procedure_note'>Procedure Note</option>
 							</select>
 						</div>
-						<div className='form-group'>
-							<label htmlFor='note_text'>Note Details</label>
-							<textarea
-								id='note_text'
-								rows={6}
-								value={newNoteText}
-								onChange={(e) => setNewNoteText(e.target.value)}
-								placeholder='Enter clinical observations...'
-								required
-								disabled={isSubmitting}
-							/>
-						</div>
+						{newNoteType === 'soap_note' ? (
+							<>
+								<div className='form-group'>
+									<label htmlFor='soap_subjective'>Subjective</label>
+									<textarea
+										id='soap_subjective'
+										rows={3}
+										value={soapSubjective}
+										onChange={(e) => setSoapSubjective(e.target.value)}
+										placeholder='Reported symptoms...'
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label htmlFor='soap_objective'>Objective</label>
+									<textarea
+										id='soap_objective'
+										rows={3}
+										value={soapObjective}
+										onChange={(e) => setSoapObjective(e.target.value)}
+										placeholder='Exam findings, vitals, measurable observations...'
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label htmlFor='soap_assessment'>Assessment</label>
+									<textarea
+										id='soap_assessment'
+										rows={3}
+										value={soapAssessment}
+										onChange={(e) => setSoapAssessment(e.target.value)}
+										placeholder='Diagnosis / clinical judgment...'
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+								<div className='form-group'>
+									<label htmlFor='soap_plan'>Plan</label>
+									<textarea
+										id='soap_plan'
+										rows={3}
+										value={soapPlan}
+										onChange={(e) => setSoapPlan(e.target.value)}
+										placeholder='Treatment plan, follow-up, next steps...'
+										required
+										disabled={isSubmitting}
+									/>
+								</div>
+							</>
+						) : (
+							<div className='form-group'>
+								<label htmlFor='note_text'>Note Details</label>
+								<textarea
+									id='note_text'
+									rows={6}
+									value={newNoteText}
+									onChange={(e) => setNewNoteText(e.target.value)}
+									placeholder='Enter clinical observations...'
+									required
+									disabled={isSubmitting}
+								/>
+							</div>
+						)}
 						<div className='modal-actions'>
 							<button
 								type='button'
 								className='btn-secondary'
-								onClick={
-									isSubmitting ? undefined : () => setIsModalOpen(false)
-								}
+								onClick={isSubmitting ? undefined : () => setIsModalOpen(false)}
 								disabled={isSubmitting}
 							>
 								Cancel
@@ -168,7 +255,7 @@ export const Notes = () => {
 					<div className='modal-body'>
 						<div className='note-header'>
 							<span
-								className={`note-type-badge type-${selectedNote?.note_type?.split('_')[1] || 'generic'}`}
+								className={`note-type-badge type-${selectedNote?.note_type?.replace(/_/g, '-') || 'generic'}`}
 							>
 								{selectedNote?.note_type?.replace(/_/g, ' ').toUpperCase()}
 							</span>
@@ -181,7 +268,7 @@ export const Notes = () => {
 							{selectedNote?.doctor_last_name}
 						</div>
 						<div
-							className='note-text'
+							className='note-text note-text--full'
 							style={{
 								width: '100%',
 								whiteSpace: 'pre-wrap',
@@ -189,7 +276,9 @@ export const Notes = () => {
 								overflowY: 'auto',
 							}}
 						>
-							{selectedNote?.note_text}
+							{selectedNote?.note_text
+								? renderNoteText(selectedNote.note_text)
+								: null}
 						</div>
 					</div>
 				</Modal>

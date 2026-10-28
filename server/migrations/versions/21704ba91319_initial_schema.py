@@ -169,8 +169,7 @@ def upgrade() -> None:
             visit_id             UUID NOT NULL REFERENCES visits(visit_id) ON DELETE CASCADE,
             doctor_serial_number VARCHAR(8) NOT NULL REFERENCES doctors(doctor_serial_number),
             note_type            VARCHAR(50) NOT NULL CONSTRAINT clinical_notes_note_type_check CHECK (note_type IN (
-                                     'soap_subjective', 'soap_objective', 'soap_assessment', 'soap_plan',
-                                     'progress_note', 'consult_note', 'discharge_summary', 'procedure_note'
+                                     'soap_note', 'progress_note', 'consult_note', 'discharge_summary', 'procedure_note'
                                  )),
             note_text            TEXT NOT NULL,
             summary              TEXT,

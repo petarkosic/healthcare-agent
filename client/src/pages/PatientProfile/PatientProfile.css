@@ -68,24 +68,29 @@
 	letter-spacing: 0.05em;
 }
 
-.type-subjective {
+.type-soap-note {
 	background: #e0f2fe;
 	color: #0369a1;
 }
 
-.type-objective {
+.type-progress-note {
 	background: var(--ok-wash);
 	color: var(--ok);
 }
 
-.type-assessment {
+.type-consult-note {
 	background: var(--warn-wash);
 	color: var(--warn);
 }
 
-.type-plan {
+.type-discharge-summary {
 	background: #f3e8ff;
 	color: #7e22ce;
+}
+
+.type-procedure-note {
+	background: var(--danger-wash);
+	color: var(--danger);
 }
 
 .type-generic {

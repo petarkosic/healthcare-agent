@@ -1,7 +1,7 @@
 """add dashboard indexes
 
 Revision ID: 4f8a2c1d9b3e
-Revises: b2f1c0a7d3e2
+Revises: 21704ba91319
 Create Date: 2026-06-24 00:00:00.000000
 
 """
@@ -10,7 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 
 revision: str = '4f8a2c1d9b3e'
-down_revision: Union[str, Sequence[str], None] = 'b2f1c0a7d3e2'
+down_revision: Union[str, Sequence[str], None] = '21704ba91319'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

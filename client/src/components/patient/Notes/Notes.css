@@ -55,6 +55,19 @@
 	max-width: 100%;
 }
 
+.note-text--full .soap-section {
+	margin: 0 0 var(--space-3);
+}
+
+.note-text--full .soap-section:last-child {
+	margin-bottom: 0;
+}
+
+.soap-label {
+	font-weight: var(--fw-semibold);
+	color: var(--accent-ink);
+}
+
 @media (max-width: 768px) {
 	.notes-timeline {
 		max-height: 300px;

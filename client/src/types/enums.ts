@@ -72,10 +72,7 @@ export const BLOOD_TYPES = [
 export type BloodType = (typeof BLOOD_TYPES)[number];
 
 export const NOTE_TYPES = [
-	'soap_subjective',
-	'soap_objective',
-	'soap_assessment',
-	'soap_plan',
+	'soap_note',
 	'progress_note',
 	'consult_note',
 	'discharge_summary',

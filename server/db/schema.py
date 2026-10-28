@@ -272,7 +272,7 @@ class ClinicalNote(Base):
     __table_args__ = (
         # Keep in sync with NoteType in models/enums.py
         CheckConstraint(
-            "note_type IN ('soap_subjective','soap_objective','soap_assessment','soap_plan','progress_note','consult_note','discharge_summary','procedure_note')",
+            "note_type IN ('soap_note','progress_note','consult_note','discharge_summary','procedure_note')",
             name="clinical_notes_note_type_check",
         ),
         Index("idx_clinical_notes_visit", "visit_id"),

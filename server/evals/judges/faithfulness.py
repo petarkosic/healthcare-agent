@@ -40,7 +40,10 @@ Task:
 4. Count unsupported and contradicted claims.
 5. passed = true only if both counts are zero.
 
-Ignore: formatting, hedging language, and generic advice with no factual content ("continue monitoring"). Judge facts only.
+Ignore: formatting, hedging language, generic advice with no factual content ("continue monitoring"), and
+clinical judgment or recommendation statements that assert no new fact about the patient ("treatment is
+indicated", "needs intensified control", "transition to a different drug class") - these are judgment
+calls / actions, not factual claims, even when unaccompanied by a cited value. Judge facts only.
 
 Return JSON: {{"claims": [{{"claim": str, "label": str, "evidence": str}}], "unsupported_count": int, "contradicted_count": int, "passed": bool}}
 """

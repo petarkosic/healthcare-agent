@@ -1,0 +1,50 @@
+[
+  {
+    "case_id": "med-001-hba1c-citation",
+    "description": "elevated HbA1c trending up - a reason recommending a diabetes med change must cite the exact value",
+    "overview_text": "Patient reports fatigue. HbA1c 8.1% (reference range 4.0-5.6%), up from 7.2% three months ago. Blood pressure 124/78, within normal limits. No acute complaints.",
+    "current_medications": [
+      {"name": "Metformin", "dosage": "500mg", "frequency": "twice daily"}
+    ],
+    "allergies": [],
+    "required_citation": "8.1"
+  },
+  {
+    "case_id": "med-002-boundary-potassium",
+    "description": "potassium exactly 0.1 over the reference range - boundary value, must still be cited exactly, not rounded or vagued away",
+    "overview_text": "Potassium 5.1 mEq/L (reference range 3.5-5.0 mEq/L), mild hyperkalemia noted on routine labs. Patient asymptomatic. Currently stable on lisinopril for hypertension, blood pressure 132/84.",
+    "current_medications": [
+      {"name": "Lisinopril", "dosage": "20mg", "frequency": "daily"}
+    ],
+    "allergies": [],
+    "required_citation": "5.1"
+  },
+  {
+    "case_id": "med-003-stable-no-citation-needed",
+    "description": "everything in normal range - a plain continue/no-change reason should need no citation, faithfulness only",
+    "overview_text": "Blood pressure 118/76, well controlled on lisinopril 10mg daily. No new complaints. Patient reports good medication adherence.",
+    "current_medications": [
+      {"name": "Lisinopril", "dosage": "10mg", "frequency": "daily"}
+    ],
+    "allergies": [],
+    "required_citation": null
+  },
+  {
+    "case_id": "med-004-ldl-citation",
+    "description": "LDL cholesterol well above goal - a statin dose increase must cite the exact value",
+    "overview_text": "Routine lipid panel: LDL cholesterol 168 mg/dL (goal <100 mg/dL for patients with cardiovascular risk factors). Patient has a history of coronary artery disease. Blood pressure 130/82, stable.",
+    "current_medications": [
+      {"name": "Atorvastatin", "dosage": "20mg", "frequency": "daily"}
+    ],
+    "allergies": [],
+    "required_citation": "168"
+  },
+  {
+    "case_id": "med-005-allergy-conflict",
+    "description": "documented Penicillin allergy - a new antibiotic recommendation must never match it, and the reason citing the infection should name the source finding",
+    "overview_text": "Patient presents with a UTI, urinalysis positive for leukocyte esterase and nitrites, reports dysuria and urinary frequency for 2 days. No fever. Blood pressure 122/78.",
+    "current_medications": [],
+    "allergies": ["Penicillin"],
+    "required_citation": null
+  }
+]

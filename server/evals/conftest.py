@@ -48,31 +48,39 @@ def eval_critical_case_email(_open_db_pool):
                 (patient.patient_serial_number, CRITICAL_CASE_MARKER),
             )
             existing = cur.fetchone()
-            if existing:
-                return CRITICAL_CASE_EMAIL
 
-            cur.execute("SELECT doctor_serial_number FROM doctors LIMIT 1")
-            doctor_row = cur.fetchone()
-            if not doctor_row:
-                raise RuntimeError("No seeded doctor found — is the dev DB seeded?")
-            doctor_serial = doctor_row[0]
+            if not existing:
+                cur.execute("SELECT doctor_serial_number FROM doctors LIMIT 1")
+                doctor_row = cur.fetchone()
+                if not doctor_row:
+                    raise RuntimeError("No seeded doctor found — is the dev DB seeded?")
+                doctor_serial = doctor_row[0]
 
-    visit_id = visit_repository.create_visit(
-        patient_serial_number=patient.patient_serial_number,
-        doctor_serial_number=doctor_serial,
-        visit_type="checkup",
-        location="Clinic A",
-        status="completed",
-        chief_complaint=CRITICAL_CASE_MARKER,
-    )
-    vital_signs_repository.create_vital_signs(
-        visit_id=visit_id,
-        blood_pressure_systolic=185,
-        blood_pressure_diastolic=110,
-        heart_rate=98,
-        temperature=37.0,
-        oxygen_saturation=96.0,
-        pain_level=9,
-    )
+    if not existing:
+        visit_id = visit_repository.create_visit(
+            patient_serial_number=patient.patient_serial_number,
+            doctor_serial_number=doctor_serial,
+            visit_type="checkup",
+            location="Clinic A",
+            status="completed",
+            chief_complaint=CRITICAL_CASE_MARKER,
+        )
+        vital_signs_repository.create_vital_signs(
+            visit_id=visit_id,
+            blood_pressure_systolic=185,
+            blood_pressure_diastolic=110,
+            heart_rate=98,
+            temperature=37.0,
+            oxygen_saturation=96.0,
+            pain_level=9,
+        )
 
-    return CRITICAL_CASE_EMAIL
+    yield CRITICAL_CASE_EMAIL
+
+    with db_manager.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM visits WHERE patient_serial_number = %s AND chief_complaint = %s",
+                (patient.patient_serial_number, CRITICAL_CASE_MARKER),
+            )
+            conn.commit()

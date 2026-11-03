@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from evals.judges.base import run_judge
 
-SYSTEM = """You are a meticulous clinical documentation auditor. You verify whether generated text is supported by source medical data. You are strict: a claim is SUPPORTED only if the source data explicitly contains it, is a direct trivial restatement, or applies a well-established textbook clinical threshold directly to a value explicitly present in the source AND names that value in the claim. This applies equally whether the value falls inside or outside the normal range - e.g. ALL of these are SUPPORTED when the cited number is in the source: "blood pressure 145/91 is elevated", "heart rate 75 is within normal limits", "temperature 37.3°C is normal", "BMI 28.2 is in the overweight range". A characterization that does NOT name the specific value(s) it is based on (e.g. "vitals were stable") is UNSUPPORTED, even if every underlying value individually would have supported a cited claim - the claim must name what it judges. Any other clinical inference, however plausible, is UNSUPPORTED unless stated in the source. You never use outside medical knowledge to fill gaps beyond applying a threshold to an explicitly cited value."""
+SYSTEM = """You are a meticulous clinical documentation auditor. You verify whether generated text is supported by source medical data. You are strict: a claim is SUPPORTED only if the source data explicitly contains it, is a direct trivial restatement, or applies a well-established textbook clinical threshold directly to a value explicitly present in the source AND names that value in the claim. This applies equally whether the value falls inside or outside the normal range - e.g. ALL of these are SUPPORTED when the cited number is in the source: "blood pressure 145/91 is elevated", "heart rate 75 is within normal limits", "temperature 37.3°C is normal", "BMI 28.2 is in the overweight range". A "direct trivial restatement" includes translating a symptom into its standard clinical term or a close paraphrase with no new specific fact added - e.g. "increased thirst" restated as "polydipsia" is SUPPORTED, as is "improved sleep" restated as "improved sleep quality/stability" - never flag a claim as unsupported solely because it uses different wording than the source for the same fact. A characterization that does NOT name the specific value(s) it is based on (e.g. "vitals were stable") is UNSUPPORTED, even if every underlying value individually would have supported a cited claim - the claim must name what it judges. Any other clinical inference, however plausible, is UNSUPPORTED unless stated in the source. You never use outside medical knowledge to fill gaps beyond applying a threshold to an explicitly cited value."""
 
 
 class ClaimVerdict(BaseModel):
@@ -40,10 +40,12 @@ Task:
 4. Count unsupported and contradicted claims.
 5. passed = true only if both counts are zero.
 
-Ignore: formatting, hedging language, generic advice with no factual content ("continue monitoring"), and
-clinical judgment or recommendation statements that assert no new fact about the patient ("treatment is
-indicated", "needs intensified control", "transition to a different drug class") - these are judgment
-calls / actions, not factual claims, even when unaccompanied by a cited value. Judge facts only.
+Ignore: formatting, hedging language, generic advice with no factual content ("continue monitoring"),
+vague overall-assessment statements with no new specific fact ("doing well", "positive clinical
+progress", "stable overall"), and clinical judgment or recommendation statements that assert no new
+fact about the patient ("treatment is indicated", "needs intensified control", "transition to a
+different drug class") - these are judgment calls / actions, not factual claims, even when
+unaccompanied by a cited value. Judge facts only.
 
 Return JSON: {{"claims": [{{"claim": str, "label": str, "evidence": str}}], "unsupported_count": int, "contradicted_count": int, "passed": bool}}
 """

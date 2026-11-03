@@ -1,0 +1,32 @@
+[
+  {
+    "case_id": "rec-001-bp-citation",
+    "description": "uncontrolled BP - a recommendation reasoning about blood pressure control must cite the exact value",
+    "overview_text": "Blood pressure 158/96 mmHg, uncontrolled despite current therapy. Patient reports occasional headaches. No other acute complaints.",
+    "required_citation": "158/96"
+  },
+  {
+    "case_id": "rec-002-hba1c-citation",
+    "description": "elevated HbA1c significantly above target - reason must cite the exact value",
+    "overview_text": "HbA1c 9.2% (reference range 4.0-5.6%), significantly above target. Patient reports increased thirst and fatigue over the past month.",
+    "required_citation": "9.2"
+  },
+  {
+    "case_id": "rec-003-boundary-ldl",
+    "description": "LDL exactly 1 mg/dL over goal - boundary value, must still be cited exactly, not rounded away",
+    "overview_text": "LDL cholesterol 101 mg/dL (goal <100 mg/dL for patients with cardiovascular risk factors), just above goal. Patient has a history of coronary artery disease.",
+    "required_citation": "101"
+  },
+  {
+    "case_id": "rec-004-routine-no-citation-needed",
+    "description": "routine preventive care, nothing abnormal - a plain scheduling recommendation should need no citation, faithfulness only",
+    "overview_text": "Patient due for annual influenza vaccination per preventive care schedule. No acute complaints. Vitals stable.",
+    "required_citation": null
+  },
+  {
+    "case_id": "rec-005-stable-mental-health",
+    "description": "everything stable and improving - faithfulness only, must not invent labs/meds not present in the overview",
+    "overview_text": "Patient reports improved mood and sleep on current sertraline regimen. No new complaints. Continues outpatient therapy sessions biweekly.",
+    "required_citation": null
+  }
+]

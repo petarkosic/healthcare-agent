@@ -1,0 +1,35 @@
+{
+  "answer": "The patient's blood pressure readings have fluctuated between 116/83 mmHg and 136/82 mmHg over the recorded period from January 2025 to November 2026.",
+  "chart_data": {
+    "label": "Systolic Blood Pressure",
+    "series": [
+      {
+        "date": "2025-01-23",
+        "value": 118.0
+      },
+      {
+        "date": "2025-05-03",
+        "value": 132.0
+      },
+      {
+        "date": "2026-03-22",
+        "value": 120.0
+      },
+      {
+        "date": "2026-08-23",
+        "value": 136.0
+      },
+      {
+        "date": "2026-11-04",
+        "value": 116.0
+      }
+    ],
+    "type": "line"
+  },
+  "tool_calls": [
+    {
+      "args": {},
+      "tool": "get_vitals"
+    }
+  ]
+}

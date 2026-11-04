@@ -1,0 +1,14 @@
+{
+  "answer": "The patient has one active diagnosis: Type 2 diabetes mellitus.",
+  "chart_data": null,
+  "tool_calls": [
+    {
+      "args": {
+        "statuses": [
+          "active"
+        ]
+      },
+      "tool": "get_diagnoses"
+    }
+  ]
+}

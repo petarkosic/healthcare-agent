@@ -1,0 +1,27 @@
+{
+  "answer": "The only lab result available in the chart is an HbA1c of 7.8% recorded on March 22, 2026.",
+  "chart_data": null,
+  "tool_calls": [
+    {
+      "args": {},
+      "tool": "get_labs"
+    },
+    {
+      "args": {},
+      "tool": "get_visits"
+    },
+    {
+      "args": {
+        "query": "lab results"
+      },
+      "tool": "search_notes"
+    },
+    {
+      "args": {
+        "end_date": "2026-12-31",
+        "start_date": "2026-01-01"
+      },
+      "tool": "get_labs"
+    }
+  ]
+}

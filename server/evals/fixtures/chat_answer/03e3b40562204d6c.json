@@ -1,0 +1,12 @@
+{
+  "answer": "The patient's current active medications are:\n- Sitagliptin 100mg, once daily (prescribed for Type 2 diabetes add-on)\n- Metformin 1000mg, twice daily (prescribed for Type 2 diabetes)",
+  "chart_data": null,
+  "tool_calls": [
+    {
+      "args": {
+        "status": "active"
+      },
+      "tool": "get_medications"
+    }
+  ]
+}

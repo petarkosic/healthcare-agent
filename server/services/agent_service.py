@@ -192,6 +192,7 @@ class AgentService:
                 Guidelines:
                 - Overview must be a summary of the patient's last visit, previous visit notes, any relevant medications and any critical alerts.
                 - Critical alerts must be a list of alerts that require immediate attention, such as pain, fever, or blood pressure.
+                - If ALLERGIES above is not "None", the overview MUST explicitly state the allergy (e.g. "Patient has a documented allergy to Penicillin") — never omit a known allergy, even when it isn't directly relevant to the current visit.
                 - Suggested questions must be a list of questions that the doctor could ask the patient to better understand the patient's condition.
                 - Do NOT include the patient's name or other identifiers (address, phone, email) anywhere in your response — refer to the patient generically (e.g. "the patient").
                 - When characterizing a vital sign or lab result (e.g. "elevated", "stable", "above reference range"), always cite the specific value alongside the characterization (e.g. "blood pressure 145/91 is elevated", "HbA1c 7.8% is above the reference range"). Never make an uncited blanket judgment like "vitals were stable" — name every value that judgment is based on.

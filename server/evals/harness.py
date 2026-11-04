@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from guardrails.runner import generate_medications, generate_recommendations
 from repositories import patient_repository
-from services import agent_service
+from services import agent_service, chat_service
 from rag import rag_service as rag
 from utils import cache
 
@@ -63,6 +63,24 @@ def resolve_patient_serial(patient_email: str) -> str:
         raise ValueError(f"No seeded patient with email {patient_email!r}")
 
     return patient.patient_serial_number
+
+
+def generate_chat_answer_case(case: dict, force_live: bool = False) -> dict:
+    """Return the chat agent's answer for a dataset case, from a cached
+    fixture unless force_live. Cache key is the case_id, same pattern as
+    the other generate_*_case functions. History is always empty - every
+    case here is a fresh, single-turn question (see plan's Global
+    Constraints on multi-turn being out of scope)."""
+    def _generate():
+        patient_serial = resolve_patient_serial(case["patient_email"])
+        return chat_service.answer_question(patient_serial, case["message"], history=[])
+
+    return cache_or_generate(
+        namespace="chat_answer",
+        key_payload={"case_id": case["case_id"]},
+        generate=_generate,
+        force_live=force_live,
+    )
 
 
 def generate_overview_case(case: dict, force_live: bool = False) -> dict:

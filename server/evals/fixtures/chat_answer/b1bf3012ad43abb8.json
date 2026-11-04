@@ -1,0 +1,12 @@
+{
+  "answer": "The lisinopril dose was reduced on January 15, 2026, due to the patient experiencing orthostatic hypotension, characterized by dizziness when standing up quickly and a mild drop in blood pressure upon standing.",
+  "chart_data": null,
+  "tool_calls": [
+    {
+      "args": {
+        "query": "lisinopril dose reduction"
+      },
+      "tool": "search_notes"
+    }
+  ]
+}

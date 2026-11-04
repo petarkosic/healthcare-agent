@@ -1,0 +1,12 @@
+{
+  "answer": "Yes, in a note dated February 1, 2026, the patient reported mild seasonal allergy symptoms, specifically sneezing and watery eyes. The assessment was seasonal allergic rhinitis, and the plan was to recommend an OTC antihistamine.",
+  "chart_data": null,
+  "tool_calls": [
+    {
+      "args": {
+        "query": "allergy symptoms"
+      },
+      "tool": "search_notes"
+    }
+  ]
+}

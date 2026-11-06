@@ -89,34 +89,33 @@ def send_message(
 
     with propagate_attributes(
         user_id=doctor.serial,
-        metadata={"patient_serial": patient_serial, "conversation_id": conversation_id},
+        session_id=conversation_id,
+        metadata={"patient_serial": patient_serial},
         tags=["chat"],
     ):
-        pass
+        prior_messages = chat_repository.list_messages(conversation_id)
+        history = [{"role": m["role"], "content": m["content"]} for m in prior_messages]
 
-    prior_messages = chat_repository.list_messages(conversation_id)
-    history = [{"role": m["role"], "content": m["content"]} for m in prior_messages]
+        chat_repository.add_message(conversation_id, role="user", content=body.message, tool_calls=[], chart_data=None)
 
-    chat_repository.add_message(conversation_id, role="user", content=body.message, tool_calls=[], chart_data=None)
+        try:
+            result = chat_service.answer_question(patient_serial, body.message, history)
+        except Exception:
+            logger.exception("Chat agent loop failed for patient %s", patient_serial)
+            raise HTTPException(status_code=500, detail="Error generating chat response")
 
-    try:
-        result = chat_service.answer_question(patient_serial, body.message, history)
-    except Exception:
-        logger.exception("Chat agent loop failed for patient %s", patient_serial)
-        raise HTTPException(status_code=500, detail="Error generating chat response")
+        message_id = chat_repository.add_message(
+            conversation_id,
+            role="assistant",
+            content=result["answer"],
+            tool_calls=result["tool_calls"],
+            chart_data=result.get("chart_data"),
+        )
 
-    message_id = chat_repository.add_message(
-        conversation_id,
-        role="assistant",
-        content=result["answer"],
-        tool_calls=result["tool_calls"],
-        chart_data=result.get("chart_data"),
-    )
-
-    return {
-        "id": message_id,
-        "role": "assistant",
-        "content": result["answer"],
-        "tool_calls": result["tool_calls"],
-        "chart_data": result.get("chart_data"),
-    }
+        return {
+            "id": message_id,
+            "role": "assistant",
+            "content": result["answer"],
+            "tool_calls": result["tool_calls"],
+            "chart_data": result.get("chart_data"),
+        }

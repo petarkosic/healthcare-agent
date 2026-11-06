@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import { ensureGoogleConnected } from '../../store/googleCalendarSlice';
@@ -65,7 +66,7 @@ export const SettingsModal = ({
 
 	if (!isOpen) return null;
 
-	return (
+	return createPortal(
 		<div className='settings-overlay' onClick={onClose}>
 			<div
 				className='settings-modal'
@@ -200,6 +201,7 @@ export const SettingsModal = ({
 					</div>
 				</div>
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 };

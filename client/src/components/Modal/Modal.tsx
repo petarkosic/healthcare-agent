@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { createPortal } from 'react-dom';
 import { useModalA11y } from '../../hooks/useModalA11y';
 import './Modal.css';
 
@@ -31,7 +32,7 @@ export const Modal = ({
 		.filter(Boolean)
 		.join(' ');
 
-	return (
+	return createPortal(
 		<div
 			className='modal-overlay'
 			onClick={disabled ? undefined : onClose}
@@ -58,6 +59,7 @@ export const Modal = ({
 				</div>
 				{children}
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 };

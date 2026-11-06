@@ -16,6 +16,10 @@ build
 .ruff_cache
 .coverage
 htmlcov
+.cache
+.vscode
+.idea
+*.swp
 .env
 .env.*
 !.env.example

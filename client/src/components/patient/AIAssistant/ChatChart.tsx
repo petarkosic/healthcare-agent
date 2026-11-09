@@ -13,37 +13,65 @@ const PADDING_BOTTOM = 22;
 
 const Y_TICKS = 4;
 
+const LINE_COLORS = [
+	'var(--chart-line-1)',
+	'var(--chart-line-2)',
+	'var(--chart-line-3)',
+	'var(--chart-line-4)',
+];
+
 const formatDate = (iso: string) =>
-	new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+	new Date(iso).toLocaleDateString(undefined, {
+		month: 'short',
+		day: 'numeric',
+	});
 
 const formatValue = (value: number) =>
 	Number.isInteger(value) ? String(value) : value.toFixed(1);
 
-const ChartSvg = ({ data, width, height }: { data: ChartData; width: number; height: number }) => {
-	const values = data.series.map((p) => p.value);
+const ChartSvg = ({
+	data,
+	width,
+	height,
+}: {
+	data: ChartData;
+	width: number;
+	height: number;
+}) => {
+	const values = data.lines.flatMap((l) => l.points.map((p) => p.value));
 	const min = Math.min(...values);
 	const max = Math.max(...values);
 	const range = max - min || 1;
 
+	const longestLine = data.lines.reduce((a, b) =>
+		a.points.length >= b.points.length ? a : b,
+	);
+	const lastIndex = Math.max(longestLine.points.length - 1, 1);
+
 	const plotWidth = width - PADDING_LEFT - PADDING_RIGHT;
 	const plotHeight = height - PADDING_TOP - PADDING_BOTTOM;
-	const lastIndex = Math.max(data.series.length - 1, 1);
 
 	const xAt = (i: number) => PADDING_LEFT + (i / lastIndex) * plotWidth;
 	const yAt = (value: number) =>
 		PADDING_TOP + plotHeight - ((value - min) / range) * plotHeight;
 
-	const points = data.series.map((p, i) => `${xAt(i)},${yAt(p.value)}`);
+	const yTicks = Array.from(
+		{ length: Y_TICKS + 1 },
+		(_, i) => min + (range * i) / Y_TICKS,
+	);
 
-	const yTicks = Array.from({ length: Y_TICKS + 1 }, (_, i) => min + (range * i) / Y_TICKS);
-
-	const lastDataIndex = data.series.length - 1;
+	const lastDataIndex = longestLine.points.length - 1;
 	const xTickIndexes = Array.from(
 		new Set([0, Math.round(lastDataIndex / 2), lastDataIndex]),
 	);
 
 	return (
-		<svg viewBox={`0 0 ${width} ${height}`} width='100%' height={height} role='img'>
+		<svg
+			viewBox={`0 0 ${width} ${height}`}
+			width='100%'
+			height={height}
+			role='img'
+		>
 			{yTicks.map((tick) => (
 				<g key={tick}>
 					<line
@@ -87,29 +115,54 @@ const ChartSvg = ({ data, width, height }: { data: ChartData; width: number; hei
 					x={xAt(i)}
 					y={height - PADDING_BOTTOM + 14}
 					textAnchor={
-						idx === 0 ? 'start' : idx === xTickIndexes.length - 1 ? 'end' : 'middle'
+						idx === 0
+							? 'start'
+							: idx === xTickIndexes.length - 1
+								? 'end'
+								: 'middle'
 					}
 				>
-					{formatDate(data.series[i].date)}
+					{formatDate(longestLine.points[i].date)}
 				</text>
 			))}
 
-			<polyline
-				points={points.join(' ')}
-				fill='none'
-				stroke='currentColor'
-				strokeWidth={2}
-			/>
-			{data.series.map((p, i) => {
-				const [x, y] = points[i].split(',');
+			{data.lines.map((line, lineIndex) => {
+				const color = LINE_COLORS[lineIndex % LINE_COLORS.length];
+				const points = line.points.map((p, i) => `${xAt(i)},${yAt(p.value)}`);
+
 				return (
-					<g key={`${p.date}-${i}`} className='ai-chat__chart-point'>
-						<circle cx={x} cy={y} r={8} fill='transparent' className='ai-chat__chart-hit'>
-							<title>
-								{formatDate(p.date)}: {formatValue(p.value)}
-							</title>
-						</circle>
-						<circle cx={x} cy={y} r={2.5} fill='currentColor' className='ai-chat__chart-dot' />
+					<g key={line.name}>
+						<polyline
+							points={points.join(' ')}
+							fill='none'
+							stroke={color}
+							strokeWidth={2}
+						/>
+						{line.points.map((p, i) => {
+							const [x, y] = points[i].split(',');
+							return (
+								<g key={`${p.date}-${i}`} className='ai-chat__chart-point'>
+									<circle
+										cx={x}
+										cy={y}
+										r={8}
+										fill='transparent'
+										className='ai-chat__chart-hit'
+									>
+										<title>
+											{line.name} — {formatDate(p.date)}: {formatValue(p.value)}
+										</title>
+									</circle>
+									<circle
+										cx={x}
+										cy={y}
+										r={2.5}
+										fill={color}
+										className='ai-chat__chart-dot'
+									/>
+								</g>
+							);
+						})}
 					</g>
 				);
 			})}
@@ -117,15 +170,35 @@ const ChartSvg = ({ data, width, height }: { data: ChartData; width: number; hei
 	);
 };
 
+const ChartLegend = ({ data }: { data: ChartData }) => {
+	if (data.lines.length < 2) return null;
+
+	return (
+		<ul className='ai-chat__chart-legend'>
+			{data.lines.map((line, i) => (
+				<li key={line.name}>
+					<span
+						className='ai-chat__chart-legend-swatch'
+						style={{ background: LINE_COLORS[i % LINE_COLORS.length] }}
+					/>
+					{line.name}
+				</li>
+			))}
+		</ul>
+	);
+};
+
 export const ChatChart = ({ data }: { data: ChartData }) => {
 	const [expanded, setExpanded] = useState(false);
 
-	if (data.series.length === 0) return null;
+	if (!data.lines?.length || data.lines.every((l) => l.points?.length === 0))
+		return null;
 
 	return (
 		<>
 			<figure className='ai-chat__chart' aria-label={data.label}>
 				<ChartSvg data={data} width={WIDTH} height={HEIGHT} />
+				<ChartLegend data={data} />
 				<figcaption>
 					{data.label}
 					<button
@@ -139,9 +212,18 @@ export const ChatChart = ({ data }: { data: ChartData }) => {
 				</figcaption>
 			</figure>
 			{expanded && (
-				<Modal title={data.label} onClose={() => setExpanded(false)} size='wide'>
+				<Modal
+					title={data.label}
+					onClose={() => setExpanded(false)}
+					size='wide'
+				>
 					<div className='modal-body ai-chat__chart-modal-body'>
-						<ChartSvg data={data} width={EXPANDED_WIDTH} height={EXPANDED_HEIGHT} />
+						<ChartSvg
+							data={data}
+							width={EXPANDED_WIDTH}
+							height={EXPANDED_HEIGHT}
+						/>
+						<ChartLegend data={data} />
 					</div>
 				</Modal>
 			)}

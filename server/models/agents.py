@@ -107,14 +107,18 @@ class ChatToolCall(BaseModel):
     tool: str
     args: dict
 
-class ChartSeries(BaseModel):
+class ChartPoint(BaseModel):
     date: str
     value: float
+
+class ChartLine(BaseModel):
+    name: str
+    points: list[ChartPoint]
 
 class ChartData(BaseModel):
     type: Literal["line"]
     label: str
-    series: list[ChartSeries]
+    lines: list[ChartLine]
 
 class ChatMessageOut(BaseModel):
     role: Literal["user", "assistant"]

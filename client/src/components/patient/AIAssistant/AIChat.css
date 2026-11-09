@@ -39,7 +39,34 @@
 
 .ai-chat__chart-modal-body {
 	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.ai-chat__chart-legend {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
+	gap: var(--space-3);
+	margin: var(--space-1) 0 0;
+	padding: 0;
+	font-size: var(--fs-sm);
+	color: var(--text-muted);
+}
+
+.ai-chat__chart-legend li {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.ai-chat__chart-legend-swatch {
+	width: 10px;
+	height: 10px;
+	border-radius: var(--radius-pill);
+	flex-shrink: 0;
 }
 
 .ai-chat__chart-gridline {

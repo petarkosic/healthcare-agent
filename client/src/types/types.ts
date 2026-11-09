@@ -213,15 +213,20 @@ export type MedicationsResponse = {
 
 export type ResponseData = RecommendationsResponse | MedicationsResponse;
 
-export interface ChartSeriesPoint {
+export interface ChartPoint {
 	date: string;
 	value: number;
+}
+
+export interface ChartLine {
+	name: string;
+	points: ChartPoint[];
 }
 
 export interface ChartData {
 	type: 'line';
 	label: string;
-	series: ChartSeriesPoint[];
+	lines: ChartLine[];
 }
 
 export interface ChatToolCall {

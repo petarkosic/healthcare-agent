@@ -20,6 +20,12 @@
 	--danger: #b23b32;
 	--danger-wash: #f8ecea;
 
+	/* chat chart lines */
+	--chart-line-1: #6558a8;
+	--chart-line-2: #b07d2a;
+	--chart-line-3: #3f8f6e;
+	--chart-line-4: #c56a3a;
+
 	/* visit-type dots */
 	--vt-checkup: #3b6fb0;
 	--vt-followup: #3f8f6e;
@@ -94,4 +100,9 @@
 	--warn-wash: #2b2418;
 	--danger: #d07b73;
 	--danger-wash: #2c1c1a;
+
+	--chart-line-1: #9188c9;
+	--chart-line-2: #d2a560;
+	--chart-line-3: #6fae86;
+	--chart-line-4: #d4895f;
 }

@@ -85,12 +85,43 @@
 	font-family: inherit;
 }
 
-.ai-chat__chart-hit {
-	cursor: pointer;
+.ai-chat__chart svg,
+.ai-chat__chart-modal-body svg {
+	cursor: crosshair;
 }
 
 .ai-chat__chart-dot {
 	transition: r 0.1s ease;
+}
+
+.ai-chat__chart-scanline {
+	stroke: var(--text-faint);
+	stroke-width: 1;
+	stroke-dasharray: 2 2;
+}
+
+.ai-chat__chart-callout-box {
+	fill: var(--surface);
+	stroke: var(--border-strong);
+	stroke-width: 1;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+}
+
+.ai-chat__chart-callout-header,
+.ai-chat__chart-callout-text {
+	font-family: inherit;
+	dominant-baseline: middle;
+}
+
+.ai-chat__chart-callout-header {
+	font-size: 9.5px;
+	font-weight: var(--fw-semibold);
+	fill: var(--text-muted);
+}
+
+.ai-chat__chart-callout-text {
+	font-size: 10px;
+	fill: var(--text);
 }
 
 .ai-chat__chart-hit:hover + .ai-chat__chart-dot {

@@ -1,27 +1,57 @@
 {
-  "answer": "The patient's blood pressure readings have fluctuated between 116/83 mmHg and 136/82 mmHg over the recorded period from January 2025 to November 2026.",
+  "answer": "The patient's blood pressure readings over time are as follows: 138/76 mmHg (2025-01-28), 112/84 mmHg (2025-05-08), 112/78 mmHg (2026-03-27), 129/73 mmHg (2026-08-28), and 139/78 mmHg (2026-11-09).",
   "chart_data": {
-    "label": "Systolic Blood Pressure",
-    "series": [
+    "label": "Blood Pressure Trend",
+    "lines": [
       {
-        "date": "2025-01-23",
-        "value": 118.0
+        "name": "Systolic",
+        "points": [
+          {
+            "date": "2025-01-28",
+            "value": 138.0
+          },
+          {
+            "date": "2025-05-08",
+            "value": 112.0
+          },
+          {
+            "date": "2026-03-27",
+            "value": 112.0
+          },
+          {
+            "date": "2026-08-28",
+            "value": 129.0
+          },
+          {
+            "date": "2026-11-09",
+            "value": 139.0
+          }
+        ]
       },
       {
-        "date": "2025-05-03",
-        "value": 132.0
-      },
-      {
-        "date": "2026-03-22",
-        "value": 120.0
-      },
-      {
-        "date": "2026-08-23",
-        "value": 136.0
-      },
-      {
-        "date": "2026-11-04",
-        "value": 116.0
+        "name": "Diastolic",
+        "points": [
+          {
+            "date": "2025-01-28",
+            "value": 76.0
+          },
+          {
+            "date": "2025-05-08",
+            "value": 84.0
+          },
+          {
+            "date": "2026-03-27",
+            "value": 78.0
+          },
+          {
+            "date": "2026-08-28",
+            "value": 73.0
+          },
+          {
+            "date": "2026-11-09",
+            "value": 78.0
+          }
+        ]
       }
     ],
     "type": "line"

@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 MAX_TOTAL_TOOL_CALLS = 4
 MAX_SEARCH_NOTES_CALLS = 2
 MAX_STRUCTURED_CALLS_PER_TOOL = 3
+# Hard stop on LLM rounds: the tool budget plus rounds to answer. The last round
+# always runs with tools disabled, so a model that keeps asking for tools cannot
+# loop forever.
+MAX_ITERATIONS = MAX_TOTAL_TOOL_CALLS + 2
 
 # Re-exported at module level so tests can patch them individually.
 get_patient_medications = medication_repository.get_patient_medications
@@ -127,7 +131,10 @@ lines) - never merge multiple metrics into one line's points."""
 
 def _build_tool_dispatch(patient_serial: str):
     def _search_notes(args: dict) -> Any:
-        return rag_service.search_notes(patient_serial, query=args["query"])
+        query = args.get("query")
+        if not isinstance(query, str) or not query.strip():
+            return {"error": "query is required"}
+        return rag_service.search_notes(patient_serial, query=query)
 
     def _get_vitals(args: dict) -> Any:
         return vital_signs_repository.get_vitals_history(
@@ -169,11 +176,21 @@ def _default(obj):
     return str(obj)
 
 
+def _parse_tool_args(raw: str | None) -> dict | None:
+    """Return the tool arguments as a dict, or None if they are not a JSON object."""
+    try:
+        args = json.loads(raw or "{}")
+    except (TypeError, ValueError):
+        return None
+    return args if isinstance(args, dict) else None
+
+
 @observe(as_type="span")
 def answer_question(patient_serial: str, message: str, history: list[dict]) -> dict:
     dispatch = _build_tool_dispatch(patient_serial)
     call_counts: dict[str, int] = {}
     tool_call_log: list[dict] = []
+    rejected_calls = 0  # unknown tool or over budget; still counts toward the total
 
     messages = [
         {"role": "system", "content": _SYSTEM_PROMPT},
@@ -181,9 +198,9 @@ def answer_question(patient_serial: str, message: str, history: list[dict]) -> d
         {"role": "user", "content": message},
     ]
 
-    while True:
-        total_calls_so_far = sum(call_counts.values())
-        allow_more_tools = total_calls_so_far < MAX_TOTAL_TOOL_CALLS
+    for iteration in range(MAX_ITERATIONS):
+        total_calls_so_far = sum(call_counts.values()) + rejected_calls
+        allow_more_tools = total_calls_so_far < MAX_TOTAL_TOOL_CALLS and iteration < MAX_ITERATIONS - 1
 
         response = openai_client.chat.completions.create(
             model=LLM_MODEL_NAME,
@@ -215,20 +232,39 @@ def answer_question(patient_serial: str, message: str, history: list[dict]) -> d
 
         for tool_call in choice_message.tool_calls:
             tool_name = tool_call.function.name
-            args = json.loads(tool_call.function.arguments or "{}")
+            args = _parse_tool_args(tool_call.function.arguments)
 
             per_tool_cap = MAX_SEARCH_NOTES_CALLS if tool_name == "search_notes" else MAX_STRUCTURED_CALLS_PER_TOOL
             over_cap = call_counts.get(tool_name, 0) >= per_tool_cap or sum(call_counts.values()) >= MAX_TOTAL_TOOL_CALLS
 
-            if over_cap or tool_name not in dispatch:
-                result: Any = {"error": "tool call budget exceeded for this message - answer with what you already have"}
+            result: Any
+
+            if tool_name not in dispatch:
+                rejected_calls += 1
+                result = {"error": "unknown tool"}
+            elif over_cap:
+                rejected_calls += 1
+                result = {"error": "tool call budget exceeded for this message - answer with what you already have"}
             else:
+                # Invalid-argument and failed calls still count against the caps.
                 call_counts[tool_name] = call_counts.get(tool_name, 0) + 1
-                tool_call_log.append({"tool": tool_name, "args": args})
-                result = dispatch[tool_name](args)
+                tool_call_log.append({"tool": tool_name, "args": args or {}})
+
+                if args is None:
+                    result = {"error": "invalid tool arguments: expected a JSON object"}
+                else:
+                    try:
+                        result = dispatch[tool_name](args)
+                    except Exception:
+                        logger.exception("Chat tool %s failed for patient %s", tool_name, patient_serial)
+                        result = {"error": "tool failed"}
 
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
                 "content": json.dumps(result, default=_default),
             })
+
+    logger.warning("Chat for patient %s hit the %d-iteration limit without a final answer", patient_serial, MAX_ITERATIONS)
+    
+    return {"answer": "I couldn't produce an answer.", "chart_data": None, "tool_calls": tool_call_log}

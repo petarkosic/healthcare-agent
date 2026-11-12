@@ -161,14 +161,21 @@ class AgentService:
             else "No previous summaries available."
         )
 
+        latest_visit = pg_data['latest_visit']
+        last_visit_for_prompt = (
+            {k: latest_visit[k] for k in ('date', 'type', 'chief_complaint', 'specialty', 'status')}
+            if latest_visit
+            else None
+        )
+
         return f"""
                 Provide a clinical briefing for this patient:
 
-                DEMOGRAPHICS: {pg_data['full_name']}, {pg_data['age']}yo {pg_data['gender']}, Blood: {pg_data['blood_type']}
+                DEMOGRAPHICS: {pg_data['age']}yo {pg_data['gender']}, Blood: {pg_data['blood_type']}
                 ALLERGIES: {pg_data['allergies'] or 'None'}
                 CHRONIC CONDITIONS: {pg_data['chronic_conditions'] or 'None'}
 
-                LAST VISIT: {pg_data['latest_visit']}
+                LAST VISIT: {last_visit_for_prompt}
 
                 CURRENT VITALS: {pg_data['latest_vitals']}
 

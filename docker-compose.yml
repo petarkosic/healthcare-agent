@@ -9,8 +9,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-healthcare_agent}
     volumes:
       - postgres-data:/var/lib/postgresql/18/docker
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
     networks:
       - ha-network
     healthcheck:
@@ -22,8 +20,6 @@ services:
   chroma:
     image: chromadb/chroma:1.5.9
     container_name: ha-chroma
-    ports:
-      - '8001:8000'
     volumes:
       - chroma-data:/data
     networks:

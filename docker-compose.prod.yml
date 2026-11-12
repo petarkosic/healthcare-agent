@@ -1,4 +1,8 @@
 services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in prod}
+
   server:
     build:
       context: ./server
@@ -6,7 +10,7 @@ services:
     container_name: ha-server
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in prod}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-healthcare_agent}
@@ -25,8 +29,11 @@ services:
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
       FRONTEND_URL: ${FRONTEND_URL}
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY}
+    # Loopback only: reachable from this machine (e.g. a host-run Vite dev
+    # server, or a host-installed reverse proxy) but never from the network, so
+    # outside clients cannot bypass the proxy or forge X-Real-IP.
     ports:
-      - '8000:8000'
+      - '127.0.0.1:8000:8000'
     depends_on:
       postgres:
         condition: service_healthy

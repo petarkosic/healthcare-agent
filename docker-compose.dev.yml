@@ -1,4 +1,14 @@
 services:
+  # Databases are published to the host in dev only.
+  # The base file publishes nothing so prod is closed by default.
+  postgres:
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+
+  chroma:
+    ports:
+      - '8001:8000'
+
   server:
     build:
       context: ./server

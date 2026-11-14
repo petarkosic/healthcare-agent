@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from evals.judges.base import run_judge
 
@@ -14,10 +14,25 @@ class ClaimVerdict(BaseModel):
 
 
 class FaithfulnessVerdict(BaseModel):
+    """The judge only labels claims. Counts and the pass/fail decision are
+    computed here, never taken from the model's own arithmetic."""
+
     claims: list[ClaimVerdict]
-    unsupported_count: int
-    contradicted_count: int
-    passed: bool
+
+    @computed_field
+    @property
+    def unsupported_count(self) -> int:
+        return sum(1 for c in self.claims if c.label == "unsupported")
+
+    @computed_field
+    @property
+    def contradicted_count(self) -> int:
+        return sum(1 for c in self.claims if c.label == "contradicted")
+
+    @computed_field
+    @property
+    def passed(self) -> bool:
+        return self.unsupported_count == 0 and self.contradicted_count == 0
 
 
 PROMPT_TEMPLATE = """SOURCE DATA (ground truth):
@@ -37,8 +52,6 @@ Task:
    - "unsupported": source neither contains nor contradicts it
    - "contradicted": source states something incompatible
 3. Quote the exact source fragment as evidence, or "none".
-4. Count unsupported and contradicted claims.
-5. passed = true only if both counts are zero.
 
 Ignore: formatting, hedging language, generic advice with no factual content ("continue monitoring"),
 vague overall-assessment statements with no new specific fact ("doing well", "positive clinical
@@ -47,7 +60,7 @@ fact about the patient ("treatment is indicated", "needs intensified control", "
 different drug class") - these are judgment calls / actions, not factual claims, even when
 unaccompanied by a cited value. Judge facts only.
 
-Return JSON: {{"claims": [{{"claim": str, "label": str, "evidence": str}}], "unsupported_count": int, "contradicted_count": int, "passed": bool}}
+Return JSON: {{"claims": [{{"claim": str, "label": str, "evidence": str}}]}}
 """
 
 

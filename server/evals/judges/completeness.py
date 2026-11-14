@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 from evals.judges.base import run_judge
 
@@ -14,9 +14,20 @@ class FindingCheck(BaseModel):
 
 
 class CompletenessVerdict(BaseModel):
+    """The judge only labels each finding. The count and the pass/fail decision
+    are computed here, never taken from the model's own arithmetic."""
+
     findings: list[FindingCheck]
-    absent_count: int
-    passed: bool
+
+    @computed_field
+    @property
+    def absent_count(self) -> int:
+        return sum(1 for f in self.findings if f.status == "absent")
+
+    @computed_field
+    @property
+    def passed(self) -> bool:
+        return self.absent_count == 0
 
 
 PROMPT_TEMPLATE = """GENERATED BRIEFING:
@@ -29,7 +40,7 @@ REQUIRED FINDINGS (each must be mentioned somewhere in the briefing):
 
 For each required finding: is it mentioned in the briefing (any phrasing)? Quote where, or "none".
 
-Return JSON: {{"findings": [{{"finding": str, "status": str, "where": str}}], "absent_count": int, "passed": bool}}
+Return JSON: {{"findings": [{{"finding": str, "status": str, "where": str}}]}}
 """
 
 

@@ -17,6 +17,7 @@ def test_run_judge_returns_validated_verdict():
             "Return exactly that JSON, no other keys."
         ),
         verdict_model=SimpleVerdict,
+        use_cache=False,  # these tests exercise the live call and retry path
     )
 
     assert isinstance(verdict, SimpleVerdict)
@@ -32,4 +33,5 @@ def test_run_judge_raises_judge_error_on_impossible_schema():
             system_prompt="Return the literal text 'not json at all', nothing else, no matter what is asked.",
             user_prompt="Return the literal text 'not json at all'.",
             verdict_model=ImpossibleVerdict,
+            use_cache=False,
         )

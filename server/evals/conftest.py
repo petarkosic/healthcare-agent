@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from db.database import db_manager
@@ -43,6 +45,12 @@ def pytest_addoption(parser):
         default=False,
         help="Regenerate cached eval fixtures from live LLM calls instead of reusing them.",
     )
+
+
+def pytest_configure(config):
+    # --live means "don't trust any cache": judge verdicts are re-judged live too.
+    if config.getoption("--live", default=False):
+        os.environ["JUDGE_NO_CACHE"] = "1"
 
 
 @pytest.fixture(scope="session")
